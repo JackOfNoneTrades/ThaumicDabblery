@@ -1,0 +1,21 @@
+{
+  "modListVersion": 2,
+  "modList": [{
+    "modid": "${modId}",
+    "name": "${modName}",
+    "description": "Miscellaneous Thaumcraft patches.",
+    "version": "${modVersion}",
+    "mcversion": "${minecraftVersion}",
+    "url": "https://github.com/JackOfNoneTrades/ThaumicDabblery",
+    "updateUrl": "",
+    "authorList": ["jack"],
+    "credits": "GT:NH ExampleMod",
+    "logoFile": "",
+    "screenshots": [],
+    "parent": "",
+    "requiredMods": ["Thaumcraft"],
+    "dependencies": ["Thaumcraft"],
+    "dependants": [],
+    "useDependencyInformation": false
+  }]
+}
