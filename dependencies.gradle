@@ -38,12 +38,12 @@ dependencies {
     runtimeOnlyNonPublishable("com.github.GTNewHorizons:Hodgepodge:2.7.172:dev")
     runtimeOnlyNonPublishable("com.github.GTNewHorizons:NotEnoughItems:2.8.114-GTNH:dev")
     runtimeOnlyNonPublishable("com.github.GTNewHorizons:Angelica:2.1.53:dev")
-    runtimeOnlyNonPublishable("com.github.GTNewHorizons:Baubles-Expanded:2.2.21-GTNH:dev")
     runtimeOnlyNonPublishable(rfg.deobf("maven.modrinth:bugtorch:1.2.14"))
     runtimeOnlyNonPublishable(rfg.deobf("curse.maven:catalogue-vintage-1465746:8384975")) // 1.0.8-1.7.10
 
     // Compile + runtime
     devOnlyNonPublishable("thaumcraft:Thaumcraft:1.7.10-4.2.3.5:dev")
+    devOnlyNonPublishable("com.github.GTNewHorizons:Baubles-Expanded:2.2.21-GTNH:dev")
     devOnlyNonPublishable("com.github.GTNewHorizons:CraftTweaker:3.4.8:dev")
     devOnlyNonPublishable("com.github.GTNewHorizons:ModTweaker:0.14.0:dev")
 

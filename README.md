@@ -22,6 +22,21 @@ Miscellaneous Thaumcraft 4 patches for Minecraft 1.7.10.
 * [ContentTweaker](https://modrinth.com/mod/contenttweaker) (optional) [![curse](images/icons/curse.png)](https://www.curseforge.com/minecraft/mc-mods/contenttweaker) [![modrinth](images/icons/modrinth.png)](https://modrinth.com/mod/contenttweaker) [![git](images/icons/git.png)](https://github.com/CraftTweaker/ContentTweaker)
 * [UniMixins](https://modrinth.com/mod/unimixins) [![curse](images/icons/curse.png)](https://www.curseforge.com/minecraft/mc-mods/unimixins) [![modrinth](images/icons/modrinth.png)](https://modrinth.com/mod/unimixins/versions) [![git](images/icons/git.png)](https://github.com/LegacyModdingMC/UniMixins/releases)
 
+## ModTweaker
+
+Vis discounts are integer percentage points. A scripted value replaces an item's native discount; the two values are
+never added together. Aspect-specific values take precedence over the universal value for that aspect.
+
+```zenscript
+// Set a universal 5% vis discount.
+mods.thaumcraft.VisDiscount.set(<minecraft:golden_helmet>, 5);
+
+// Override only the Aer discount with 12%.
+mods.thaumcraft.VisDiscount.set(<minecraft:golden_helmet>, <aspect:aer>, 12);
+```
+
+Only equipped armor and Baubles contribute. Expanded Baubles slots beyond the original four are supported.
+
 ## Building
 
 `./gradlew build`.

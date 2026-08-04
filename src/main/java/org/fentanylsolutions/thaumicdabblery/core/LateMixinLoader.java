@@ -23,6 +23,9 @@ public class LateMixinLoader implements ILateMixinLoader {
 
     @Override
     public List<String> getMixins(Set<String> loadedMods) {
+        if (loadedMods.contains("Thaumcraft")) {
+            return Collections.singletonList("thaumcraft.MixinWandManager");
+        }
         return Collections.emptyList();
     }
 }
