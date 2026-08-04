@@ -1,6 +1,7 @@
 package org.fentanylsolutions.thaumicdabblery.feature.visdiscount;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import net.minecraft.item.Item;
@@ -49,6 +50,30 @@ public final class VisDiscountRegistry {
         return new Change(key, aspect, hadPrevious, previous);
     }
 
+    static synchronized TooltipRule getTooltipRule(ItemStack stack) {
+        if (stack == null || stack.getItem() == null) {
+            return TooltipRule.EMPTY;
+        }
+
+        int damage = getRuleDamage(stack);
+        DiscountRule exactRule = RULES.get(new ItemKey(stack.getItem(), damage));
+        DiscountRule wildcardRule = damage == OreDictionary.WILDCARD_VALUE ? null
+            : RULES.get(new ItemKey(stack.getItem(), OreDictionary.WILDCARD_VALUE));
+
+        Integer universal = exactRule != null && exactRule.universal != null ? exactRule.universal
+            : wildcardRule == null ? null : wildcardRule.universal;
+        Map<Aspect, Integer> aspects = new LinkedHashMap<>();
+
+        if (wildcardRule != null && (exactRule == null || exactRule.universal == null)) {
+            aspects.putAll(wildcardRule.aspects);
+        }
+        if (exactRule != null) {
+            aspects.putAll(exactRule.aspects);
+        }
+
+        return universal == null && aspects.isEmpty() ? TooltipRule.EMPTY : new TooltipRule(universal, aspects);
+    }
+
     private static int getRuleDamage(ItemStack stack) {
         return stack.getItem()
             .isDamageable() ? OreDictionary.WILDCARD_VALUE : stack.getItemDamage();
@@ -90,10 +115,35 @@ public final class VisDiscountRegistry {
         }
     }
 
+    static final class TooltipRule {
+
+        private static final TooltipRule EMPTY = new TooltipRule(null, new LinkedHashMap<Aspect, Integer>());
+
+        private final Integer universal;
+        private final Map<Aspect, Integer> aspects;
+
+        private TooltipRule(Integer universal, Map<Aspect, Integer> aspects) {
+            this.universal = universal;
+            this.aspects = new LinkedHashMap<>(aspects);
+        }
+
+        Integer getUniversal() {
+            return universal;
+        }
+
+        Map<Aspect, Integer> getAspects() {
+            return aspects;
+        }
+
+        boolean isEmpty() {
+            return universal == null && aspects.isEmpty();
+        }
+    }
+
     private static final class DiscountRule {
 
         private Integer universal;
-        private final Map<Aspect, Integer> aspects = new HashMap<>();
+        private final Map<Aspect, Integer> aspects = new LinkedHashMap<>();
 
         private Integer get(Aspect aspect) {
             Integer aspectDiscount = aspect == null ? null : aspects.get(aspect);
