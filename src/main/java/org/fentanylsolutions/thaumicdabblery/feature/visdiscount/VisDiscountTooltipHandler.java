@@ -36,12 +36,14 @@ public final class VisDiscountTooltipHandler {
         String label = StatCollector.translateToLocal("tc.visdiscount");
         removeOverriddenNativeLines(event, label, rule);
 
-        if (rule.getUniversal() != null) {
+        if (rule.getUniversal() != null && rule.getUniversal() != 0) {
             event.toolTip.add(format(label, null, rule.getUniversal()));
         }
         for (Map.Entry<Aspect, Integer> entry : rule.getAspects()
             .entrySet()) {
-            event.toolTip.add(format(label, entry.getKey(), entry.getValue()));
+            if (entry.getValue() != 0) {
+                event.toolTip.add(format(label, entry.getKey(), entry.getValue()));
+            }
         }
     }
 
