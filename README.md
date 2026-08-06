@@ -22,7 +22,7 @@ Extends ModTweaker Thaumcraft 4 compatibility to feature Vis discount modificati
 * [Modtweaker](https://www.curseforge.com/minecraft/mc-mods/modtweaker) [![curse](images/icons/curse.png)](https://www.curseforge.com/minecraft/mc-mods/modtweaker) [![modrinth](images/icons/modrinth.png)](https://modrinth.com/mod/modtweaker/versions) 
 * [UniMixins](https://modrinth.com/mod/unimixins) [![curse](images/icons/curse.png)](https://www.curseforge.com/minecraft/mc-mods/unimixins) [![modrinth](images/icons/modrinth.png)](https://modrinth.com/mod/unimixins/versions) [![git](images/icons/git.png)](https://github.com/LegacyModdingMC/UniMixins/releases)
 
-## ModTweaker
+## Documentation
 
 Vis discounts are integer percentage points. A scripted value replaces an item's native discount; the two values are
 never added together. Aspect-specific values take precedence over the universal value for that aspect.
