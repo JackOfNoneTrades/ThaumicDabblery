@@ -2,7 +2,7 @@
 
 ![logo](images/logo_small.png)
 
-Extended ModTweaker Thaumcraft 4 compat.
+Extends ModTweaker Thaumcraft 4 compatibility to feature Vis discount modification for equippables (armor and baubles) as well as entity and item scanning based prerequisites for research.
 
 
 [![hub](images/badges/github.png)](https://github.com/JackOfNoneTrades/ThaumicDabblery/releases)
@@ -75,9 +75,9 @@ Clear every scripted requirement for an entry without deleting or recreating the
 ```zenscript
 mods.thaumcraft.ResearchScanGates.clear("BANNERS");
 ```
-
-While a gate is active, it replaces that entry's native item, entity, and aspect discovery triggers and makes the
-entry strictly scan-discovered. Clearing or undoing the gate restores its original triggers and visibility flags.
+ 
+While a gate is active, it replaces that entry's native item, entity, and aspect discovery triggers and hides it until
+all gate requirements are met. Clearing or undoing the gate restores its original triggers and visibility flags.
 Progress is stored per player, and a target scanned before a gate was installed may be scanned once more to recover
 the missing requirement without awarding aspects twice. Entities still need registered Thaumcraft aspects to be
 valid scan targets. Fully qualified calls such as the examples require no import. In a dedicated pack, distribute the
@@ -91,7 +91,6 @@ targets.
 ## Credits
 
 * [GT:NH buildscript](https://github.com/GTNewHorizons/ExampleMod1.7.10)
-* Catalogue Vintage banner by [u/RShotZz](https://www.reddit.com/user/RShotZz/) ([source](https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2Flz64ouwgxaw61.png))
 
 ## License
 
