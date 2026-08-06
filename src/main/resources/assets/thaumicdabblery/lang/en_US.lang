@@ -1,3 +1,5 @@
 thaumicdabblery.config.title=Thaumic Dabblery Configuration
 thaumicdabblery.config.feature.visDiscount=Vis Discount Tweaker
 thaumicdabblery.config.feature.visDiscount.enabled=Enabled
+thaumicdabblery.config.feature.researchScanGates=Research Scan Gates
+thaumicdabblery.config.feature.researchScanGates.enabled=Enabled

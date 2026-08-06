@@ -1,6 +1,6 @@
 package org.fentanylsolutions.thaumicdabblery.core;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -24,8 +24,12 @@ public class LateMixinLoader implements ILateMixinLoader {
     @Override
     public List<String> getMixins(Set<String> loadedMods) {
         if (loadedMods.contains("Thaumcraft")) {
-            return Collections.singletonList("thaumcraft.MixinWandManager");
+            return Arrays.asList(
+                "thaumcraft.MixinWandManager",
+                "thaumcraft.ResearchItemAccessor",
+                "thaumcraft.MixinResearchManager",
+                "thaumcraft.MixinScanManager");
         }
-        return Collections.emptyList();
+        return java.util.Collections.emptyList();
     }
 }

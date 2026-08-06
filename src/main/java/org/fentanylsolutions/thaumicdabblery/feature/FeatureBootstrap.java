@@ -1,5 +1,6 @@
 package org.fentanylsolutions.thaumicdabblery.feature;
 
+import org.fentanylsolutions.thaumicdabblery.feature.researchscangates.ResearchScanGatesFeature;
 import org.fentanylsolutions.thaumicdabblery.feature.visdiscount.VisDiscountFeature;
 
 /** Central registration point for feature modules. */
@@ -9,5 +10,6 @@ final class FeatureBootstrap {
 
     static void registerFeatures() {
         FeatureManager.register(new VisDiscountFeature());
+        FeatureManager.register(new ResearchScanGatesFeature());
     }
 }
