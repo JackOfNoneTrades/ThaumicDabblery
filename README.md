@@ -4,7 +4,8 @@
 
 Extends ModTweaker Thaumcraft 4 compatibility to feature Vis discount modification for equippables (armor and baubles) as well as entity and item scanning based prerequisites for research.
 
-
+[![modrinth](images/badges/modrinth.png)](https://modrinth.com/mod/thaumic-dabblery/settings/versions)
+[![curse](images/badges/curse.png)](https://www.curseforge.com/minecraft/mc-mods/thaumic-dabblery)
 [![hub](images/badges/github.png)](https://github.com/JackOfNoneTrades/ThaumicDabblery/releases)
 ![forge](images/badges/forge.png)
 
