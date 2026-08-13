@@ -35,19 +35,20 @@
  */
 dependencies {
     // Pure runtime
-    runtimeOnlyNonPublishable("com.github.GTNewHorizons:Hodgepodge:2.7.180:dev")
-    runtimeOnlyNonPublishable("com.github.GTNewHorizons:NotEnoughItems:2.8.119-GTNH:dev")
-    runtimeOnlyNonPublishable("com.github.GTNewHorizons:Angelica:2.1.60:dev")
+    runtimeOnlyNonPublishable("com.github.GTNewHorizons:Hodgepodge:2.7.187:dev")
+    runtimeOnlyNonPublishable("com.github.GTNewHorizons:NotEnoughItems:2.8.123-GTNH:dev")
+    runtimeOnlyNonPublishable("com.github.GTNewHorizons:Angelica:2.2.4:dev")
     runtimeOnlyNonPublishable(rfg.deobf("maven.modrinth:bugtorch:1.2.14"))
     runtimeOnlyNonPublishable(rfg.deobf("curse.maven:catalogue-vintage-1465746:8384975")) // 1.0.8-1.7.10
 
     // Compile + runtime
     devOnlyNonPublishable("thaumcraft:Thaumcraft:1.7.10-4.2.3.5:dev")
-    devOnlyNonPublishable("com.github.GTNewHorizons:Baubles-Expanded:2.2.21-GTNH:dev")
+    devOnlyNonPublishable("com.github.GTNewHorizons:Baubles-Expanded:2.2.22-GTNH:dev")
     devOnlyNonPublishable("com.github.GTNewHorizons:CraftTweaker:3.4.8:dev")
     devOnlyNonPublishable("com.github.GTNewHorizons:ModTweaker:0.14.0:dev")
 
     // Optional integration
+    compileOnly(rfg.deobf("curse.maven:witchery-69673:2234410"))
     devOnlyNonPublishable(rfg.deobf("maven.modrinth:contenttweaker:1.0.5"))
     runtimeOnlyNonPublishable(rfg.deobf("maven.modrinth:fluxed-core:1.0.9"))
 }
