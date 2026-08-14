@@ -9,13 +9,34 @@ import org.fentanylsolutions.thaumicdabblery.feature.witcherybranch.VirtualItemU
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EntityPlayer.class)
 public abstract class MixinEntityPlayer {
 
     @Unique
     private boolean thaumicdabblery$loggedVirtualBranchSubstitution;
+
+    @Unique
+    private boolean thaumicdabblery$loggedSuppressedClear;
+
+    @Inject(method = "clearItemInUse", at = @At("HEAD"), cancellable = true)
+    private void thaumicdabblery$suppressUnexpectedClear(CallbackInfo ci) {
+        EntityPlayer player = (EntityPlayer) (Object) this;
+        if (VirtualItemUseState.isActive(player)) {
+            if (!thaumicdabblery$loggedSuppressedClear) {
+                ThaumicDabblery.debug(
+                    "[Mystic Branch/mixin] Suppressed EntityPlayer.clearItemInUse while virtual use is active on "
+                        + (player.worldObj.isRemote ? "client" : "server"));
+                thaumicdabblery$loggedSuppressedClear = true;
+            }
+            ci.cancel();
+        } else {
+            thaumicdabblery$loggedSuppressedClear = false;
+        }
+    }
 
     @Redirect(
         method = "onUpdate",

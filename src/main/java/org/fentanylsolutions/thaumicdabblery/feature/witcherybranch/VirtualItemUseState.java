@@ -1,8 +1,8 @@
 package org.fentanylsolutions.thaumicdabblery.feature.witcherybranch;
 
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -11,8 +11,10 @@ import org.fentanylsolutions.thaumicdabblery.ThaumicDabblery;
 
 public final class VirtualItemUseState {
 
+    // Entity.equals compares entity IDs. In an integrated server, the client and server player
+    // objects share an ID but must retain their own ItemStack instances for identity checks.
     private static final Map<EntityPlayer, ItemStack> ACTIVE_BRANCHES = Collections
-        .synchronizedMap(new WeakHashMap<>());
+        .synchronizedMap(new IdentityHashMap<>());
 
     private VirtualItemUseState() {}
 

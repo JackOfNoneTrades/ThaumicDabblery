@@ -63,6 +63,9 @@ public final class WitcheryBranchVirtualUse {
 
         finishVirtualUse(player);
         VirtualItemUseState.end(player);
+        if (ItemUseMethods.isUsingItem(player)) {
+            ItemUseMethods.clearItemInUse(player);
+        }
         debugState("FINISH completed", player);
     }
 
@@ -97,10 +100,10 @@ public final class WitcheryBranchVirtualUse {
 
     private static void clearVirtualUse(EntityPlayer player) {
         ItemStack inUse = ItemUseMethods.getItemInUse(player);
+        VirtualItemUseState.end(player);
         if (inUse != null && inUse.getItem() == Witchery.Items.MYSTIC_BRANCH) {
             ItemUseMethods.clearItemInUse(player);
         }
-        VirtualItemUseState.end(player);
         player.getEntityData()
             .removeTag("WITCSpellEffectID");
         player.getEntityData()

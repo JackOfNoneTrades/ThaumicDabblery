@@ -113,10 +113,14 @@ public final class WitcheryBranchKeyHandler {
 
     private void finish(EntityClientPlayerMP player) {
         debugState("finishing virtual use", Minecraft.getMinecraft(), player);
-        if (player != null && isUsingVirtualBranch(player)) {
+        boolean wasVirtualUse = player != null && isUsingVirtualBranch(player);
+        if (wasVirtualUse && player.isUsingItem()) {
             player.stopUsingItem();
         }
         VirtualItemUseState.end(player);
+        if (wasVirtualUse && player.isUsingItem()) {
+            player.clearItemInUse();
+        }
         virtualUseActive = false;
         debugHeartbeatTicks = 0;
         WitcheryBranchNetwork.send(WitcheryBranchNetwork.Action.FINISH);
@@ -124,8 +128,11 @@ public final class WitcheryBranchKeyHandler {
 
     private void cancel(EntityClientPlayerMP player) {
         debugState("cancelling virtual use", Minecraft.getMinecraft(), player);
-        if (player != null && isUsingVirtualBranch(player)) {
-            player.clearItemInUse();
+        boolean wasVirtualUse = player != null && isUsingVirtualBranch(player);
+        boolean wasUsingBranch = wasVirtualUse && player.getItemInUse() != null
+            && player.getItemInUse()
+                .getItem() == Witchery.Items.MYSTIC_BRANCH;
+        if (wasVirtualUse) {
             player.getEntityData()
                 .removeTag("Strokes");
             player.getEntityData()
@@ -134,6 +141,9 @@ public final class WitcheryBranchKeyHandler {
                 .removeTag("startPitch");
         }
         VirtualItemUseState.end(player);
+        if (wasUsingBranch) {
+            player.clearItemInUse();
+        }
         if (virtualUseActive) {
             WitcheryBranchNetwork.send(WitcheryBranchNetwork.Action.CANCEL);
         }
