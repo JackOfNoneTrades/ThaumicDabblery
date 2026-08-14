@@ -4,13 +4,18 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 
+import org.fentanylsolutions.thaumicdabblery.ThaumicDabblery;
 import org.fentanylsolutions.thaumicdabblery.feature.witcherybranch.VirtualItemUseState;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(EntityPlayer.class)
 public abstract class MixinEntityPlayer {
+
+    @Unique
+    private boolean thaumicdabblery$loggedVirtualBranchSubstitution;
 
     @Redirect(
         method = "onUpdate",
@@ -22,6 +27,14 @@ public abstract class MixinEntityPlayer {
     private ItemStack thaumicdabblery$keepVirtualMysticBranchInUse(InventoryPlayer inventory) {
         EntityPlayer player = (EntityPlayer) (Object) this;
         ItemStack virtualBranch = VirtualItemUseState.getVirtualHeldItem(player);
+        if (virtualBranch != null && !thaumicdabblery$loggedVirtualBranchSubstitution) {
+            ThaumicDabblery.debug(
+                "[Mystic Branch/mixin] EntityPlayer.onUpdate substituted the virtual branch on "
+                    + (player.worldObj.isRemote ? "client" : "server"));
+            thaumicdabblery$loggedVirtualBranchSubstitution = true;
+        } else if (virtualBranch == null) {
+            thaumicdabblery$loggedVirtualBranchSubstitution = false;
+        }
         return virtualBranch != null ? virtualBranch : inventory.getCurrentItem();
     }
 }

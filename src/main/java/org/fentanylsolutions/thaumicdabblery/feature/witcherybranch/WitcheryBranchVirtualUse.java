@@ -3,6 +3,7 @@ package org.fentanylsolutions.thaumicdabblery.feature.witcherybranch;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -10,6 +11,7 @@ import java.util.UUID;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 
 import org.fentanylsolutions.thaumicdabblery.ThaumicDabblery;
 
@@ -32,9 +34,11 @@ public final class WitcheryBranchVirtualUse {
     private WitcheryBranchVirtualUse() {}
 
     static synchronized void begin(EntityPlayerMP player) {
+        debugState("START requested", player);
         cancel(player);
         if (!canUse(player) || ItemUseMethods.isUsingItem(player)) {
             ThaumicDabblery.LOG.warn("Rejected virtual Mystic Branch start from {}", player.getGameProfile());
+            debugState("START rejected", player);
             return;
         }
 
@@ -42,33 +46,43 @@ public final class WitcheryBranchVirtualUse {
         VirtualItemUseState.begin(player, branch);
         ((ItemMysticBranch) Witchery.Items.MYSTIC_BRANCH).onItemRightClick(branch, player.worldObj, player);
         ACTIVE_PLAYERS.put(player.getUniqueID(), player);
+        debugState("START completed", player);
     }
 
     static synchronized void finish(EntityPlayerMP player) {
+        debugState("FINISH requested", player);
         if (ACTIVE_PLAYERS.remove(player.getUniqueID()) == null) {
+            debugState("FINISH ignored because player was not active", player);
             return;
         }
         if (!canUse(player)) {
+            debugState("FINISH converted to clear because validation failed", player);
             clearVirtualUse(player);
             return;
         }
 
         finishVirtualUse(player);
         VirtualItemUseState.end(player);
+        debugState("FINISH completed", player);
     }
 
     private static void finishVirtualUse(EntityPlayer player) {
         ItemStack inUse = ItemUseMethods.getItemInUse(player);
         if (inUse != null && inUse.getItem() == Witchery.Items.MYSTIC_BRANCH) {
+            ThaumicDabblery.debug("[Mystic Branch/server] Stopping Witchery branch normally");
             ItemUseMethods.stopUsingItem(player);
         } else {
+            ThaumicDabblery.debug(
+                "[Mystic Branch/server] Clearing unexpected item in use instead of stopping: " + itemName(inUse));
             ItemUseMethods.clearItemInUse(player);
         }
     }
 
     static synchronized void cancel(EntityPlayer player) {
         if (player != null && ACTIVE_PLAYERS.remove(player.getUniqueID()) != null) {
+            debugState("CANCEL requested", player);
             clearVirtualUse(player);
+            debugState("CANCEL completed", player);
         }
     }
 
@@ -91,6 +105,46 @@ public final class WitcheryBranchVirtualUse {
             .removeTag("WITCSpellEffectID");
         player.getEntityData()
             .removeTag("WITCSpellEffectEnhanced");
+    }
+
+    private static void debugState(String stage, EntityPlayer player) {
+        if (!ThaumicDabblery.isDebugMode()) {
+            return;
+        }
+        if (player == null) {
+            ThaumicDabblery.debug("[Mystic Branch/server] " + stage + ": player=null");
+            return;
+        }
+        EntityInfusionProperties properties = (EntityInfusionProperties) player
+            .getExtendedProperties(EntityInfusionProperties.EXT_PROP_NAME);
+        NBTTagCompound data = player.getEntityData();
+        ItemStack inUse = ItemUseMethods.getItemInUse(player);
+        ThaumicDabblery.debug(
+            "[Mystic Branch/server] " + stage
+                + ": player="
+                + player.getCommandSenderName()
+                + ", featureActive="
+                + WitcheryBranchFeature.isActive()
+                + ", compatRegistered="
+                + WitcheryBranchCompat.isRegistered()
+                + ", hasInfusion="
+                + (properties != null && properties.hasPlayerInfusion(WitcheryBranchFeature.INFUSION_ID))
+                + ", trackedActive="
+                + ACTIVE_PLAYERS.containsKey(player.getUniqueID())
+                + ", virtualActive="
+                + VirtualItemUseState.isActive(player)
+                + ", itemInUse="
+                + itemName(inUse)
+                + ", strokes="
+                + Arrays.toString(data.getByteArray("Strokes"))
+                + ", preparedEffect="
+                + (data.hasKey("WITCSpellEffectID") ? data.getInteger("WITCSpellEffectID") : "missing")
+                + ", enhancedLevel="
+                + (data.hasKey("WITCSpellEffectEnhanced") ? data.getInteger("WITCSpellEffectEnhanced") : "missing"));
+    }
+
+    private static String itemName(ItemStack stack) {
+        return stack == null ? "null" : stack.getUnlocalizedName() + ":" + stack.getItemDamage();
     }
 
     @SubscribeEvent

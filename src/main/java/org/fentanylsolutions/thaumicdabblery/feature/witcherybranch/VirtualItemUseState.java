@@ -7,6 +7,8 @@ import java.util.WeakHashMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
+import org.fentanylsolutions.thaumicdabblery.ThaumicDabblery;
+
 public final class VirtualItemUseState {
 
     private static final Map<EntityPlayer, ItemStack> ACTIVE_BRANCHES = Collections
@@ -25,12 +27,22 @@ public final class VirtualItemUseState {
     static void begin(EntityPlayer player, ItemStack branch) {
         if (player != null && branch != null) {
             ACTIVE_BRANCHES.put(player, branch);
+            ThaumicDabblery.debug(
+                "[Mystic Branch/virtual item] Installed branch for " + player.getCommandSenderName()
+                    + " on "
+                    + (player.worldObj.isRemote ? "client" : "server"));
         }
     }
 
     static void end(EntityPlayer player) {
         if (player != null) {
-            ACTIVE_BRANCHES.remove(player);
+            boolean removed = ACTIVE_BRANCHES.remove(player) != null;
+            ThaumicDabblery.debug(
+                "[Mystic Branch/virtual item] Removed branch for " + player.getCommandSenderName()
+                    + " on "
+                    + (player.worldObj.isRemote ? "client" : "server")
+                    + "; wasPresent="
+                    + removed);
         }
     }
 }

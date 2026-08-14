@@ -25,9 +25,11 @@ public final class WitcheryBranchNetwork {
         FMLCommonHandler.instance()
             .bus()
             .register(WitcheryBranchVirtualUse.INSTANCE);
+        ThaumicDabblery.debug("[Mystic Branch/network] Registered virtual-use packet handler");
     }
 
     static void send(Action action) {
+        ThaumicDabblery.debug("[Mystic Branch/network] Sending " + action + " to server");
         CHANNEL.sendToServer(new UseMessage(action));
     }
 
@@ -63,12 +65,16 @@ public final class WitcheryBranchNetwork {
             @Override
             public IMessage onMessage(UseMessage message, MessageContext context) {
                 EntityPlayerMP player = context.getServerHandler().playerEntity;
+                ThaumicDabblery.debug(
+                    "[Mystic Branch/network] Received " + message.action + " from " + player.getCommandSenderName());
                 try {
                     switch (message.action) {
                         case START -> WitcheryBranchVirtualUse.begin(player);
                         case FINISH -> WitcheryBranchVirtualUse.finish(player);
                         case CANCEL -> WitcheryBranchVirtualUse.cancel(player);
                     }
+                    ThaumicDabblery.debug(
+                        "[Mystic Branch/network] Handled " + message.action + " for " + player.getCommandSenderName());
                 } catch (RuntimeException | LinkageError error) {
                     ThaumicDabblery.LOG.error(
                         "Failed to handle virtual Mystic Branch action {} for {}",
