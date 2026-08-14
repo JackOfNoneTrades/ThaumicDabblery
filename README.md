@@ -2,7 +2,12 @@
 
 ![logo](images/logo_small.png)
 
-Extends ModTweaker Thaumcraft 4 compatibility to feature Vis discount modification for equippables (armor and baubles) as well as entity and item scanning based prerequisites for research.
+## Features
+
+* Extends ModTweaker Thaumcraft 4 compatibility
+    * Vis discount modification for equippables (armor and baubles)
+    * Entity and item scanning based prerequisites for research
+* Thaumic Horizons self-infusion allowing the player to cast Witchery Mystic Branch spells using a keybind (WIP)
 
 Documentation can be found [here](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Documentation)
 

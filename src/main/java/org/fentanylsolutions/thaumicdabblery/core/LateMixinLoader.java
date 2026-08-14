@@ -1,6 +1,6 @@
 package org.fentanylsolutions.thaumicdabblery.core;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -9,6 +9,7 @@ import org.fentanylsolutions.thaumicdabblery.ThaumicDabblery;
 import com.gtnewhorizon.gtnhmixins.ILateMixinLoader;
 import com.gtnewhorizon.gtnhmixins.LateMixin;
 
+import cpw.mods.fml.relauncher.FMLLaunchHandler;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 
 @SuppressWarnings("unused")
@@ -23,13 +24,19 @@ public class LateMixinLoader implements ILateMixinLoader {
 
     @Override
     public List<String> getMixins(Set<String> loadedMods) {
+        List<String> mixins = new ArrayList<>();
         if (loadedMods.contains("Thaumcraft")) {
-            return Arrays.asList(
-                "thaumcraft.MixinWandManager",
-                "thaumcraft.ResearchItemAccessor",
-                "thaumcraft.MixinResearchManager",
-                "thaumcraft.MixinScanManager");
+            mixins.add("thaumcraft.MixinWandManager");
+            mixins.add("thaumcraft.ResearchItemAccessor");
+            mixins.add("thaumcraft.MixinResearchManager");
+            mixins.add("thaumcraft.MixinScanManager");
         }
-        return java.util.Collections.emptyList();
+        if (loadedMods.contains("ThaumicHorizons") && loadedMods.contains("witchery")) {
+            if (FMLLaunchHandler.side()
+                .isClient()) {
+                mixins.add("thaumichorizons.MixinGuiVat");
+            }
+        }
+        return mixins;
     }
 }

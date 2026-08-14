@@ -16,7 +16,8 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
     version = Tags.VERSION,
     name = ThaumicDabblery.MODNAME,
     acceptedMinecraftVersions = "[1.7.10]",
-    dependencies = "required-after:Thaumcraft@[4.2.3.5,);after:MineTweaker3;after:modtweaker2;after:contenttweaker",
+    dependencies = "required-after:Thaumcraft@[4.2.3.5,);after:MineTweaker3;after:modtweaker2;after:contenttweaker;"
+        + "after:witchery;after:ThaumicHorizons",
     guiFactory = ThaumicDabblery.MODGROUP + "." + ThaumicDabblery.MODID + ".gui.GuiFactory",
     customProperties = { @Mod.CustomProperty(k = "license", v = "CC BY 4.0"),
         @Mod.CustomProperty(k = "issueTrackerUrl", v = "https://github.com/JackOfNoneTrades/ThaumicDabblery/issues"),

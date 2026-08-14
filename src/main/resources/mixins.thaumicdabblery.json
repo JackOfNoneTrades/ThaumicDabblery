@@ -5,7 +5,11 @@
   "refmap": "mixins.thaumicdabblery.refmap.json",
   "target": "@env(DEFAULT)",
   "compatibilityLevel": "JAVA_8",
-  "mixins": [],
-  "client": [],
+  "mixins": [
+    "MixinEntityPlayer"
+  ],
+  "client": [
+    "MixinMinecraft"
+  ],
   "server": []
 }

@@ -48,7 +48,8 @@ dependencies {
     devOnlyNonPublishable("com.github.GTNewHorizons:ModTweaker:0.14.0:dev")
 
     // Optional integration
-    compileOnly(rfg.deobf("curse.maven:witchery-69673:2234410"))
+    devOnlyNonPublishable(rfg.deobf("curse.maven:witchery-69673:2234410"))
+    devOnlyNonPublishable("com.github.GTNewHorizons:ThaumicHorizons:1.8.21:dev")
     devOnlyNonPublishable(rfg.deobf("maven.modrinth:contenttweaker:1.0.5"))
     runtimeOnlyNonPublishable(rfg.deobf("maven.modrinth:fluxed-core:1.0.9"))
 }
