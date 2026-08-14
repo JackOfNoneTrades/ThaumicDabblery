@@ -80,6 +80,14 @@ final class WitcheryBranchCompat {
         if (existingResearch == null) {
             ResearchCategories.addResearch(research);
         }
+        if (ResearchCategories.getResearch(RESEARCH_KEY) != research) {
+            ThaumicDabblery.LOG.error(
+                "Could not register Mystic Branch self-infusion research at column {}, row {}",
+                RESEARCH_COLUMN,
+                RESEARCH_ROW);
+            ThaumicHorizons.selfRecipes.remove(recipe);
+            return;
+        }
         registered = true;
         ThaumicDabblery.LOG.info(
             "Registered Mystic Branch self-infusion with Thaumic Horizons infusion ID {}",

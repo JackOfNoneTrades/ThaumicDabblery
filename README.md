@@ -7,9 +7,29 @@
 * Extends ModTweaker Thaumcraft 4 compatibility
     * Vis discount modification for equippables (armor and baubles)
     * Entity and item scanning based prerequisites for research
+    * Thaumic Horizons player vat infusion recipe modification
 * Thaumic Horizons self-infusion allowing the player to cast Witchery Mystic Branch spells using a keybind (WIP)
 
 Documentation can be found [here](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Documentation)
+
+Thaumic Horizons vat recipes can be replaced by infusion ID:
+
+```zenscript
+mods.thaumichorizons.SelfInfusion.removeRecipe(11);
+mods.thaumichorizons.SelfInfusion.addRecipe(
+    "thaumicdabbleryMysticBranch",
+    11,
+    10,
+    "corpus 24, spiritus 32, humanus 16, motus 16, praecantatio 64",
+    [<minecraft:cactus>]
+);
+```
+
+The arguments to `addRecipe` are the research key, infusion effect ID, instability,
+essentia costs, and pedestal items. An empty research key removes the research
+requirement. Adding a new ID only defines its recipe; Java code must still implement
+the corresponding player effect. Existing Thaumonomicon recipe pages are synchronized
+with scripted removals and replacements.
 
 [![hub](images/badges/github.png)](https://github.com/JackOfNoneTrades/ThaumicDabblery/releases)
 [![modrinth](images/badges/modrinth.png)](https://modrinth.com/mod/thaumic-dabblery/settings/versions)

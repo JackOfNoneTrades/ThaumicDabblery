@@ -30,6 +30,7 @@ public class ThaumicDabblery {
     public static final Logger LOG = LogManager.getLogger(MODID);
 
     public static File configFile;
+    private static boolean DEBUG_MODE;
 
     @SidedProxy(
         clientSide = MODGROUP + "." + MODID + ".ClientProxy",
@@ -39,7 +40,12 @@ public class ThaumicDabblery {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         configFile = event.getSuggestedConfigurationFile();
+        DEBUG_MODE = System.getenv("MCMODDING_DEBUG_MODE") != null;
+        LOG.info("MCMODDING_DEBUG_MODE env var: {}", DEBUG_MODE);
+        LOG.info("Using config file {}", configFile);
         proxy.preInit(event);
+        LOG.info("debugMode config option: {}", Config.debugMode);
+        LOG.info("isDebugMode: {}", isDebugMode());
     }
 
     @Mod.EventHandler
@@ -50,5 +56,15 @@ public class ThaumicDabblery {
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         proxy.postInit(event);
+    }
+
+    public static boolean isDebugMode() {
+        return DEBUG_MODE || Config.debugMode;
+    }
+
+    public static void debug(String message) {
+        if (isDebugMode()) {
+            LOG.info("DEBUG: {}", message);
+        }
     }
 }

@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
+import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
 
@@ -60,15 +61,31 @@ public class GuiFactory implements IModGuiFactory {
 
             List<IConfigElement> elements = new ArrayList<>();
             for (String category : categories) {
-                elements.add(new ConfigElement(configuration.getCategory(category)));
+                ConfigCategory configCategory = configuration.getCategory(category);
+                if (!configCategory.isChild()) {
+                    elements.add(new ConfigElement(configCategory));
+                }
             }
             return elements;
         }
 
         @Override
+        public void initGui() {
+            super.initGui();
+            ThaumicDabblery.debug("Initializing config gui");
+        }
+
+        @Override
+        public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+            super.drawScreen(mouseX, mouseY, partialTicks);
+        }
+
+        @Override
         protected void actionPerformed(GuiButton button) {
+            ThaumicDabblery.debug("Config button id " + button.id + " pressed");
             super.actionPerformed(button);
             if (button.id == 2000) {
+                ThaumicDabblery.debug("Saving config");
                 Config.getRawConfig()
                     .save();
                 ThaumicDabblery.proxy.onConfigReload();

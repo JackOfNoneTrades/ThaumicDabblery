@@ -1,4 +1,6 @@
 thaumicdabblery.config.title=Thaumic Dabblery Configuration
+thaumicdabblery.config.debug=Debug
+thaumicdabblery.config.debug.debugMode=Debug Mode
 thaumicdabblery.config.feature.visDiscount=Vis Discount Tweaker
 thaumicdabblery.config.feature.visDiscount.enabled=Enabled
 thaumicdabblery.config.feature.researchScanGates=Research Scan Gates
