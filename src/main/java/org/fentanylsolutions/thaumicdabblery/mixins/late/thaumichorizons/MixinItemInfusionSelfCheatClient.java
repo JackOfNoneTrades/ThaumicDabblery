@@ -25,12 +25,12 @@ public abstract class MixinItemInfusionSelfCheatClient {
     @Unique
     private IIcon thaumicdabblery$mysticHandsIcon;
 
-    @Inject(method = "registerIcons", at = @At("TAIL"))
+    @Inject(method = { "registerIcons", "func_94581_a" }, at = @At("TAIL"), remap = false)
     private void thaumicdabblery$registerMysticHandsIcon(IIconRegister register, CallbackInfo ci) {
         thaumicdabblery$mysticHandsIcon = register.registerIcon("thaumicdabblery:mystic_hands");
     }
 
-    @Inject(method = "getSubItems", at = @At("TAIL"))
+    @Inject(method = { "getSubItems", "func_150895_a" }, at = @At("TAIL"), remap = false)
     private void thaumicdabblery$addMysticBranchSelfItem(Item item, CreativeTabs tab, List<ItemStack> items,
         CallbackInfo ci) {
         if (WitcheryBranchFeature.isActive()) {
@@ -38,14 +38,14 @@ public abstract class MixinItemInfusionSelfCheatClient {
         }
     }
 
-    @Inject(method = "getIconFromDamage", at = @At("HEAD"), cancellable = true)
+    @Inject(method = { "getIconFromDamage", "func_77617_a" }, at = @At("HEAD"), cancellable = true, remap = false)
     private void thaumicdabblery$useMysticBranchIcon(int damage, CallbackInfoReturnable<IIcon> cir) {
         if (damage == WitcheryBranchFeature.INFUSION_ID) {
             cir.setReturnValue(thaumicdabblery$mysticHandsIcon);
         }
     }
 
-    @Inject(method = "getItemStackDisplayName", at = @At("HEAD"), cancellable = true)
+    @Inject(method = { "getItemStackDisplayName", "func_77653_i" }, at = @At("HEAD"), cancellable = true, remap = false)
     private void thaumicdabblery$nameMysticBranchSelfItem(ItemStack stack, CallbackInfoReturnable<String> cir) {
         if (stack.getItemDamage() == WitcheryBranchFeature.INFUSION_ID) {
             cir.setReturnValue(StatCollector.translateToLocal("selfInfusions.thaumicdabbleryMysticBranch"));

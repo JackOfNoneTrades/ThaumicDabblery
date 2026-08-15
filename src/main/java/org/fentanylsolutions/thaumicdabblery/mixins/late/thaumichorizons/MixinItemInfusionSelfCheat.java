@@ -18,7 +18,7 @@ import com.kentington.thaumichorizons.common.lib.EntityInfusionProperties;
 @Mixin(value = ItemInfusionSelfCheat.class, remap = false)
 public abstract class MixinItemInfusionSelfCheat {
 
-    @Inject(method = "onItemRightClick", at = @At("RETURN"))
+    @Inject(method = { "onItemRightClick", "func_77659_a" }, at = @At("RETURN"), remap = false)
     private void thaumicdabblery$grantMysticBranchSelfInfusion(ItemStack stack, World world, EntityPlayer player,
         CallbackInfoReturnable<ItemStack> cir) {
         if (!WitcheryBranchFeature.isActive() || stack.getItemDamage() != WitcheryBranchFeature.INFUSION_ID) {
