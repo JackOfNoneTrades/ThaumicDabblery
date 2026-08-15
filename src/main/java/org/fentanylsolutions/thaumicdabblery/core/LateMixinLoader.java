@@ -32,6 +32,7 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("thaumcraft.MixinScanManager");
             if (loadedMods.contains("modtweaker2")) {
                 mixins.add("modtweaker.MixinMoveResearch");
+                mixins.add("modtweaker.MixinRemoveResearch");
             }
         }
         if (loadedMods.contains("ThaumicHorizons") && loadedMods.contains("witchery")) {
