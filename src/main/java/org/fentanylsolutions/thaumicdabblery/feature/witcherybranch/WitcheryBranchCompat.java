@@ -1,7 +1,6 @@
 package org.fentanylsolutions.thaumicdabblery.feature.witcherybranch;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 
 import org.fentanylsolutions.thaumicdabblery.ThaumicDabblery;
 
@@ -22,7 +21,6 @@ final class WitcheryBranchCompat {
     private static final String RESEARCH_KEY = "thaumicdabbleryMysticBranch";
     private static final String RESEARCH_CATEGORY = "ThaumicHorizons";
     private static final String PARENT_RESEARCH_KEY = "humanInfusion";
-    private static final String INFUSION_NAME_KEY = "selfInfusions.thaumicdabbleryMysticBranch";
     private static final String PLACEHOLDER_LORE_KEY = "thaumicdabblery.research.mysticBranch.placeholder";
     private static final int INSTABILITY = 10;
     private static final int RESEARCH_COLUMN = 19;
@@ -115,11 +113,10 @@ final class WitcheryBranchCompat {
             lorePage = new ResearchPage(PLACEHOLDER_LORE_KEY);
         }
         if (researchPage == null) {
-            // Thaumic Horizons' human silhouette is temporary art until the final icon is supplied.
-            ItemStack displayOutput = new ItemStack(ThaumicHorizons.itemDummy, 1, 15);
-            NBTTagCompound displayTag = new NBTTagCompound();
-            displayTag.setString("infName", INFUSION_NAME_KEY);
-            displayOutput.setTagCompound(displayTag);
+            ItemStack displayOutput = new ItemStack(
+                ThaumicHorizons.itemInfusionSelfCheat,
+                1,
+                WitcheryBranchFeature.INFUSION_ID);
 
             InfusionRecipe displayRecipe = new InfusionRecipe(
                 RESEARCH_KEY,
@@ -140,7 +137,7 @@ final class WitcheryBranchCompat {
                 RESEARCH_COLUMN,
                 RESEARCH_ROW,
                 3,
-                new ItemStack(Witchery.Items.MYSTIC_BRANCH));
+                new ItemStack(ThaumicHorizons.itemInfusionSelfCheat, 1, WitcheryBranchFeature.INFUSION_ID));
             research.setParents(PARENT_RESEARCH_KEY);
             research.setConcealed();
             research.setPages(lorePage, researchPage);

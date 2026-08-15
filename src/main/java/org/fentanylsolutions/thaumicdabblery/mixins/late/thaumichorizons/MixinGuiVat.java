@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.emoniph.witchery.Witchery;
 import com.kentington.thaumichorizons.client.gui.GuiVat;
+import com.kentington.thaumichorizons.common.ThaumicHorizons;
 import com.kentington.thaumichorizons.common.tiles.TileVat;
 
 @Mixin(value = GuiVat.class, remap = false)
@@ -41,7 +41,7 @@ public abstract class MixinGuiVat {
                     .renderItemAndEffectIntoGUI(
                         gui.mc.fontRenderer,
                         gui.mc.getTextureManager(),
-                        new ItemStack(Witchery.Items.MYSTIC_BRANCH),
+                        new ItemStack(ThaumicHorizons.itemInfusionSelfCheat, 1, WitcheryBranchFeature.INFUSION_ID),
                         left + 55 + 16 * (slot % 4),
                         top + 56 + 17 * (slot / 4));
             }
