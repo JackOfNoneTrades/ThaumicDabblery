@@ -21,13 +21,15 @@ final class WitcheryBranchCompat {
     private static final String RESEARCH_KEY = "thaumicdabbleryMysticBranch";
     private static final String RESEARCH_CATEGORY = "ThaumicHorizons";
     private static final String PARENT_RESEARCH_KEY = "humanInfusion";
-    private static final String PLACEHOLDER_LORE_KEY = "thaumicdabblery.research.mysticBranch.placeholder";
+    private static final String LORE_PAGE_ONE_KEY = "thaumicdabblery.research.mysticBranch.page1";
+    private static final String LORE_PAGE_TWO_KEY = "thaumicdabblery.research.mysticBranch.page2";
     private static final int INSTABILITY = 10;
     private static final int RESEARCH_COLUMN = 19;
     private static final int RESEARCH_ROW = 5;
 
     private static SelfInfusionRecipe recipe;
-    private static ResearchPage lorePage;
+    private static ResearchPage lorePageOne;
+    private static ResearchPage lorePageTwo;
     private static ResearchPage researchPage;
     private static ResearchItem research;
     private static boolean registered;
@@ -109,8 +111,11 @@ final class WitcheryBranchCompat {
                 createComponents(),
                 WitcheryBranchFeature.INFUSION_ID);
         }
-        if (lorePage == null) {
-            lorePage = new ResearchPage(PLACEHOLDER_LORE_KEY);
+        if (lorePageOne == null) {
+            lorePageOne = new ResearchPage(LORE_PAGE_ONE_KEY);
+        }
+        if (lorePageTwo == null) {
+            lorePageTwo = new ResearchPage(LORE_PAGE_TWO_KEY);
         }
         if (researchPage == null) {
             ItemStack displayOutput = new ItemStack(
@@ -140,7 +145,7 @@ final class WitcheryBranchCompat {
                 new ItemStack(ThaumicHorizons.itemInfusionSelfCheat, 1, WitcheryBranchFeature.INFUSION_ID));
             research.setParents(PARENT_RESEARCH_KEY);
             research.setConcealed();
-            research.setPages(lorePage, researchPage);
+            research.setPages(lorePageOne, lorePageTwo, researchPage);
         }
     }
 
