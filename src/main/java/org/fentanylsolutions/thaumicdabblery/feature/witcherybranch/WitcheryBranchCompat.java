@@ -145,6 +145,8 @@ final class WitcheryBranchCompat {
                 new ItemStack(ThaumicHorizons.itemInfusionSelfCheat, 1, WitcheryBranchFeature.INFUSION_ID));
             research.setParents(PARENT_RESEARCH_KEY);
             research.setConcealed();
+            research.setHidden();
+            research.setItemTriggers(new ItemStack(Witchery.Items.MYSTIC_BRANCH));
             research.setPages(lorePageOne, lorePageTwo, researchPage);
         }
     }
