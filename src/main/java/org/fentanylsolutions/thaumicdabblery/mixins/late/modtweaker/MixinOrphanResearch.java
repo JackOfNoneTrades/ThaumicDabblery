@@ -1,9 +1,10 @@
 package org.fentanylsolutions.thaumicdabblery.mixins.late.modtweaker;
 
 import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -14,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import minetweaker.MineTweakerAPI;
 import modtweaker2.mods.thaumcraft.research.OrphanResearch;
 import thaumcraft.api.research.ResearchCategories;
+import thaumcraft.api.research.ResearchCategoryList;
 import thaumcraft.api.research.ResearchItem;
 
 @Mixin(value = OrphanResearch.class, remap = false)
@@ -22,24 +24,56 @@ public abstract class MixinOrphanResearch {
     @Shadow
     private String key;
 
-    @Shadow
-    @Final
-    private Set<String> children;
+    @Unique
+    private final Set<String> thaumicdabblery$children = new LinkedHashSet<>();
 
-    @Shadow
-    @Final
-    private Set<String> secretChildren;
+    @Unique
+    private final Set<String> thaumicdabblery$secretChildren = new LinkedHashSet<>();
 
-    @Shadow
-    @Final
-    private Set<String> siblings;
+    @Unique
+    private final Set<String> thaumicdabblery$siblings = new LinkedHashSet<>();
+
+    @Inject(method = "apply", at = @At("HEAD"))
+    private void thaumicdabblery$captureReferences(CallbackInfo ci) {
+        thaumicdabblery$children.clear();
+        thaumicdabblery$secretChildren.clear();
+        thaumicdabblery$siblings.clear();
+
+        for (ResearchCategoryList category : ResearchCategories.researchCategories.values()) {
+            for (Map.Entry<String, ResearchItem> entry : category.research.entrySet()) {
+                ResearchItem research = entry.getValue();
+                if (thaumicdabblery$containsReference(research.parents)) {
+                    thaumicdabblery$children.add(entry.getKey());
+                }
+                if (thaumicdabblery$containsReference(research.parentsHidden)) {
+                    thaumicdabblery$secretChildren.add(entry.getKey());
+                }
+                if (thaumicdabblery$containsReference(research.siblings)) {
+                    thaumicdabblery$siblings.add(entry.getKey());
+                }
+            }
+        }
+    }
 
     @Inject(method = "undo", at = @At("HEAD"), cancellable = true)
     private void thaumicdabblery$restoreReferences(CallbackInfo ci) {
-        thaumicdabblery$restoreParents(children, false);
-        thaumicdabblery$restoreParents(secretChildren, true);
+        thaumicdabblery$restoreParents(thaumicdabblery$children, false);
+        thaumicdabblery$restoreParents(thaumicdabblery$secretChildren, true);
         thaumicdabblery$restoreSiblings();
         ci.cancel();
+    }
+
+    @Unique
+    private boolean thaumicdabblery$containsReference(String[] references) {
+        if (references == null) {
+            return false;
+        }
+        for (String reference : references) {
+            if (key == null ? reference == null : key.equals(reference)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Unique
@@ -59,7 +93,7 @@ public abstract class MixinOrphanResearch {
 
     @Unique
     private void thaumicdabblery$restoreSiblings() {
-        for (String researchKey : siblings) {
+        for (String researchKey : thaumicdabblery$siblings) {
             ResearchItem research = thaumicdabblery$getResearch(researchKey);
             if (research != null) {
                 research.setSiblings(thaumicdabblery$appendReference(research.siblings));
