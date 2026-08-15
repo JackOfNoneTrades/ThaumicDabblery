@@ -32,11 +32,13 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("thaumcraft.MixinScanManager");
         }
         if (loadedMods.contains("ThaumicHorizons") && loadedMods.contains("witchery")) {
+            mixins.add("thaumichorizons.MixinItemInfusionSelfCheat");
             mixins.add("witchery.MixinItemMysticBranch");
             mixins.add("witchery.MixinPacketSpellPreparedHandler");
             if (FMLLaunchHandler.side()
                 .isClient()) {
                 mixins.add("thaumichorizons.MixinGuiVat");
+                mixins.add("thaumichorizons.MixinItemInfusionSelfCheatClient");
             }
         }
         return mixins;
