@@ -9,7 +9,7 @@
     * Entity and item scanning based prerequisites for research
     * Safe research movement and removal
     * Thaumic Horizons player vat infusion recipe modification
-* Thaumic Horizons self-infusion allowing the player to cast Witchery Mystic Branch spells using a keybind, with a creative grant item (WIP)
+* Thaumic Horizons self-infusion allowing the player to cast Witchery Mystic Branch spells using a keybind, with a creative grant item.
 
 Documentation can be found [here](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Documentation)
 
