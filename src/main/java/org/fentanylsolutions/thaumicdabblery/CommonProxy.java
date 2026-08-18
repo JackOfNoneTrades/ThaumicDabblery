@@ -1,5 +1,6 @@
 package org.fentanylsolutions.thaumicdabblery;
 
+import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ResearchTabsZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ThaumicHorizonsSelfInfusionZen;
 import org.fentanylsolutions.thaumicdabblery.feature.FeatureManager;
 
@@ -23,9 +24,11 @@ public class CommonProxy {
 
     public void init(FMLInitializationEvent event) {
         FeatureManager.init(event);
-        if (Loader.isModLoaded("MineTweaker3") && Loader.isModLoaded("modtweaker2")
-            && Loader.isModLoaded("ThaumicHorizons")) {
-            ThaumicHorizonsSelfInfusionZen.register();
+        if (Loader.isModLoaded("MineTweaker3") && Loader.isModLoaded("modtweaker2")) {
+            ResearchTabsZen.register();
+            if (Loader.isModLoaded("ThaumicHorizons")) {
+                ThaumicHorizonsSelfInfusionZen.register();
+            }
         }
     }
 

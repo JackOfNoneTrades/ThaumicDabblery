@@ -8,6 +8,7 @@
     * Vis discount modification for equippables (armor and baubles)
     * Entity and item scanning based prerequisites for research
     * Safe research movement and removal
+    * Reload-safe Thaumonomicon tab name, icon, and background overrides
     * Thaumic Horizons player vat infusion recipe modification
 * Thaumic Horizons self-infusion allowing the player to cast Witchery Mystic Branch spells using a keybind, with a creative grant item.
 
