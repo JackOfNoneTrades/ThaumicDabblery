@@ -9,38 +9,43 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import minetweaker.MineTweakerAPI;
-import modtweaker2.mods.thaumcraft.research.AddPrereq;
+import modtweaker2.mods.thaumcraft.research.ClearPrereqs;
 import thaumcraft.api.research.ResearchCategories;
 import thaumcraft.api.research.ResearchItem;
 
-@Mixin(value = AddPrereq.class, remap = false)
-public abstract class MixinAddPrereq {
+@Mixin(value = ClearPrereqs.class, remap = false)
+public abstract class MixinClearPrereqs {
 
     @Unique
     private boolean thaumicdabblery$ignoredMissingResearch;
+
+    @Unique
+    private boolean thaumicdabblery$applied;
 
     @Shadow
     private String key;
 
     @Shadow
-    private String[] oldPrereqs;
+    private String[] prereqs;
 
     @Shadow
-    private boolean hidden;
+    private String[] secretPrereqs;
 
     @Inject(method = "apply", at = @At("HEAD"), cancellable = true)
     private void thaumicdabblery$rejectMissingResearch(CallbackInfo ci) {
         if (ResearchCategories.getResearch(key) == null) {
             thaumicdabblery$ignoredMissingResearch = true;
             MineTweakerAPI.logError(
-                "Cannot add a prerequisite to missing Thaumcraft research " + key + ". The action was ignored.");
+                "Cannot clear prerequisites for missing Thaumcraft research " + key + ". The action was ignored.");
             ci.cancel();
+        } else {
+            thaumicdabblery$applied = true;
         }
     }
 
     @Inject(method = "canUndo", at = @At("HEAD"), cancellable = true)
     private void thaumicdabblery$allowIgnoredActionCleanup(CallbackInfoReturnable<Boolean> cir) {
-        if (thaumicdabblery$ignoredMissingResearch) {
+        if (thaumicdabblery$ignoredMissingResearch || thaumicdabblery$applied) {
             cir.setReturnValue(true);
         }
     }
@@ -56,12 +61,9 @@ public abstract class MixinAddPrereq {
         if (research == null) {
             MineTweakerAPI.logWarning(
                 "Could not restore prerequisites for missing Thaumcraft research " + key + ". The undo was skipped.");
-        } else if (oldPrereqs != null) {
-            if (hidden) {
-                research.setParentsHidden(oldPrereqs);
-            } else {
-                research.setParents(oldPrereqs);
-            }
+        } else {
+            research.parents = prereqs;
+            research.parentsHidden = secretPrereqs;
         }
         ci.cancel();
     }
