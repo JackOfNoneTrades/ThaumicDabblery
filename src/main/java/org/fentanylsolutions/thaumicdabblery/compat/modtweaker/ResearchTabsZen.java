@@ -45,6 +45,22 @@ public final class ResearchTabsZen {
         setTexture(categoryKey, resourceDomain, resourcePath, TextureTarget.ICON);
     }
 
+    @ZenMethod
+    public static void setResearchGate(String categoryKey, String researchKey) {
+        String category = requireCategory(categoryKey);
+        String research = requireText(researchKey, "research gate");
+        if (ResearchCategories.getResearch(research) == null) {
+            throw new IllegalArgumentException("Unknown Thaumcraft research: " + research);
+        }
+        ResearchTabGateRegistry.validateCanSet(category);
+        MineTweakerAPI.apply(new SetResearchGateAction(category, research));
+    }
+
+    @ZenMethod
+    public static void clearResearchGate(String categoryKey) {
+        MineTweakerAPI.apply(new ClearResearchGateAction(requireCategory(categoryKey)));
+    }
+
     private static void setTexture(String categoryKey, String resourceDomain, String resourcePath,
         TextureTarget target) {
         String key = requireCategory(categoryKey);
@@ -144,6 +160,73 @@ public final class ResearchTabsZen {
         @Override
         public Object getOverrideKey() {
             return null;
+        }
+    }
+
+    private abstract static class ResearchGateAction implements IUndoableAction {
+
+        protected final String categoryKey;
+        protected ResearchTabGateRegistry.Change change;
+
+        private ResearchGateAction(String categoryKey) {
+            this.categoryKey = categoryKey;
+        }
+
+        @Override
+        public boolean canUndo() {
+            return change != null;
+        }
+
+        @Override
+        public void undo() {
+            change.undo();
+        }
+
+        @Override
+        public String describeUndo() {
+            return "Restoring Thaumcraft research category " + categoryKey + " research gate";
+        }
+
+        @Override
+        public Object getOverrideKey() {
+            return null;
+        }
+    }
+
+    private static final class SetResearchGateAction extends ResearchGateAction {
+
+        private final String researchKey;
+
+        private SetResearchGateAction(String categoryKey, String researchKey) {
+            super(categoryKey);
+            this.researchKey = researchKey;
+        }
+
+        @Override
+        public void apply() {
+            change = ResearchTabGateRegistry.set(categoryKey, researchKey);
+        }
+
+        @Override
+        public String describe() {
+            return "Hiding Thaumcraft research category " + categoryKey + " until " + researchKey + " is complete";
+        }
+    }
+
+    private static final class ClearResearchGateAction extends ResearchGateAction {
+
+        private ClearResearchGateAction(String categoryKey) {
+            super(categoryKey);
+        }
+
+        @Override
+        public void apply() {
+            change = ResearchTabGateRegistry.clear(categoryKey);
+        }
+
+        @Override
+        public String describe() {
+            return "Clearing Thaumcraft research category " + categoryKey + " research gate";
         }
     }
 }

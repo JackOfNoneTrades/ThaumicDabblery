@@ -30,6 +30,10 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("thaumcraft.ResearchItemAccessor");
             mixins.add("thaumcraft.MixinResearchManager");
             mixins.add("thaumcraft.MixinScanManager");
+            if (FMLLaunchHandler.side()
+                .isClient()) {
+                mixins.add("thaumcraft.MixinGuiResearchBrowser");
+            }
             if (loadedMods.contains("modtweaker2")) {
                 mixins.add("modtweaker.MixinAddPrereq");
                 mixins.add("modtweaker.MixinClearPrereqs");
