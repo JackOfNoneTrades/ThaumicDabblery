@@ -27,6 +27,8 @@ public class LateMixinLoader implements ILateMixinLoader {
         List<String> mixins = new ArrayList<>();
         if (loadedMods.contains("Thaumcraft")) {
             mixins.add("thaumcraft.MixinWandManager");
+            mixins.add("thaumcraft.MixinEventHandlerRunic");
+            mixins.add("thaumcraft.MixinInfusionRunicAugmentRecipe");
             mixins.add("thaumcraft.ResearchItemAccessor");
             mixins.add("thaumcraft.MixinResearchManager");
             mixins.add("thaumcraft.MixinScanManager");

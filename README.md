@@ -6,6 +6,7 @@
 
 * Extends ModTweaker Thaumcraft 4 compatibility
     * Vis discount modification for equippables (armor and baubles)
+    * Equipped item warp and runic shielding modification
     * Entity and item scanning based prerequisites for research
     * Safe research movement and removal
     * Reload-safe Thaumonomicon tab name, icon, and background overrides
@@ -39,6 +40,7 @@ Documentation can be found [here](https://github.com/JackOfNoneTrades/ThaumicDab
 ## Credits
 
 * [GT:NH buildscript](https://github.com/GTNewHorizons/ExampleMod1.7.10)
+* [AlexSocol's StatTweaker](https://bitbucket.org/AlexSocol/stattweaker), whose Thaumcraft integration inspired the item warp and runic shielding scripting support
 
 ## License
 
