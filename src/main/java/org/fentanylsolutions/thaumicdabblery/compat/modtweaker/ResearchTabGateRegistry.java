@@ -54,10 +54,12 @@ public final class ResearchTabGateRegistry {
             }
         }
 
-        if (visible.isEmpty() && !categories.isEmpty()) {
-            String fallback = categories.iterator()
-                .next();
+        String fallback = getFallbackIfEveryCategoryIsHidden(playerName);
+        if (visible.isEmpty() && fallback != null && categories.contains(fallback)) {
             visible.add(fallback);
+        }
+
+        if (fallback != null) {
             if (!warnedAboutEmptyResult) {
                 ThaumicDabblery.LOG.warn(
                     "Every Thaumcraft research category is hidden for {}. Showing {} as a safety fallback.",
@@ -65,7 +67,7 @@ public final class ResearchTabGateRegistry {
                     fallback);
                 warnedAboutEmptyResult = true;
             }
-        } else if (!visible.isEmpty()) {
+        } else {
             warnedAboutEmptyResult = false;
         }
         return visible;
@@ -83,6 +85,19 @@ public final class ResearchTabGateRegistry {
     private static boolean isResearchComplete(String playerName, String researchKey) {
         return playerName != null && !playerName.isEmpty()
             && ResearchManager.isResearchComplete(playerName, researchKey);
+    }
+
+    private static String getFallbackIfEveryCategoryIsHidden(String playerName) {
+        String fallback = null;
+        for (String category : ResearchCategories.researchCategories.keySet()) {
+            if (fallback == null) {
+                fallback = category;
+            }
+            if (isVisible(category, playerName)) {
+                return null;
+            }
+        }
+        return fallback;
     }
 
     private static void requireCategory(String categoryKey) {

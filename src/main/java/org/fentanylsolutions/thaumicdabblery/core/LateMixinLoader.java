@@ -40,10 +40,17 @@ public class LateMixinLoader implements ILateMixinLoader {
                 mixins.add("modtweaker.MixinMoveResearch");
                 mixins.add("modtweaker.MixinOrphanResearch");
                 mixins.add("modtweaker.MixinRemoveResearch");
+                mixins.add("modtweaker.MixinRemoveTab");
                 mixins.add("modtweaker.MixinSetResearch");
             }
             if (loadedMods.contains("tc4tweak")) {
                 mixins.add("tc4tweaks.MixinGetResearch");
+            }
+            if (loadedMods.contains("WitchingGadgets") && FMLLaunchHandler.side()
+                .isClient()) {
+                mixins.add("witchinggadgets.MixinClientEventHandler");
+                mixins.add("witchinggadgets.MixinPacketClientNotifier");
+                mixins.add("witchinggadgets.MixinMessageClientNotifierHandler");
             }
         }
         if (loadedMods.contains("ThaumicHorizons") && loadedMods.contains("witchery")) {
