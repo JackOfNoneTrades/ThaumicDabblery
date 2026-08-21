@@ -50,6 +50,7 @@ dependencies {
     // Optional integration
     devOnlyNonPublishable(rfg.deobf("curse.maven:witchery-69673:2234410"))
     devOnlyNonPublishable("com.github.GTNewHorizons:ThaumicHorizons:1.8.21:dev")
+    devOnlyNonPublishable(rfg.deobf("curse.maven:tc4tweaks-431297:8668688")) // 1.5.47
     devOnlyNonPublishable(rfg.deobf("maven.modrinth:contenttweaker:1.0.5"))
     runtimeOnlyNonPublishable(rfg.deobf("maven.modrinth:fluxed-core:1.0.9"))
 }

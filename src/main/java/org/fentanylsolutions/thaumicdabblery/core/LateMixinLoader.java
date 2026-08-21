@@ -42,6 +42,9 @@ public class LateMixinLoader implements ILateMixinLoader {
                 mixins.add("modtweaker.MixinRemoveResearch");
                 mixins.add("modtweaker.MixinSetResearch");
             }
+            if (loadedMods.contains("tc4tweak")) {
+                mixins.add("tc4tweaks.MixinGetResearch");
+            }
         }
         if (loadedMods.contains("ThaumicHorizons") && loadedMods.contains("witchery")) {
             mixins.add("thaumichorizons.MixinItemInfusionSelfCheat");

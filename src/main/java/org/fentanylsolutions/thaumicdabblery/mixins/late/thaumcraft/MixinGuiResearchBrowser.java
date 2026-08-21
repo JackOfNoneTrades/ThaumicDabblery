@@ -34,7 +34,8 @@ public abstract class MixinGuiResearchBrowser {
     }
 
     @Redirect(
-        method = { "updateResearch", "drawScreen", "genResearchBackground", "mouseClicked" },
+        method = { "updateResearch", "drawScreen", "func_73863_a", "genResearchBackground", "mouseClicked",
+            "func_73864_a" },
         at = @At(value = "INVOKE", target = "Ljava/util/LinkedHashMap;keySet()Ljava/util/Set;"),
         require = 4)
     private Set<String> thaumicdabblery$hideResearchCategories(LinkedHashMap<String, ResearchCategoryList> categories) {
