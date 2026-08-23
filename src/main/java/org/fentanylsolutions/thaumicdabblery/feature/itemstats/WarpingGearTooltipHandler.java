@@ -7,7 +7,7 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
-final class WarpingGearTooltipHandler {
+public final class WarpingGearTooltipHandler {
 
     static final WarpingGearTooltipHandler INSTANCE = new WarpingGearTooltipHandler();
 
