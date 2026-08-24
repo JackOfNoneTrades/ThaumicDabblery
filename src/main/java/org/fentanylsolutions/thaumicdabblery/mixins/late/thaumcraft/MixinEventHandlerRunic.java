@@ -9,11 +9,13 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.entity.living.LivingEvent;
 
+import org.fentanylsolutions.thaumicdabblery.ThaumicDabblery;
 import org.fentanylsolutions.thaumicdabblery.feature.itemstats.RunicShieldingRegistry;
 import org.fentanylsolutions.thaumicdabblery.feature.itemstats.ThaumcraftItemStatsFeature;
 import org.fentanylsolutions.thaumicdabblery.feature.itemstats.WarpingGearRegistry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -39,6 +41,12 @@ public abstract class MixinEventHandlerRunic {
 
     @Shadow
     public HashMap<Integer, Integer[]> runicInfo;
+
+    @Shadow
+    public boolean isDirty;
+
+    @Unique
+    private final HashMap<Integer, Integer> thaumicdabblery$chargeBeforeRebuild = new HashMap<>();
 
     @Inject(method = "getFinalWarp", at = @At("HEAD"), cancellable = true, require = 1)
     private static void thaumicdabblery$getScriptedWarp(ItemStack stack, EntityPlayer player,
@@ -72,6 +80,31 @@ public abstract class MixinEventHandlerRunic {
         if (ThaumcraftItemStatsFeature.isEnabled() && RunicShieldingRegistry.isAugmentable(stack)
             && !(stack.getItem() instanceof IRunicArmor)) {
             cir.setReturnValue(getHardeningTag(stack));
+        }
+    }
+
+    @Inject(method = "livingTick", at = @At("HEAD"), require = 1)
+    private void thaumicdabblery$captureChargeBeforeNativeRebuild(LivingEvent.LivingUpdateEvent event,
+        CallbackInfo ci) {
+        if (!ThaumcraftItemStatsFeature.isEnabled() || event.entity.worldObj.isRemote
+            || !(event.entity instanceof EntityPlayerMP)) {
+            return;
+        }
+
+        EntityPlayerMP player = (EntityPlayerMP) event.entity;
+        if ((!isDirty && player.ticksExisted % 40 != 0)
+            || !hasScriptedRunicItem(player, BaublesApi.getBaubles(player))) {
+            return;
+        }
+
+        int id = player.getEntityId();
+        Integer charge = runicCharge.get(id);
+        thaumicdabblery$chargeBeforeRebuild.put(id, charge == null ? 0 : charge);
+        if (ThaumicDabblery.isDebugMode()) {
+            ThaumicDabblery.debug(
+                "[Runic shielding] Preserving " + (charge == null ? 0 : charge)
+                    + " charge before Thaumcraft rebuild for "
+                    + player.getCommandSenderName());
         }
     }
 
@@ -121,15 +154,37 @@ public abstract class MixinEventHandlerRunic {
             }
         }
 
-        updateRunicState(player, max, charged, kinetic, healing, emergency);
+        updateRunicState(
+            player,
+            max,
+            charged,
+            kinetic,
+            healing,
+            emergency,
+            thaumicdabblery$chargeBeforeRebuild.remove(player.getEntityId()));
     }
 
-    private void updateRunicState(EntityPlayerMP player, int max, int charged, int kinetic, int healing,
-        int emergency) {
+    private void updateRunicState(EntityPlayerMP player, int max, int charged, int kinetic, int healing, int emergency,
+        Integer chargeBeforeRebuild) {
         int id = player.getEntityId();
         Integer[] previousInfo = runicInfo.get(id);
         int previousCharge = runicCharge.containsKey(id) ? runicCharge.get(id) : 0;
+        if (chargeBeforeRebuild != null) {
+            previousCharge = Math.max(previousCharge, chargeBeforeRebuild);
+        }
         int charge = Math.max(0, Math.min(previousCharge, max));
+        if (chargeBeforeRebuild != null && ThaumicDabblery.isDebugMode()) {
+            ThaumicDabblery.debug(
+                "[Runic shielding] Reconciled " + player.getCommandSenderName()
+                    + " after rebuild: preserved="
+                    + chargeBeforeRebuild
+                    + ", native="
+                    + (runicCharge.containsKey(id) ? runicCharge.get(id) : 0)
+                    + ", final="
+                    + charge
+                    + ", max="
+                    + max);
+        }
 
         if (max > 0) {
             Integer[] newInfo = { max, charged, kinetic, healing, emergency };
