@@ -15,7 +15,13 @@ import thaumcraft.api.research.ResearchCategories;
 @Mixin(targets = "witchinggadgets.client.ClientEventHandler", remap = false)
 public abstract class MixinClientEventHandler {
 
-    @Inject(method = "onGuiOpen", at = @At("HEAD"), cancellable = true, require = 1)
+    // KryptonCaptain 1.2.9 comments this handler out; the GTNH fork still ships it.
+    @Inject(
+        method = "onGuiOpen(Lnet/minecraftforge/client/event/GuiOpenEvent;)V",
+        at = @At("HEAD"),
+        cancellable = true,
+        require = 0,
+        allow = 1)
     private void thaumicdabblery$skipMissingResearchCategory(GuiOpenEvent event, CallbackInfo ci) {
         if (ResearchCategories.getResearchList("WITCHGADG") == null) {
             ci.cancel();
