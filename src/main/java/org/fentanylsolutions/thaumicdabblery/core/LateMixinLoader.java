@@ -1,10 +1,18 @@
 package org.fentanylsolutions.thaumicdabblery.core;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import net.minecraft.launchwrapper.Launch;
+
 import org.fentanylsolutions.thaumicdabblery.ThaumicDabblery;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 import com.gtnewhorizon.gtnhmixins.ILateMixinLoader;
 import com.gtnewhorizon.gtnhmixins.LateMixin;
@@ -39,7 +47,11 @@ public class LateMixinLoader implements ILateMixinLoader {
             if (loadedMods.contains("modtweaker2")) {
                 mixins.add("modtweaker.MixinAddPrereq");
                 mixins.add("modtweaker.MixinClearPrereqs");
-                mixins.add("modtweaker.MixinMoveResearch");
+                if (hasModTweakerMoveResearchHelper()) {
+                    mixins.add("modtweaker.MixinMoveResearch");
+                } else {
+                    mixins.add("modtweaker.MixinMoveResearchLegacy");
+                }
                 mixins.add("modtweaker.MixinOrphanResearch");
                 mixins.add("modtweaker.MixinRemoveResearch");
                 mixins.add("modtweaker.MixinRemoveTab");
@@ -66,5 +78,32 @@ public class LateMixinLoader implements ILateMixinLoader {
             }
         }
         return mixins;
+    }
+
+    private static boolean hasModTweakerMoveResearchHelper() {
+        String resource = "modtweaker2/mods/thaumcraft/research/MoveResearch.class";
+        try (InputStream input = Launch.classLoader.getResourceAsStream(resource)) {
+            if (input == null) {
+                throw new IllegalStateException("Could not inspect ModTweaker MoveResearch bytecode");
+            }
+
+            final boolean[] found = { false };
+            new ClassReader(input).accept(new ClassVisitor(Opcodes.ASM5) {
+
+                @Override
+                public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
+                    String[] exceptions) {
+                    if ("moveResearchItem".equals(name)) {
+                        found[0] = true;
+                    }
+                    return null;
+                }
+            }, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+            ThaumicDabblery.LOG
+                .info("Detected {} ModTweaker MoveResearch layout", found[0] ? "helper-based" : "legacy inline");
+            return found[0];
+        } catch (IOException exception) {
+            throw new IllegalStateException("Could not inspect ModTweaker MoveResearch bytecode", exception);
+        }
     }
 }

@@ -9,10 +9,12 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import modtweaker2.mods.thaumcraft.research.MoveResearch;
+import thaumcraft.api.research.ResearchCategories;
+import thaumcraft.api.research.ResearchCategoryList;
 import thaumcraft.api.research.ResearchItem;
 
 @Mixin(value = MoveResearch.class, remap = false)
-public abstract class MixinMoveResearch {
+public abstract class MixinMoveResearchLegacy {
 
     @Shadow
     private String key;
@@ -26,6 +28,18 @@ public abstract class MixinMoveResearch {
     @Shadow
     private int y;
 
+    @Shadow
+    private String oldTab;
+
+    @Shadow
+    private int oldX;
+
+    @Shadow
+    private int oldY;
+
+    @Shadow
+    private boolean moved;
+
     @Inject(method = "apply", at = @At("HEAD"), cancellable = true, require = 1)
     private void thaumicdabblery$rejectInvalidDestination(CallbackInfo ci) {
         if (MoveResearchCompat.shouldRejectInvalidDestination(key, newTab, x, y)) {
@@ -33,8 +47,23 @@ public abstract class MixinMoveResearch {
         }
     }
 
+    @Inject(method = "undo", at = @At("HEAD"), cancellable = true, require = 1)
+    private void thaumicdabblery$undoFromCurrentCategory(CallbackInfo ci) {
+        ResearchItem research = ResearchCategories.getResearch(key);
+        if (research != null) {
+            ResearchCategoryList currentCategory = ResearchCategories.getResearchList(research.category);
+            if (currentCategory != null) {
+                currentCategory.research.remove(key);
+            }
+            MoveResearchCompat.setPositionAndCategory(research, oldX, oldY, oldTab);
+            MoveResearchCompat.registerIgnoringVirtualOccupants(research);
+        }
+        moved = false;
+        ci.cancel();
+    }
+
     @Redirect(
-        method = "moveResearchItem",
+        method = "apply",
         at = @At(
             value = "INVOKE",
             target = "Lthaumcraft/api/research/ResearchItem;registerResearchItem()Lthaumcraft/api/research/ResearchItem;"),
