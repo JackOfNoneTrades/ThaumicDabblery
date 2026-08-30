@@ -1,5 +1,10 @@
 package org.fentanylsolutions.thaumicdabblery.compat.modtweaker;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import net.minecraft.util.ResourceLocation;
 
 import minetweaker.IUndoableAction;
@@ -43,6 +48,24 @@ public final class ResearchTabsZen {
     @ZenMethod
     public static void setIcon(String categoryKey, String resourceDomain, String resourcePath) {
         setTexture(categoryKey, resourceDomain, resourcePath, TextureTarget.ICON);
+    }
+
+    @ZenMethod
+    public static void setOrder(String[] categoryKeys) {
+        if (categoryKeys == null || categoryKeys.length == 0) {
+            throw new IllegalArgumentException("Thaumcraft research tab order cannot be empty");
+        }
+
+        List<String> order = new ArrayList<>(categoryKeys.length);
+        Set<String> seen = new HashSet<>();
+        for (String categoryKey : categoryKeys) {
+            String key = requireCategory(categoryKey);
+            if (!seen.add(key)) {
+                throw new IllegalArgumentException("Duplicate Thaumcraft research category in tab order: " + key);
+            }
+            order.add(key);
+        }
+        MineTweakerAPI.apply(new SetOrderAction(order));
     }
 
     @ZenMethod
@@ -155,6 +178,47 @@ public final class ResearchTabsZen {
         @Override
         public String describeUndo() {
             return "Restoring Thaumcraft research category " + categoryKey + " " + target.description;
+        }
+
+        @Override
+        public Object getOverrideKey() {
+            return null;
+        }
+    }
+
+    private static final class SetOrderAction implements IUndoableAction {
+
+        private final List<String> categoryOrder;
+
+        private ResearchTabOrderRegistry.Change change;
+
+        private SetOrderAction(List<String> categoryOrder) {
+            this.categoryOrder = categoryOrder;
+        }
+
+        @Override
+        public void apply() {
+            change = ResearchTabOrderRegistry.set(categoryOrder);
+        }
+
+        @Override
+        public boolean canUndo() {
+            return change != null;
+        }
+
+        @Override
+        public void undo() {
+            change.undo();
+        }
+
+        @Override
+        public String describe() {
+            return "Reordering Thaumcraft research categories: " + categoryOrder;
+        }
+
+        @Override
+        public String describeUndo() {
+            return "Restoring the previous Thaumcraft research category order";
         }
 
         @Override
