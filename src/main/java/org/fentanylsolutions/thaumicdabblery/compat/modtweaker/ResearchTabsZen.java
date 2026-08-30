@@ -59,7 +59,7 @@ public final class ResearchTabsZen {
         List<String> order = new ArrayList<>(categoryKeys.length);
         Set<String> seen = new HashSet<>();
         for (String categoryKey : categoryKeys) {
-            String key = requireCategory(categoryKey);
+            String key = requireText(categoryKey, "category key");
             if (!seen.add(key)) {
                 throw new IllegalArgumentException("Duplicate Thaumcraft research category in tab order: " + key);
             }

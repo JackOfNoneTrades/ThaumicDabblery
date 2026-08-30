@@ -45,6 +45,8 @@ public class LateMixinLoader implements ILateMixinLoader {
                 mixins.add("thaumcraft.MixinGuiResearchBrowser");
             }
             if (loadedMods.contains("modtweaker2")) {
+                mixins.add("thaumcraft.MixinResearchCategories");
+                mixins.add("modtweaker.MixinAddPage");
                 mixins.add("modtweaker.MixinAddPrereq");
                 mixins.add("modtweaker.MixinClearPrereqs");
                 if (hasModTweakerMoveResearchHelper()) {

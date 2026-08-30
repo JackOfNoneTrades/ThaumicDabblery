@@ -31,6 +31,12 @@ public final class ResearchTabOrderRegistry {
         }
     }
 
+    public static synchronized void onCategoryRegistered(String categoryKey) {
+        if (activeOrder.contains(categoryKey)) {
+            applyOrder(activeOrder);
+        }
+    }
+
     private static List<String> getConcreteOrder() {
         return new ArrayList<>(ResearchCategories.researchCategories.keySet());
     }
