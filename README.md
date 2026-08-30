@@ -14,19 +14,14 @@
     * Thaumic Horizons player vat infusion recipe modification
 * Thaumic Horizons self-infusion allowing the player to cast Witchery Mystic Branch spells using a keybind, with a creative grant item.
 
-Documentation can be found [here](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Documentation)
+Documentation can be found [here](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Documentation).
 
 [![hub](images/badges/github.png)](https://github.com/JackOfNoneTrades/ThaumicDabblery/releases)
 [![modrinth](images/badges/modrinth.png)](https://modrinth.com/mod/thaumic-dabblery/settings/versions)
 [![curse](images/badges/curse.png)](https://www.curseforge.com/minecraft/mc-mods/thaumic-dabblery)
-![forge](images/badges/forge.png)
-
-<!--
-[![modrinth](images/badges/modrinth.png)](https://modrinth.com/mod/thaumic-dabblery)
-[![curse](images/badges/curse.png)](https://www.curseforge.com/minecraft/mc-mods/thaumic-dabblery)
 [![67](images/badges/67.png)](https://67.fentanylsolutions.org/mod/thaumic-dabblery)
 [![maven](images/badges/maven.png)](https://maven.fentanylsolutions.org/#/releases/org/fentanylsolutions/thaumicdabblery/ThaumicDabblery)
--->
+![forge](images/badges/forge.png)
 
 ## Dependencies
 
