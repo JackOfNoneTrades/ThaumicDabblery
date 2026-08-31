@@ -46,6 +46,11 @@ public class LateMixinLoader implements ILateMixinLoader {
             }
             if (loadedMods.contains("modtweaker2")) {
                 mixins.add("thaumcraft.MixinResearchCategories");
+                mixins.add("thaumcraft.MixinTileFocalManipulator");
+                if (FMLLaunchHandler.side()
+                    .isClient()) {
+                    mixins.add("thaumcraft.MixinGuiFocalManipulator");
+                }
                 mixins.add("modtweaker.MixinAddPage");
                 mixins.add("modtweaker.MixinAddPrereq");
                 mixins.add("modtweaker.MixinClearPrereqs");

@@ -11,6 +11,7 @@
     * Safe research movement and removal
     * Reload-safe Thaumonomicon tab name, icon, and background overrides
     * Reload-safe Thaumonomicon tab ordering, including compatibility with TC4Tweaks
+    * Focal Manipulator upgrade path customization
     * Thaumic Horizons player vat infusion recipe modification
 * Thaumic Horizons self-infusion allowing the player to cast Witchery Mystic Branch spells using a keybind, with a creative grant item.
 

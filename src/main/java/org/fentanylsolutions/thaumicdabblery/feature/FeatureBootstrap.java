@@ -1,5 +1,6 @@
 package org.fentanylsolutions.thaumicdabblery.feature;
 
+import org.fentanylsolutions.thaumicdabblery.feature.focusupgrades.FocusUpgradesFeature;
 import org.fentanylsolutions.thaumicdabblery.feature.itemstats.ThaumcraftItemStatsFeature;
 import org.fentanylsolutions.thaumicdabblery.feature.researchscangates.ResearchScanGatesFeature;
 import org.fentanylsolutions.thaumicdabblery.feature.visdiscount.VisDiscountFeature;
@@ -11,6 +12,7 @@ final class FeatureBootstrap {
     private FeatureBootstrap() {}
 
     static void registerFeatures() {
+        FeatureManager.register(new FocusUpgradesFeature());
         FeatureManager.register(new VisDiscountFeature());
         FeatureManager.register(new ThaumcraftItemStatsFeature());
         FeatureManager.register(new ResearchScanGatesFeature());
