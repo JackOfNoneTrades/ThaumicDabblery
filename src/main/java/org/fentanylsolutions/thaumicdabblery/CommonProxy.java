@@ -8,6 +8,7 @@ import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
 
 public class CommonProxy {
 
@@ -38,6 +39,10 @@ public class CommonProxy {
             && Loader.isModLoaded("ThaumicHorizons")) {
             ThaumicHorizonsSelfInfusionZen.initializeDisplayPages();
         }
+    }
+
+    public void serverStarting(FMLServerStartingEvent event) {
+        FeatureManager.serverStarting(event);
     }
 
     public void onConfigReload() {

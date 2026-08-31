@@ -10,6 +10,7 @@ import net.minecraftforge.common.config.Configuration;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
 
 public final class FeatureManager {
 
@@ -63,6 +64,12 @@ public final class FeatureManager {
     public static void postInit(FMLPostInitializationEvent event) {
         for (Feature feature : FEATURES) {
             feature.postInit(event);
+        }
+    }
+
+    public static void serverStarting(FMLServerStartingEvent event) {
+        for (Feature feature : FEATURES) {
+            feature.serverStarting(event);
         }
     }
 

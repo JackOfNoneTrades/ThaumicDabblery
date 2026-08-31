@@ -5,6 +5,7 @@ import net.minecraftforge.common.config.Configuration;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
 
 /** An independently configurable patch or integration supplied by Thaumic Dabblery. */
 public interface Feature {
@@ -18,6 +19,8 @@ public interface Feature {
     default void init(FMLInitializationEvent event) {}
 
     default void postInit(FMLPostInitializationEvent event) {}
+
+    default void serverStarting(FMLServerStartingEvent event) {}
 
     default void onConfigReload() {}
 }
