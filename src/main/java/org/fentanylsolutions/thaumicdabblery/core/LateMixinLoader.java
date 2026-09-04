@@ -34,6 +34,7 @@ public class LateMixinLoader implements ILateMixinLoader {
     public List<String> getMixins(Set<String> loadedMods) {
         List<String> mixins = new ArrayList<>();
         if (loadedMods.contains("Thaumcraft")) {
+            mixins.add("thaumcraft.MixinItemWandCasting");
             mixins.add("thaumcraft.MixinWandManager");
             mixins.add("thaumcraft.MixinEventHandlerRunic");
             mixins.add("thaumcraft.MixinInfusionRunicAugmentRecipe");
@@ -66,6 +67,9 @@ public class LateMixinLoader implements ILateMixinLoader {
             }
             if (loadedMods.contains("tc4tweak")) {
                 mixins.add("tc4tweaks.MixinGetResearch");
+            }
+            if (loadedMods.contains("thaumicbases")) {
+                mixins.add("thaumicbases.MixinItemCastingBracelet");
             }
             if (loadedMods.contains("WitchingGadgets") && FMLLaunchHandler.side()
                 .isClient()) {

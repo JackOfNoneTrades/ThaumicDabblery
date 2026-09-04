@@ -4,6 +4,7 @@ import org.fentanylsolutions.thaumicdabblery.feature.focusupgrades.FocusUpgrades
 import org.fentanylsolutions.thaumicdabblery.feature.itemstats.ThaumcraftItemStatsFeature;
 import org.fentanylsolutions.thaumicdabblery.feature.researchscangates.ResearchScanGatesFeature;
 import org.fentanylsolutions.thaumicdabblery.feature.visdiscount.VisDiscountFeature;
+import org.fentanylsolutions.thaumicdabblery.feature.wandcomponents.WandComponentVisDiscountFeature;
 import org.fentanylsolutions.thaumicdabblery.feature.witcherybranch.WitcheryBranchFeature;
 
 /** Central registration point for feature modules. */
@@ -14,6 +15,7 @@ final class FeatureBootstrap {
     static void registerFeatures() {
         FeatureManager.register(new FocusUpgradesFeature());
         FeatureManager.register(new VisDiscountFeature());
+        FeatureManager.register(new WandComponentVisDiscountFeature());
         FeatureManager.register(new ThaumcraftItemStatsFeature());
         FeatureManager.register(new ResearchScanGatesFeature());
         FeatureManager.register(new WitcheryBranchFeature());
