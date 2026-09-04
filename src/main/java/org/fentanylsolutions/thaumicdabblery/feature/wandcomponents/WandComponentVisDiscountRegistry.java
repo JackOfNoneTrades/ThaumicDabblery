@@ -61,7 +61,7 @@ public final class WandComponentVisDiscountRegistry {
         return Change.forCastingItem(key, aspect, hadPrevious, previous);
     }
 
-    private static Integer getCapDiscount(String capId, Aspect aspect) {
+    public static synchronized Integer getCapDiscount(String capId, Aspect aspect) {
         if (capId == null || aspect == null) {
             return null;
         }

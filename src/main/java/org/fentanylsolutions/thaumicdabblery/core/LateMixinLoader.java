@@ -71,6 +71,10 @@ public class LateMixinLoader implements ILateMixinLoader {
             if (loadedMods.contains("thaumicbases")) {
                 mixins.add("thaumicbases.MixinItemCastingBracelet");
             }
+            if (loadedMods.contains("salisarcana") && FMLLaunchHandler.side()
+                .isClient()) {
+                mixins.add("salisarcana.MixinWandPartTooltipEventHandler");
+            }
             if (loadedMods.contains("WitchingGadgets") && FMLLaunchHandler.side()
                 .isClient()) {
                 mixins.add("witchinggadgets.MixinClientEventHandler");

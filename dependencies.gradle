@@ -54,6 +54,7 @@ dependencies {
     devOnlyNonPublishable("com.github.GTNewHorizons:WitchingGadgets:1.8.49-GTNH:dev")
     devOnlyNonPublishable("com.github.GTNewHorizons:ThaumicBases:1.8.13:dev") { transitive = false }
     devOnlyNonPublishable("com.github.GTNewHorizons:DummyCore:1.20.0:dev") { transitive = false }
+    devOnlyNonPublishable("com.github.GTNewHorizons:Salis-Arcana:1.1.71-GTNH:dev") { transitive = false }
     devOnlyNonPublishable(rfg.deobf("maven.modrinth:contenttweaker:1.0.5"))
     runtimeOnlyNonPublishable(rfg.deobf("maven.modrinth:fluxed-core:1.0.9"))
 }
