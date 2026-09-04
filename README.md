@@ -14,6 +14,7 @@
     * Reload-safe Thaumonomicon tab ordering, including compatibility with TC4Tweaks
     * Focal Manipulator upgrade path customization
     * Thaumic Horizons player vat infusion recipe modification
+* Configurable minimum Vis cost for casting and crafting, including Thaumic Bases bracelets
 * Thaumic Horizons self-infusion allowing the player to cast Witchery Mystic Branch spells using a keybind, with a creative grant item.
 
 Documentation can be found [here](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Documentation).

@@ -3,10 +3,12 @@ package org.fentanylsolutions.thaumicdabblery.mixins.late.thaumcraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
+import org.fentanylsolutions.thaumicdabblery.Config;
 import org.fentanylsolutions.thaumicdabblery.feature.wandcomponents.WandComponentVisDiscountFeature;
 import org.fentanylsolutions.thaumicdabblery.feature.wandcomponents.WandComponentVisDiscountRegistry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import thaumcraft.api.aspects.Aspect;
@@ -15,6 +17,15 @@ import thaumcraft.common.items.wands.ItemWandCasting;
 
 @Mixin(value = ItemWandCasting.class, remap = false)
 public abstract class MixinItemWandCasting {
+
+    @ModifyArg(
+        method = "getConsumptionModifier",
+        at = @At(value = "INVOKE", target = "Ljava/lang/Math;max(FF)F"),
+        index = 1,
+        require = 1)
+    private float thaumicdabblery$minimumVisCost(float originalMinimum) {
+        return Config.minimumVisCostPercent / 100.0F;
+    }
 
     @Redirect(
         method = "getConsumptionModifier",
