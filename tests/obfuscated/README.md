@@ -9,6 +9,10 @@ the server probe alters scripts/config temporarily, and both probes stop their i
 `WandComponentStatsProbe.java` checks actual arcane recipe costs, capacity and charging, native and scripted
 regeneration, independent aspect timing, fractional amounts, ceilings, Potency stacking, individual bracelet
 variants, wildcard precedence, validation, feature toggling, and repeated MineTweaker rollback/replay.
+Both probes also use `WandCraftingCostChecks.java`: compile that source alongside each probe. It checks costs
+22/24/32, independent cap/core edits with Forbidden Magic's creative components unchanged, wand/staff versus
+sceptre limits, unsafe recipe rejection, zero costs, external integer overflow, and item metadata save/load.
+The server additionally checks the actual recipe `matches` methods with a researched fake player.
 
 Prepare an isolated production Forge 1.7.10 server with the built **reobfuscated** Thaumic Dabblery jar,
 CraftTweaker, one ModTweaker version, Thaumcraft, UniMixins, and their production dependencies.
@@ -26,7 +30,7 @@ and Forge's library jars. For this project's RetroFuturaGradle setup, the Minecr
 These compilation inputs are not the runtime: launch the normal production Forge universal server jar.
 
 ```sh
-javac --release 8 -proc:none -cp "$probe_classpath" -d "$probe_classes" tests/obfuscated/WandComponentStatsProbe.java
+javac --release 8 -proc:none -cp "$probe_classpath" -d "$probe_classes" tests/obfuscated/WandComponentStatsProbe.java tests/obfuscated/WandCraftingCostChecks.java
 jar cf "$probe_jar" -C "$probe_classes" .
 # Install probe_jar in the isolated server's mods directory, then launch from that directory using Java 8:
 java -Xmx1536m -Dmixin.debug.verbose=true -Dmixin.debug.export=true -jar forge-1.7.10-10.13.4.1614-1.7.10-universal.jar nogui
@@ -45,7 +49,9 @@ The original and GTNH Thaumic Bases layouts must both be covered.
 `WandComponentClientProbe.java` is client-only. Compile it similarly, also including LWJGL 2 in the compilation
 classpath. Use a separate jar/instance from the server probe. It waits for client ticks, forces expanded Salis
 tooltips, and checks the actual Forge tooltip event pipeline, including baseline descriptions, scripted numeric
-values, removal of obsolete descriptions, disabled regeneration, and assembled-item Potency.
+values, removal of obsolete descriptions, disabled regeneration, and assembled-item Potency. Zero Potency must
+hide both our `+0` line and Salis's obsolete native `+1` description; undo must restore the positive custom
+description on cores and assembled wands.
 
 Run with production jars through `runObfClient`, in an isolated working directory. Require
 `TD_WAND_CLIENT_ALL_PASS` and no `TD_WAND_CLIENT_FAILED`. Cover Salis Arcana 1.1.71-GTNH and v2.6.0,

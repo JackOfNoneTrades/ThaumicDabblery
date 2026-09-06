@@ -41,6 +41,7 @@ public class WandComponentClientProbe {
         done = true;
         try {
             check(Boolean.FALSE.equals(Launch.blackboard.get("fml.deobfuscatedEnvironment")), "obfuscated client");
+            checks += new WandCraftingCostChecks().run(null);
             Field keys = Keyboard.class.getDeclaredField("keyDownBuffer");
             keys.setAccessible(true);
             ByteBuffer state = (ByteBuffer) keys.get(null);
@@ -79,6 +80,21 @@ public class WandComponentClientProbe {
                 ItemStack assembled = new ItemStack(ConfigItems.itemWandCasting);
                 ((thaumcraft.common.items.wands.ItemWandCasting) assembled.func_77973_b()).setRod(assembled, ConfigItems.STAFF_ROD_PRIMAL);
                 check(tooltip(assembled).contains(StatCollector.func_74837_a("thaumicdabblery.wand.potency", 3)), "assembled innate bonus shown");
+                Runnable zeroPotency = WandComponentStatsRegistry.setPotency("primal_staff", 0);
+                try {
+                    String zeroLine = StatCollector.func_74837_a("thaumicdabblery.wand.potency", 0);
+                    List<String> zeroCore = tooltip(ConfigItems.STAFF_ROD_PRIMAL.getItem());
+                    check(!zeroCore.contains(zeroLine), "zero innate Potency hidden on loose core");
+                    check(!zeroCore.contains(nativeRune), "zero override removes Salis native +1");
+                    List<String> zeroWand = tooltip(assembled);
+                    check(!zeroWand.contains(zeroLine), "zero innate Potency hidden on assembled wand");
+                    check(!zeroWand.contains(nativeRune), "zero assembled override has no native +1");
+                    check(contains(zeroCore, "32"), "other core tooltip information retained");
+                } finally {
+                    zeroPotency.run();
+                }
+                check(tooltip(ConfigItems.STAFF_ROD_PRIMAL.getItem()).contains(StatCollector.func_74837_a("thaumicdabblery.wand.potency", 3)), "undo zero restores positive core tooltip");
+                check(tooltip(assembled).contains(StatCollector.func_74837_a("thaumicdabblery.wand.potency", 3)), "undo zero restores positive assembled tooltip");
                 System.out.println("TD_WAND_CLIENT_ALL_PASS checks=" + checks);
             } finally {
                 state.put(Keyboard.KEY_LCONTROL, previousKey);

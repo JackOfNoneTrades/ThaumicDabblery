@@ -48,3 +48,45 @@ and missing-texture messages did not prevent the tests from passing.
 
 Local raw logs and isolated instances are retained in `/tmp/td-wand-stats-obf.bRLBQO/`.
 The manual-test instance is `run/wand-component-stats-test/`; its scripts and world are separate from other clients.
+
+## Crafting safety and zero-Potency regression — 2026-09-06
+
+Production artifact: `thaumicdabblery-3122a78-snapshot-master.1+852a99bdd4-dirty.jar`
+
+SHA-256: `baa9d720eaac17d2b80b02ea2b2d0954a8df38918d66a77534a72a87211aa3bb`
+
+The previous artifact reproduced the reported script failure at Silverwood core cost 22 with Forbidden Magic
+installed (`old-control/logs/minetweaker.log`). The corrected artifact passed the expanded committed probes:
+
+| ModTweaker | Server addons | Server checks | Client checks |
+| --- | --- | --- | --- |
+| 0.14.0 | none | 871 | — |
+| 0.9.6 | none | 871 | — |
+| 0.14.0 | Thaumic Bases 1.8.13, Salis 1.1.71-GTNH, TC4Tweaks | 1117 | — |
+| 0.9.6 | Thaumic Bases 1.3.1710.4, Salis v2.6.0, TC4Tweaks | 1117 | — |
+| 0.14.0 | corresponding full set plus Concilium, Forbidden Magic, Thaumic Tinkerer | 1242 | 580 |
+| 0.9.6 | corresponding full set plus Concilium, Forbidden Magic, Thaumic Tinkerer | 1242 | 580 |
+
+Other production dependency versions match the matrix above. All runtimes asserted the obfuscated-environment
+flag. Total: 6460 server assertions and 1160 client assertions, including the existing component suite.
+
+New coverage includes:
+
+- Core costs 22, 24 and 32 on Greatwood, Silverwood and their staff cores, plus Primal staff; cap multipliers
+  22, 24 and 32; actual ZenScript loading, repeated reloads and rollback of the reported values.
+- Forbidden Magic's orichalcum, neutronium and neutronium staff remain at 1000 without any workaround script.
+- Actual recipe matching, output and aspect costs. Safe ordinary wand/staff recipes remain usable when the same
+  product would exceed the sceptre limit. Unsafe recipes have no match/output; their costs cannot overflow.
+- Signed-short boundaries and NBT save/load, zero costs, external `65536 × 65536` and
+  `Integer.MAX_VALUE × Integer.MAX_VALUE` values, negative external values, and edits while disabled.
+- Both recipe mixin targets on production clients and servers; both Salis tooltip event pipelines. A zero innate
+  Potency hides the custom `+0` and obsolete native `+1` lines on loose cores and assembled items; undo restores
+  the positive custom tooltip. Existing server checks also verify that focus upgrade Potency remains effective.
+
+An initial production run caught a multi-target Mixin shadow annotation issue; it was corrected before the final
+matrix. Final runs have no mixin application/injection failures, failed probe assertions, or MineTweaker script
+errors. Build, formatting and whitespace checks passed. No deobfuscated runtime tests were used.
+
+Raw logs and isolated instances: `/tmp/td-wand-cost-fix-obf.Biglnx/`. Initial-attempt logs are retained separately,
+and `old-control/` intentionally contains the failure reproduced with the previous artifact.
+Manual client: `run/wand-component-fixes-test/`, using the committed `manual-wand-cost-fixes.zs` example.

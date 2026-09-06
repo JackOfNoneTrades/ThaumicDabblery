@@ -33,17 +33,11 @@ public final class WandComponentStatsRegistry {
 
     public static synchronized Runnable setCapCost(WandCap cap, int cost) {
         requireCraftCost(cost);
-        for (WandRod rod : WandRod.rods.values()) {
-            requireProduct(cost, configuredValue("cost:" + rod.getTag(), rod.getCraftCost()));
-        }
         return setNative("cap:" + cap.getTag(), cap::getCraftCost, cap::setCraftCost, cost);
     }
 
     public static synchronized Runnable setCoreCost(WandRod rod, int cost) {
         requireCraftCost(cost);
-        for (WandCap cap : WandCap.caps.values()) {
-            requireProduct(cost, configuredValue("cap:" + cap.getTag(), cap.getCraftCost()));
-        }
         return setNative("cost:" + rod.getTag(), rod::getCraftCost, rod::setCraftCost, cost);
     }
 
@@ -206,21 +200,9 @@ public final class WandComponentStatsRegistry {
         }
     }
 
-    private static int configuredValue(String key, int fallback) {
-        NativeValue value = NATIVE_VALUES.get(key);
-        return value == null ? fallback : value.value;
-    }
-
     private static void requireCraftCost(int cost) {
-        if (cost < 0 || cost > 21845) {
-            throw new IllegalArgumentException("Wand crafting cost/multiplier must be between 0 and 21845");
-        }
-    }
-
-    private static void requireProduct(int first, int second) {
-        if ((long) first * second * 3 / 2 > Short.MAX_VALUE) {
-            throw new IllegalArgumentException(
-                "Combined cap/core cost exceeds Thaumcraft's safe recipe metadata range (32767 including sceptre scaling)");
+        if (cost < 0 || cost > Short.MAX_VALUE) {
+            throw new IllegalArgumentException("Wand crafting cost/multiplier must be between 0 and 32767");
         }
     }
 

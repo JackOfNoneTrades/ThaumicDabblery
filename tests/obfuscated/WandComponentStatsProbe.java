@@ -48,6 +48,7 @@ public class WandComponentStatsProbe {
             check(Boolean.FALSE.equals(Launch.blackboard.get("fml.deobfuscatedEnvironment")), "production environment required");
             player = FakePlayerFactory.getMinecraft(server.func_71218_a(0));
             scripted();
+            checks += new WandCraftingCostChecks().run(player);
             nativeAndOverrides();
             validation();
             toggle();
@@ -66,6 +67,9 @@ public class WandComponentStatsProbe {
                 MineTweakerImplementationAPI.reload();
                 eq(3, ConfigItems.WAND_CAP_GOLD.getCraftCost(), "cap restored after script removal");
                 eq(3, ConfigItems.WAND_ROD_GREATWOOD.getCraftCost(), "core cost restored");
+                eq(9, ConfigItems.WAND_ROD_SILVERWOOD.getCraftCost(), "silverwood cost restored");
+                eq(8, ConfigItems.STAFF_ROD_GREATWOOD.getCraftCost(), "greatwood staff cost restored");
+                eq(6, ConfigItems.WAND_CAP_THAUMIUM.getCraftCost(), "thaumium cap restored");
                 eq(50, ConfigItems.WAND_ROD_GREATWOOD.getCapacity(), "core capacity restored");
                 eq(125, ConfigItems.STAFF_ROD_GREATWOOD.getCapacity(), "staff capacity restored");
                 ItemStack greatwood = wand(ConfigItems.WAND_ROD_GREATWOOD, false);
@@ -98,6 +102,11 @@ public class WandComponentStatsProbe {
     private void scripted() {
         eq(4, ConfigItems.WAND_CAP_GOLD.getCraftCost(), "script cap multiplier");
         eq(11, ConfigItems.WAND_ROD_GREATWOOD.getCraftCost(), "script core cost");
+        eq(22, ConfigItems.WAND_ROD_SILVERWOOD.getCraftCost(), "script core cost above creative-cap threshold");
+        eq(24, ConfigItems.STAFF_ROD_GREATWOOD.getCraftCost(), "script greatwood staff cost");
+        eq(24, ConfigItems.STAFF_ROD_SILVERWOOD.getCraftCost(), "script silverwood staff cost");
+        eq(32, ConfigItems.STAFF_ROD_PRIMAL.getCraftCost(), "script primal staff cost");
+        eq(24, ConfigItems.WAND_CAP_THAUMIUM.getCraftCost(), "script cap above creative-core threshold");
         eq(80, ConfigItems.WAND_ROD_GREATWOOD.getCapacity(), "script core capacity");
         eq(160, ConfigItems.STAFF_ROD_GREATWOOD.getCapacity(), "separate staff core");
         ItemStack wand = wand(ConfigItems.WAND_ROD_GREATWOOD, false);
@@ -275,7 +284,9 @@ public class WandComponentStatsProbe {
         reject(() -> WandComponentStatsRegistry.setCoreCapacity(ConfigItems.WAND_ROD_GREATWOOD, 0));
         reject(() -> WandComponentStatsRegistry.setCoreCapacity(ConfigItems.WAND_ROD_GREATWOOD, Integer.MAX_VALUE));
         reject(() -> WandComponentStatsRegistry.setCapCost(ConfigItems.WAND_CAP_GOLD, -1));
-        reject(() -> WandComponentStatsRegistry.setCapCost(ConfigItems.WAND_CAP_GOLD, 21845));
+        reject(() -> WandComponentStatsRegistry.setCapCost(ConfigItems.WAND_CAP_GOLD, 32768));
+        reject(() -> WandComponentStatsRegistry.setCoreCost(ConfigItems.WAND_ROD_GREATWOOD, -1));
+        reject(() -> WandComponentStatsRegistry.setCoreCost(ConfigItems.WAND_ROD_GREATWOOD, 32768));
         reject(() -> WandComponentStatsRegistry.setCoreCost(ConfigItems.WAND_ROD_GREATWOOD, Integer.MAX_VALUE));
         reject(() -> WandComponentStatsRegistry.setPotency("greatwood", -1));
         reject(() -> WandComponentStatsRegistry.setRegeneration("blaze", Aspect.MAGIC, 20, 1, 10));

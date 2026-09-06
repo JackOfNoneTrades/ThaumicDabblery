@@ -36,6 +36,7 @@ public class LateMixinLoader implements ILateMixinLoader {
         if (loadedMods.contains("Thaumcraft")) {
             mixins.add("thaumcraft.MixinItemWandCasting");
             mixins.add("thaumcraft.MixinItemWandCastingStats");
+            mixins.add("thaumcraft.MixinArcaneWandRecipeCost");
             mixins.add("thaumcraft.MixinWandManager");
             mixins.add("thaumcraft.MixinEventHandlerRunic");
             mixins.add("thaumcraft.MixinInfusionRunicAugmentRecipe");

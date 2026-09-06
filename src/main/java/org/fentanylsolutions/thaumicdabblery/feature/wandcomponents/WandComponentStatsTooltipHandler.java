@@ -44,7 +44,9 @@ public final class WandComponentStatsTooltipHandler {
         }
         if (potency != null) {
             event.toolTip.remove(StatCollector.translateToLocal("salisarcana:wand_rod.runes"));
-            event.toolTip.add(StatCollector.translateToLocalFormatted("thaumicdabblery.wand.potency", potency));
+            if (potency > 0) {
+                event.toolTip.add(StatCollector.translateToLocalFormatted("thaumicdabblery.wand.potency", potency));
+            }
         }
         if (regeneration == null) return;
         if (rod != null && rod.getOnUpdate() != null
