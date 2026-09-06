@@ -52,6 +52,9 @@ tooltips, and checks the actual Forge tooltip event pipeline, including baseline
 values, removal of obsolete descriptions, disabled regeneration, and assembled-item Potency. Zero Potency must
 hide both our `+0` line and Salis's obsolete native `+1` description; undo must restore the positive custom
 description on cores and assembled wands.
+Disabled regeneration must remove obsolete Salis descriptions without adding a status line or changing other
+tooltip information. Cover native and custom regeneration, core and casting-only rules, repeated undo, and
+feature disable/re-enable; active custom regeneration must remain visible.
 
 Run with production jars through `runObfClient`, in an isolated working directory. Require
 `TD_WAND_CLIENT_ALL_PASS` and no `TD_WAND_CLIENT_FAILED`. Cover Salis Arcana 1.1.71-GTNH and v2.6.0,

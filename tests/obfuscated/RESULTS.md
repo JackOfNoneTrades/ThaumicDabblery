@@ -90,3 +90,30 @@ errors. Build, formatting and whitespace checks passed. No deobfuscated runtime 
 Raw logs and isolated instances: `/tmp/td-wand-cost-fix-obf.Biglnx/`. Initial-attempt logs are retained separately,
 and `old-control/` intentionally contains the failure reproduced with the previous artifact.
 Manual client: `run/wand-component-fixes-test/`, using the committed `manual-wand-cost-fixes.zs` example.
+
+## Disabled-regeneration tooltip regression — 2026-09-06
+
+Production artifact: `thaumicdabblery-852a99b-snapshot-master.1+23039bfc59-dirty.jar`
+
+SHA-256: `6a7ac5f6bf3d109f0aa16c466603285bc6e7492f2554f4668651e511f02317e5`
+
+The expanded client probe reproduced the unwanted disabled-regeneration line with the previous artifact.
+The fixed artifact passed in four isolated `runObfClient` instances, all asserting the obfuscated-environment flag:
+
+| ModTweaker | Salis Arcana | TC4Tweaks | Client checks |
+| --- | --- | --- | --- |
+| 0.14.0 | 1.1.71-GTNH | 1.5.47 | 607 passed |
+| 0.9.6 | v2.6.0 | 1.5.47 | 607 passed |
+| 0.14.0 | 1.1.71-GTNH | absent | 607 passed |
+| 0.9.6 | v2.6.0 | absent | 607 passed |
+
+These use the corresponding full production addon sets above, including Thaumic Bases, Concilium and Forbidden
+Magic. Total: 2428 assertions, including existing crafting-cost and Potency regression checks.
+The tooltip checks exercise disabled native and custom regeneration, loose Icy/Blaze cores and assembled wands,
+casting-only overrides, repeated undo, and feature disable/re-enable. Other tooltip lines must stay unchanged;
+active custom regeneration and restored native descriptions must remain visible. Disabled rules remain disabled.
+
+All four final logs have no failed assertions, MineTweaker script errors or mixin application/injection errors.
+The last client briefly stalled in LWJGL's frame-swap call, then recovered and completed without changes.
+Build, formatting and whitespace checks passed; no deobfuscated runtime tests were used.
+Logs and instances: `/tmp/td-regen-tooltip-obf.vk1YND/`; `old-control/` intentionally records the previous jar's failure.

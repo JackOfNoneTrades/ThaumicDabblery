@@ -52,7 +52,8 @@ public class WandComponentClientProbe {
                 String nativeRune = StatCollector.func_74838_a("salisarcana:wand_rod.runes");
                 String nativeRegen = StatCollector.func_74838_a("salisarcana:wand_rod.special.blaze");
                 check(tooltip(ConfigItems.STAFF_ROD_PRIMAL.getItem()).contains(nativeRune), "baseline Salis rune description");
-                check(tooltip(ConfigItems.WAND_ROD_BLAZE.getItem()).contains(nativeRegen), "baseline Salis regeneration description");
+                List<String> nativeBlaze = tooltip(ConfigItems.WAND_ROD_BLAZE.getItem());
+                check(nativeBlaze.contains(nativeRegen), "baseline Salis regeneration description");
                 configure(true);
                 WandComponentStatsRegistry.setPotency("primal_staff", 3);
                 WandComponentStatsRegistry.setRegeneration("blaze", Aspect.FIRE, 40, 0.5, 20);
@@ -75,7 +76,10 @@ public class WandComponentClientProbe {
                 WandComponentStatsRegistry.disableRegeneration("blaze");
                 List<String> disabled = tooltip(ConfigItems.WAND_ROD_BLAZE.getItem());
                 check(!disabled.contains(nativeRegen), "disabled regeneration removes native text");
-                check(disabled.contains(StatCollector.func_74838_a("thaumicdabblery.wand.regeneration.disabled")), "disabled regeneration shown");
+                List<String> expectedDisabled = new ArrayList<>(nativeBlaze);
+                expectedDisabled.remove(nativeRegen);
+                check(disabled.equals(expectedDisabled), "disabling custom regeneration preserves other tooltips without adding a status line");
+                disabledRegenerationTooltips();
 
                 ItemStack assembled = new ItemStack(ConfigItems.itemWandCasting);
                 ((thaumcraft.common.items.wands.ItemWandCasting) assembled.func_77973_b()).setRod(assembled, ConfigItems.STAFF_ROD_PRIMAL);
@@ -105,6 +109,59 @@ public class WandComponentClientProbe {
             failure.printStackTrace();
         } finally {
             Minecraft.func_71410_x().func_71400_g();
+        }
+    }
+
+    private void disabledRegenerationTooltips() {
+        ItemStack core = ConfigItems.WAND_ROD_ICE.getItem();
+        ItemStack assembled = new ItemStack(ConfigItems.itemWandCasting);
+        ((thaumcraft.common.items.wands.ItemWandCasting) assembled.func_77973_b()).setRod(assembled, ConfigItems.WAND_ROD_ICE);
+        String nativeRegen = StatCollector.func_74838_a("salisarcana:wand_rod.special.ice");
+        List<String> nativeCore = tooltip(core);
+        List<String> nativeWand = tooltip(assembled);
+        check(nativeCore.contains(nativeRegen), "baseline Icy Rod regeneration description");
+        List<String> expectedCore = new ArrayList<>(nativeCore);
+        expectedCore.remove(nativeRegen);
+        List<String> expectedWand = new ArrayList<>(nativeWand);
+        expectedWand.remove(nativeRegen);
+
+        for (int cycle = 0; cycle < 3; cycle++) {
+            Runnable undo = WandComponentStatsRegistry.disableRegeneration("ice");
+            try {
+                check(tooltip(core).equals(expectedCore), "disabled Icy Rod hides regeneration without changing other lines");
+                check(tooltip(assembled).equals(expectedWand), "assembled disabled core adds no regeneration status line");
+                check(WandComponentStatsRegistry.getCoreRegeneration("ice").isEmpty(), "tooltip does not change disabled regeneration rule");
+                configure(false);
+                try {
+                    check(tooltip(core).equals(nativeCore), "disabled feature restores native regeneration description");
+                } finally {
+                    configure(true);
+                }
+                check(tooltip(core).equals(expectedCore), "reenabled feature hides disabled regeneration again");
+            } finally {
+                undo.run();
+            }
+            check(tooltip(core).equals(nativeCore), "undo restores native Icy Rod description");
+            check(tooltip(assembled).equals(nativeWand), "undo restores assembled tooltip");
+        }
+
+        Runnable custom = WandComponentStatsRegistry.setRegeneration("ice", Aspect.WATER, 40, 0.5, 20);
+        try {
+            List<String> customCore = tooltip(core);
+            List<String> customWand = tooltip(assembled);
+            check(contains(customCore, "40 ticks"), "active custom regeneration still shown on core");
+            check(contains(customWand, "40 ticks"), "active custom regeneration still shown on assembled wand");
+            Object target = WandComponentStatsRegistry.castingKey(assembled);
+            Runnable undo = WandComponentStatsRegistry.disableRegeneration(target);
+            try {
+                check(tooltip(assembled).equals(expectedWand), "casting-only disabled regeneration adds no status line");
+                check(tooltip(core).equals(customCore), "casting-only rule leaves loose core description unchanged");
+            } finally {
+                undo.run();
+            }
+            check(tooltip(assembled).equals(customWand), "undo casting-only disable restores custom description");
+        } finally {
+            custom.run();
         }
     }
 

@@ -54,9 +54,6 @@ public final class WandComponentStatsTooltipHandler {
                 .getClass() == WandRodPrimalOnUpdate.class) {
             removeTranslation(event.toolTip, "salisarcana:wand_rod.special." + rod.getTag());
         }
-        if (regeneration.isEmpty()) {
-            event.toolTip.add(StatCollector.translateToLocal("thaumicdabblery.wand.regeneration.disabled"));
-        }
         for (Map.Entry<Aspect, WandComponentStatsRegistry.Regeneration> entry : regeneration.entrySet()) {
             WandComponentStatsRegistry.Regeneration rule = entry.getValue();
             event.toolTip.add(
