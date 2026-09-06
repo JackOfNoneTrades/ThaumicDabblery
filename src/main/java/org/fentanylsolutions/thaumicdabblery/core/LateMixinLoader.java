@@ -35,6 +35,7 @@ public class LateMixinLoader implements ILateMixinLoader {
         List<String> mixins = new ArrayList<>();
         if (loadedMods.contains("Thaumcraft")) {
             mixins.add("thaumcraft.MixinItemWandCasting");
+            mixins.add("thaumcraft.MixinItemWandCastingStats");
             mixins.add("thaumcraft.MixinWandManager");
             mixins.add("thaumcraft.MixinEventHandlerRunic");
             mixins.add("thaumcraft.MixinInfusionRunicAugmentRecipe");
@@ -70,6 +71,10 @@ public class LateMixinLoader implements ILateMixinLoader {
             }
             if (loadedMods.contains("thaumicbases")) {
                 mixins.add("thaumicbases.MixinItemCastingBracelet");
+                mixins.add("thaumicbases.MixinBraceletCapacity");
+            }
+            if (loadedMods.contains("ThaumicConcilium")) {
+                mixins.add("thaumicconcilium.MixinBraceletCapacity");
             }
             if (loadedMods.contains("salisarcana") && FMLLaunchHandler.side()
                 .isClient()) {

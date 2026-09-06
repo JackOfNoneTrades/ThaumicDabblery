@@ -1,9 +1,12 @@
 package org.fentanylsolutions.thaumicdabblery.compat.modtweaker;
 
+import java.util.function.Supplier;
+
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
+import org.fentanylsolutions.thaumicdabblery.feature.wandcomponents.WandComponentStatsRegistry;
 import org.fentanylsolutions.thaumicdabblery.feature.wandcomponents.WandComponentVisDiscountRegistry;
 
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -16,6 +19,7 @@ import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.wands.WandCap;
+import thaumcraft.api.wands.WandRod;
 import thaumcraft.common.items.wands.ItemWandCasting;
 
 @ZenClass("mods.thaumcraft.WandComponents")
@@ -53,6 +57,233 @@ public final class WandComponentsZen {
         setCastingVisDiscount(registryName, OreDictionary.WILDCARD_VALUE, aspect, discount);
     }
 
+    @ZenMethod
+    public static void setCapCraftingMultiplier(String capId, int multiplier) {
+        WandCap cap = WandCap.caps.get(requireCap(capId));
+        apply(
+            "Setting " + capId + " cap crafting multiplier to " + multiplier,
+            () -> WandComponentStatsRegistry.setCapCost(cap, multiplier));
+    }
+
+    @ZenMethod
+    public static void setCoreCraftingCost(String coreId, int cost) {
+        WandRod rod = requireCore(coreId);
+        apply(
+            "Setting " + coreId + " core crafting cost to " + cost,
+            () -> WandComponentStatsRegistry.setCoreCost(rod, cost));
+    }
+
+    @ZenMethod
+    public static void setCoreCapacity(String coreId, int capacity) {
+        WandRod rod = requireCore(coreId);
+        apply(
+            "Setting " + coreId + " core capacity to " + capacity,
+            () -> WandComponentStatsRegistry.setCoreCapacity(rod, capacity));
+    }
+
+    @ZenMethod
+    public static void setCorePotency(String coreId, int levels) {
+        String target = requireCore(coreId).getTag();
+        apply(
+            "Setting " + coreId + " core innate Potency to " + levels,
+            () -> WandComponentStatsRegistry.setPotency(target, levels));
+    }
+
+    @ZenMethod
+    public static void setCoreVisRegeneration(String coreId, IAspectStack aspect, int intervalTicks, double amount,
+        int ceilingPercent) {
+        String target = requireCore(coreId).getTag();
+        Aspect primal = requirePrimalAspect(aspect);
+        apply(
+            "Setting " + coreId + " core " + primal.getTag() + " Vis regeneration",
+            () -> WandComponentStatsRegistry.setRegeneration(target, primal, intervalTicks, amount, ceilingPercent));
+    }
+
+    @ZenMethod
+    public static void disableCoreVisRegeneration(String coreId) {
+        String target = requireCore(coreId).getTag();
+        apply(
+            "Disabling " + coreId + " core Vis regeneration",
+            () -> WandComponentStatsRegistry.disableRegeneration(target));
+    }
+
+    @ZenMethod
+    public static void resetCoreVisRegeneration(String coreId) {
+        String target = requireCore(coreId).getTag();
+        apply(
+            "Restoring " + coreId + " core native Vis regeneration",
+            () -> WandComponentStatsRegistry.resetRegeneration(target));
+    }
+
+    @ZenMethod
+    public static void setCastingCapacity(IItemStack castingItem, int capacity) {
+        setCastingCapacity(requireCastingItem(castingItem), capacity);
+    }
+
+    @ZenMethod
+    public static void setCastingCapacity(String registryName, int metadata, int capacity) {
+        setCastingCapacity(requireCastingItem(registryName, metadata), capacity);
+    }
+
+    @ZenMethod
+    public static void setCastingCapacity(String registryName, int capacity) {
+        setCastingCapacity(registryName, OreDictionary.WILDCARD_VALUE, capacity);
+    }
+
+    private static void setCastingCapacity(ItemStack stack, int capacity) {
+        apply(
+            "setCastingCapacity for " + stack.getDisplayName(),
+            () -> WandComponentStatsRegistry.setCastingCapacity(stack, capacity));
+    }
+
+    @ZenMethod
+    public static void setCastingPotency(IItemStack castingItem, int levels) {
+        setCastingPotency(requireCastingItem(castingItem), levels);
+    }
+
+    @ZenMethod
+    public static void setCastingPotency(String registryName, int metadata, int levels) {
+        setCastingPotency(requireCastingItem(registryName, metadata), levels);
+    }
+
+    @ZenMethod
+    public static void setCastingPotency(String registryName, int levels) {
+        setCastingPotency(registryName, OreDictionary.WILDCARD_VALUE, levels);
+    }
+
+    private static void setCastingPotency(ItemStack stack, int levels) {
+        apply(
+            "setCastingPotency for " + stack.getDisplayName(),
+            () -> WandComponentStatsRegistry.setPotency(WandComponentStatsRegistry.castingKey(stack), levels));
+    }
+
+    @ZenMethod
+    public static void setCastingVisRegeneration(IItemStack castingItem, IAspectStack aspect, int intervalTicks,
+        double amount, int ceilingPercent) {
+        setCastingVisRegeneration(requireCastingItem(castingItem), aspect, intervalTicks, amount, ceilingPercent);
+    }
+
+    @ZenMethod
+    public static void setCastingVisRegeneration(String registryName, int metadata, IAspectStack aspect,
+        int intervalTicks, double amount, int ceilingPercent) {
+        setCastingVisRegeneration(
+            requireCastingItem(registryName, metadata),
+            aspect,
+            intervalTicks,
+            amount,
+            ceilingPercent);
+    }
+
+    @ZenMethod
+    public static void setCastingVisRegeneration(String registryName, IAspectStack aspect, int intervalTicks,
+        double amount, int ceilingPercent) {
+        setCastingVisRegeneration(
+            registryName,
+            OreDictionary.WILDCARD_VALUE,
+            aspect,
+            intervalTicks,
+            amount,
+            ceilingPercent);
+    }
+
+    private static void setCastingVisRegeneration(ItemStack stack, IAspectStack aspect, int intervalTicks,
+        double amount, int ceilingPercent) {
+        Aspect primal = requirePrimalAspect(aspect);
+        apply(
+            "setCastingVisRegeneration for " + stack.getDisplayName(),
+            () -> WandComponentStatsRegistry.setRegeneration(
+                WandComponentStatsRegistry.castingKey(stack),
+                primal,
+                intervalTicks,
+                amount,
+                ceilingPercent));
+    }
+
+    @ZenMethod
+    public static void disableCastingVisRegeneration(IItemStack castingItem) {
+        disableCastingVisRegeneration(requireCastingItem(castingItem));
+    }
+
+    @ZenMethod
+    public static void disableCastingVisRegeneration(String registryName, int metadata) {
+        disableCastingVisRegeneration(requireCastingItem(registryName, metadata));
+    }
+
+    @ZenMethod
+    public static void disableCastingVisRegeneration(String registryName) {
+        disableCastingVisRegeneration(registryName, OreDictionary.WILDCARD_VALUE);
+    }
+
+    private static void disableCastingVisRegeneration(ItemStack stack) {
+        apply(
+            "disableCastingVisRegeneration for " + stack.getDisplayName(),
+            () -> WandComponentStatsRegistry.disableRegeneration(WandComponentStatsRegistry.castingKey(stack)));
+    }
+
+    @ZenMethod
+    public static void resetCastingVisRegeneration(IItemStack castingItem) {
+        resetCastingVisRegeneration(requireCastingItem(castingItem));
+    }
+
+    @ZenMethod
+    public static void resetCastingVisRegeneration(String registryName, int metadata) {
+        resetCastingVisRegeneration(requireCastingItem(registryName, metadata));
+    }
+
+    @ZenMethod
+    public static void resetCastingVisRegeneration(String registryName) {
+        resetCastingVisRegeneration(registryName, OreDictionary.WILDCARD_VALUE);
+    }
+
+    private static void resetCastingVisRegeneration(ItemStack stack) {
+        apply(
+            "resetCastingVisRegeneration for " + stack.getDisplayName(),
+            () -> WandComponentStatsRegistry.resetRegeneration(WandComponentStatsRegistry.castingKey(stack)));
+    }
+
+    private static WandRod requireCore(String coreId) {
+        WandRod rod = WandRod.rods.get(coreId);
+        if (rod == null) throw new IllegalArgumentException("Unknown Thaumcraft wand core ID: " + coreId);
+        return rod;
+    }
+
+    private static void apply(String description, Supplier<Runnable> mutation) {
+        MineTweakerAPI.apply(new IUndoableAction() {
+
+            private Runnable undo;
+
+            @Override
+            public void apply() {
+                undo = mutation.get();
+            }
+
+            @Override
+            public boolean canUndo() {
+                return undo != null;
+            }
+
+            @Override
+            public void undo() {
+                undo.run();
+            }
+
+            @Override
+            public String describe() {
+                return description;
+            }
+
+            @Override
+            public String describeUndo() {
+                return "Undoing: " + description;
+            }
+
+            @Override
+            public Object getOverrideKey() {
+                return null;
+            }
+        });
+    }
+
     private static String requireCap(String capId) {
         if (capId == null || capId.isEmpty() || !WandCap.caps.containsKey(capId)) {
             throw new IllegalArgumentException("Unknown Thaumcraft wand cap ID: " + capId);
@@ -68,6 +299,9 @@ public final class WandComponentsZen {
         if (castingItem == null || !(castingItem.getItem() instanceof ItemWandCasting)) {
             throw new IllegalArgumentException(
                 "Casting vis discount target must be a wand, staff, or fixed casting item");
+        }
+        if (castingItem.getItemDamage() < 0 || castingItem.getItemDamage() > Short.MAX_VALUE) {
+            throw new IllegalArgumentException("Casting item metadata must be between 0 and 32767");
         }
         return castingItem.copy();
     }

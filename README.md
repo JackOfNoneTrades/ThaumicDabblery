@@ -7,6 +7,8 @@
 * Extends ModTweaker Thaumcraft 4 compatibility
     * Vis discount modification for equippables (armor and baubles)
     * Per-aspect wand cap and fixed casting item Vis discount customization, including Thaumic Bases bracelets
+    * Wand cap/core assembly cost customization
+    * Wand core capacity, Vis regeneration, and innate Potency customization, including individual Thaumic Bases and Thaumic Concilium bracelets
     * Equipped item warp and runic shielding modification
     * Entity and item scanning based prerequisites for research
     * Safe research movement and removal

@@ -2,6 +2,7 @@ package org.fentanylsolutions.thaumicdabblery;
 
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ResearchTabOrderClientHandler;
 import org.fentanylsolutions.thaumicdabblery.feature.visdiscount.VisDiscountTooltipHandler;
+import org.fentanylsolutions.thaumicdabblery.feature.wandcomponents.WandComponentStatsTooltipHandler;
 import org.fentanylsolutions.thaumicdabblery.feature.witcherybranch.WitcheryBranchFeature;
 
 import cpw.mods.fml.common.Loader;
@@ -14,6 +15,7 @@ public class ClientProxy extends CommonProxy {
     public void init(FMLInitializationEvent event) {
         super.init(event);
         VisDiscountTooltipHandler.register();
+        WandComponentStatsTooltipHandler.register();
         WitcheryBranchFeature.registerClientHandler();
         if (Loader.isModLoaded("MineTweaker3") && Loader.isModLoaded("modtweaker2")) {
             ResearchTabOrderClientHandler.register();
