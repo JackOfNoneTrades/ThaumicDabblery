@@ -1,6 +1,8 @@
 thaumicdabblery.config.title=Thaumic Dabblery Configuration
 thaumicdabblery.config.debug=Debug
 thaumicdabblery.config.debug.debugMode=Debug Mode
+thaumicdabblery.config.feature.customAspects=Custom Aspects
+thaumicdabblery.config.feature.customAspects.enabled=Enabled (Requires Restart)
 thaumicdabblery.config.visCosts=Vis Costs
 thaumicdabblery.config.visCosts.minimumVisCostPercent=Minimum Vis Cost (%)
 thaumicdabblery.config.feature.visDiscount=Vis Discount Tweaker

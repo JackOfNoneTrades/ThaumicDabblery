@@ -5,6 +5,7 @@
 ## Features
 
 * Extends ModTweaker Thaumcraft 4 compatibility
+    * Custom compound aspects with scripted names, icons, colors, components, and descriptions
     * Vis discount modification for equippables (armor and baubles)
     * Per-aspect wand cap and fixed casting item Vis discount customization, including Thaumic Bases bracelets
     * Wand cap/core assembly cost customization

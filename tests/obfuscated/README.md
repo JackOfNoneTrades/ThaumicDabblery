@@ -1,10 +1,52 @@
-# Wand component production tests
+# Obfuscated production tests
 
 These are disposable Forge test mods, **not** ordinary deobfuscated JUnit tests.
-Both probes assert that `fml.deobfuscatedEnvironment` is false. Do not install them in a player's instance:
-the server probe alters scripts/config temporarily, and both probes stop their instance when finished.
+The probes assert that `fml.deobfuscatedEnvironment` is false. Do not install them in a player's instance:
+server probes alter scripts/config temporarily, and probes stop their instance when finished.
 
-## Server probe
+## Custom aspects
+
+Compile `CustomAspectChecks.java` alongside `CustomAspectServerProbe.java` or `CustomAspectClientProbe.java`,
+using the SRG-first production compilation classpath described below. Also include the production Minecraft
+server jar (for Netty), and LWJGL for the client. Package the client translation fixture
+`custom-aspect-client-en_US.lang` as `assets/tdaspectclientprobe/lang/en_US.lang` in its probe jar.
+Never install both probes together.
+
+Copy `custom-aspects/*.zs` to the instance's `config/thaumicdabblery/aspects/` and `custom-aspects-usage.zs` to
+`scripts/`. The early files deliberately contain forward references, mixed-case IDs, a repeated-component aspect,
+and black/hex RGB colors. The ordinary script uses a new aspect bracket on the first compilation, assigns clock
+aspects, adds research and a crucible recipe, and overrides a description through localization.
+
+Run both ModTweaker 0.14.0 and 0.9.6, with and without TC4Tweaks 1.5.47, on separate dedicated servers and clients.
+The current fixtures include production IC2 2.2.828: CraftTweaker 3.4.8's generated class registry references
+`CropCard` while loading its core bracket handlers, so without IC2 it can skip item brackets entirely. This is a
+test-environment dependency, not a new dependency of Thaumic Dabblery or its aspect feature.
+
+Also cover ContentTweaker 1.0.5 with FluxedCore 1.0.9, without IC2: copy `custom-aspects-content.zs` to
+`contentScripts/`. Require its `tdaspecttoken` item registration before the custom-aspect pass, then all normal
+client assertions. This checks that the isolated compiler leaves ContentTweaker and ordinary scripts intact.
+
+Require `TD_ASPECT_EARLY_PASS` / `TD_ASPECT_CLIENT_EARLY_PASS`, then `TD_ASPECT_SERVER_ALL_PASS` /
+`TD_ASPECT_CLIENT_ALL_PASS`, with no failed checks, script errors or mixin injection errors. The client probe
+creates/joins a disposable creative world and checks resource loading, fallback descriptions, language overrides,
+and resource/script reloads. The server checks research combinations, actual crucible matching, jar input/output,
+label and aspect-list NBT, centrifuge decomposition, saved player knowledge, and TC's packet serialization.
+Both validate bad definitions without mutating the registry. The server also parks a definition and the ordinary
+script during `/mt reload`: aspects must retain identity while ordinary research is undone. Launch the same
+server again and require `TD_ASPECT_DISK_RESTART_PASS` for its saved jar.
+
+For a real dedicated-server connection, start the server probe with `-Dtd.aspects.network=true` on a free
+loopback-only port, then run the client probe with `-Dtd.aspects.server=127.0.0.1:PORT`. Require
+`TD_ASPECT_NETWORK_SENT` and `TD_ASPECT_NETWORK_RECEIVED`, plus the ordinary pass markers. The client must
+receive a pool of 23 custom research points and a jar containing 17 custom essentia with its matching label.
+The server stops after the client disconnects; use a timeout as a fallback.
+
+Negative startup controls: add a bad `.zs` after otherwise valid definitions, separately testing syntax errors,
+missing components, duplicate IDs, an existing/reversed component pair, and a dependency cycle. Each must report
+`Could not load custom aspects`, identify the problem, and stop before creating/loading a world. Do not treat
+Forge's process exit status alone as proof of success.
+
+## Wand component server probe
 
 `WandComponentStatsProbe.java` checks actual arcane recipe costs, capacity and charging, native and scripted
 regeneration, independent aspect timing, fractional amounts, ceilings, Potency stacking, individual bracelet
@@ -44,7 +86,7 @@ Test matrix: ModTweaker 0.14.0 and 0.9.6, each without optional addons, with Tha
 Thaumic Bases and Concilium. Include TC4Tweaks and the corresponding Salis build in the addon-enabled runs.
 The original and GTNH Thaumic Bases layouts must both be covered.
 
-## Client probe
+## Wand component client probe
 
 `WandComponentClientProbe.java` is client-only. Compile it similarly, also including LWJGL 2 in the compilation
 classpath. Use a separate jar/instance from the server probe. It waits for client ticks, forces expanded Salis
