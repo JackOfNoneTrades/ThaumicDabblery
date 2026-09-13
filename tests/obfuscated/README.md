@@ -4,6 +4,33 @@ These are disposable Forge test mods, **not** ordinary deobfuscated JUnit tests.
 The probes assert that `fml.deobfuscatedEnvironment` is false. Do not install them in a player's instance:
 server probes alter scripts/config temporarily, and probes stop their instance when finished.
 
+## Baubles Expanded slots
+
+Compile `BaubleSlotChecks.java` with `BaubleSlotServerProbe.java` and `WitchingBaubleSlotChecks.java` for
+the dedicated server, or with `BaubleSlotClientProbe.java` and `WitchingBaubleClientChecks.java` for the client.
+Use the SRG-first compilation classpath below, plus the production Witching Gadgets jar. Client compilation
+also needs LWJGL, Botania's API and NEI's API; these compilation inputs are not installed as runtime mods.
+The optional Witching Gadgets test classes are deliberately separate so the common probe can load without WG.
+Never install both probes together, or either probe in a normal player's instance.
+
+Install `bauble-slots.zs` in `scripts/`, plus `bauble-slots-wg.zs` only when WG is installed. Run the production
+jar against ModTweaker 0.14.0 and 0.9.6, each with and without TC4Tweaks. Test both dedicated server and
+`runObfClient`; include a no-WG control and an older Baubles Expanded control. The probes require an
+obfuscated runtime. Clients automatically create/join a disposable creative world and stop after checking it.
+
+Require `TD_BAUBLE_SERVER_ALL_PASS` / `TD_BAUBLE_CLIENT_ALL_PASS`, and no failed assertions, script errors,
+or mixin application/injection failures. Exit status alone is insufficient. The server exercises actual slots,
+normal clicks, shift-click transfers, stack limits and count conservation, NBT, native callbacks/restrictions,
+repeated reloads, script removal and full-inventory recovery. WG checks exercise moved haste/sniper effects,
+cloak/kama discovery, storage GUI selection, and focus-pouch contents without overwriting other copies.
+The client checks GUI hover and item tooltips, double jump, sniper zoom, cloak GUI creation and the actual
+raven-kama tick method's outgoing glide message slot. That message is captured by the test, not sent over
+a dedicated-server connection; manual multiplayer testing remains useful.
+
+For manual testing, use `manual-bauble-slots.zs` with WG installed. It needs no test probe and deliberately
+uses the same rules as the automated fixtures, plus a moved raven kama. Bind WG's activate key to test
+storage/glide controls. Verify items retain their contents across unequip/re-equip and save/rejoin.
+
 ## Custom aspects
 
 Compile `CustomAspectChecks.java` alongside `CustomAspectServerProbe.java` or `CustomAspectClientProbe.java`,

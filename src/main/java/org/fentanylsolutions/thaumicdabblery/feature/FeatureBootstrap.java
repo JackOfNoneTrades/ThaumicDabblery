@@ -15,6 +15,7 @@ final class FeatureBootstrap {
     private FeatureBootstrap() {}
 
     static void registerFeatures() {
+        FeatureManager.register(new org.fentanylsolutions.thaumicdabblery.feature.baubles.BaubleSlotsFeature());
         FeatureManager.register(new CustomAspectsFeature());
         FeatureManager.register(new FocusUpgradesFeature());
         FeatureManager.register(new VisDiscountFeature());

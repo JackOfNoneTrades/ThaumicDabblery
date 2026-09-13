@@ -1,4 +1,8 @@
 thaumicdabblery.config.title=Thaumic Dabblery Configuration
+thaumicdabblery.config.feature.baubleSlots=Bauble Slot Customization
+thaumicdabblery.config.feature.baubleSlots.enabled=Enabled
+thaumicdabblery.baubles.disabled=Cannot be worn in bauble slots
+thaumicdabblery.baubles.slots=Bauble slots: %s
 thaumicdabblery.config.debug=Debug
 thaumicdabblery.config.debug.debugMode=Debug Mode
 thaumicdabblery.config.feature.customAspects=Custom Aspects

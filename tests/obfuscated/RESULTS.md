@@ -185,3 +185,54 @@ Manual client: `run/custom-aspects-test/`, launched with `bash run/custom-aspect
 `manual-custom-aspects-definition.zs` and `manual-custom-aspects-usage.zs` fixtures register Tempus from
 Ordo + Vacuos and give clocks 4 Tempus; the icon is borrowed from Ordo, so no resource pack is required.
 The user also confirmed the manual in-game aspect check on 2026-09-07.
+
+## Baubles Expanded slot customization — 2026-09-13
+
+Production artifact SHA-256:
+`814e6d6f17853bd17d524d9b19abc8a68c9261ba2d1a33bb7b5a2b044338af73`.
+
+| ModTweaker | Baubles Expanded | Witching Gadgets | TC4Tweaks | Server assertions | Client assertions |
+| --- | --- | --- | --- | --- | --- |
+| GTNH 0.14.0 | 2.2.23-GTNH | 1.8.49-GTNH | 1.5.47 | 94 passed | 45 passed |
+| CurseForge 0.9.6 | 2.2.23-GTNH | 1.8.49-GTNH | 1.5.47 | 94 passed | 45 passed |
+| GTNH 0.14.0 | 2.2.23-GTNH | 1.8.49-GTNH | absent | 94 passed | 45 passed |
+| CurseForge 0.9.6 | 2.2.23-GTNH | 1.8.49-GTNH | absent | 94 passed | 45 passed |
+| GTNH 0.14.0 | 2.2.21-GTNH | 1.8.49-GTNH | 1.5.47 | 94 passed | 45 passed |
+| GTNH 0.14.0 | 2.2.23-GTNH | absent | 1.5.47 | 75 passed | 38 passed |
+
+All runs assert an obfuscated environment and use the reobfuscated mod jar with production Forge 1614,
+Thaumcraft 4.2.3.5, CraftTweaker 3.4.8, GTNHLib 0.11.23 and UniMixins 0.3.1. Production IC2 2.2.828 is
+included for CraftTweaker's generated class registry, as in the aspect suite; it is not a new mod dependency.
+Dedicated servers use Java 8. Clients run through `runObfClient` under Xvfb and join disposable integrated worlds.
+Counts include repeated rollback/replay checks, not only distinct cases.
+
+Coverage includes ordinary items and native baubles, several allowed types, wildcard/exact metadata precedence,
+durability-independent targets, input validation, undo, feature disable/re-enable, tooltips and slot hover,
+native equip/unequip/worn callbacks and restrictions, normal clicks, shift-click stack limits and item count
+conservation, shared-helper right-click, NBT serialization, repeated script reloads, and equipped-item recovery
+after script removal with both available space and a full inventory.
+
+WG checks cover relocated double-jump charms, haste vambraces, sniper movement and zoom, cloak/kama discovery,
+storage GUI selection, and focus-pouch saves from slots beyond the original four. Same-metadata belt/held
+pouches and a second storage cloak are checked against accidental replacement or overwritten contents.
+The client invokes the native raven-kama tick and verifies that its outgoing glide packet identifies the actual
+new slot. The packet is captured, not delivered over a dedicated-server connection. Real multiplayer and manual
+save/rejoin testing are not claimed by this suite; inventory NBT roundtrips are covered.
+
+Earlier probes found Expanded's whole-stack shift-click behavior and a FakePlayer-only chat issue; both were
+fixed before the final runs. Optional WG probe code was separated for the no-WG control. The client glide
+fixture explicitly presses WG's unbound activate key and runs after its first-login initialization.
+
+Final logs have no failed assertions, script compilation/execution errors, or mixin application/injection failures.
+The known IC2/CraftTweaker `WeightedItemStack is already defined in that package` registry message remains;
+the previous-feature baseline documented above reproduces it. Forge version-check, module-info discovery,
+and missing-texture messages are unrelated to these checks.
+
+Build (`spotlessApply build -x test`) and whitespace checks passed. No deobfuscated runtime tests were used.
+Final logs and disposable instances: `/tmp/td-baubles-obf.2gcSup/`, `passed.log` in all six `server-*` and six
+`client-*` directories. Earlier `first`, `matrix`, `final`, `release`, and `verified` logs are retained as history,
+not final-result evidence.
+
+Manual fixture: `tests/obfuscated/manual-bauble-slots.zs`. The prepared isolated client is
+`run/bauble-slots-test/`; launch with `bash run/bauble-slots-test/launch.sh`. Its README lists assignments,
+give commands, stack/reload checks and WG controls. Manual user verification is pending.

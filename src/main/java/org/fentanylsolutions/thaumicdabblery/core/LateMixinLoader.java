@@ -33,6 +33,30 @@ public class LateMixinLoader implements ILateMixinLoader {
     @Override
     public List<String> getMixins(Set<String> loadedMods) {
         List<String> mixins = new ArrayList<>();
+        if (loadedMods.contains("Baubles|Expanded")) {
+            mixins.add("baubles.MixinSlotBauble");
+            mixins.add("baubles.MixinInventoryBaubles");
+            mixins.add("baubles.MixinContainerPlayerExpanded");
+            mixins.add("baubles.MixinBaubleItemHelper");
+            if (FMLLaunchHandler.side()
+                .isClient()) mixins.add("baubles.MixinGuiPlayerExpanded");
+            if (loadedMods.contains("WitchingGadgets") && hasExpandedWitchingGadgets()) {
+                mixins.add("witchinggadgets.MixinUtilitiesBaubles");
+                mixins.add("witchinggadgets.MixinEventHandlerBaubleSlots");
+                mixins.add("witchinggadgets.MixinPlayerTickBaubleSlots");
+                mixins.add("witchinggadgets.MixinCommonProxyBaubleSlots");
+                mixins.add("witchinggadgets.MixinKamaBaubleSlots");
+                mixins.add("witchinggadgets.FocusPouchAccessor");
+                mixins.add("witchinggadgets.MixinFocusPouchBaubleSlots");
+                if (FMLLaunchHandler.side()
+                    .isClient()) {
+                    mixins.add("witchinggadgets.MixinKeyHandlerBaubleSlots");
+                    mixins.add("witchinggadgets.MixinClientProxyBaubleSlots");
+                    mixins.add("witchinggadgets.MixinItemCloakBaubleSlots");
+                    mixins.add("witchinggadgets.MixinFovBaubleSlots");
+                }
+            }
+        }
         if (loadedMods.contains("Thaumcraft")) {
             mixins.add("thaumcraft.MixinItemWandCasting");
             mixins.add("thaumcraft.MixinItemWandCastingStats");
@@ -99,6 +123,26 @@ public class LateMixinLoader implements ILateMixinLoader {
             }
         }
         return mixins;
+    }
+
+    private static boolean hasExpandedWitchingGadgets() {
+        try (InputStream input = Launch.classLoader
+            .getResourceAsStream("witchinggadgets/common/items/baubles/ItemMagicalBaubles.class")) {
+            if (input == null) return false;
+            final boolean[] found = { false };
+            new ClassReader(input).accept(new ClassVisitor(Opcodes.ASM5) {
+
+                @Override
+                public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
+                    String[] exceptions) {
+                    if ("getBaubleTypes".equals(name)) found[0] = true;
+                    return null;
+                }
+            }, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+            return found[0];
+        } catch (IOException exception) {
+            throw new IllegalStateException("Could not inspect Witching Gadgets bauble layout", exception);
+        }
     }
 
     private static boolean hasModTweakerMoveResearchHelper() {
