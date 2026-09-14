@@ -101,9 +101,14 @@ public class LateMixinLoader implements ILateMixinLoader {
             if (loadedMods.contains("ThaumicConcilium")) {
                 mixins.add("thaumicconcilium.MixinBraceletCapacity");
             }
-            if (loadedMods.contains("salisarcana") && FMLLaunchHandler.side()
-                .isClient()) {
-                mixins.add("salisarcana.MixinWandPartTooltipEventHandler");
+            if (loadedMods.contains("salisarcana")) {
+                mixins.add("salisarcana.MixinWandReplacementBracelets");
+                if (FMLLaunchHandler.side()
+                    .isClient()) {
+                    mixins.add("salisarcana.MixinWandPartTooltipEventHandler");
+                    if (loadedMods.contains("NotEnoughItems") && loadedMods.contains("aspectrecipeindex"))
+                        mixins.add("salisarcana.MixinWandReplacementNeiBracelets");
+                }
             }
             if (loadedMods.contains("WitchingGadgets") && FMLLaunchHandler.side()
                 .isClient()) {

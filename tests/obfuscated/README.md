@@ -4,6 +4,25 @@ These are disposable Forge test mods, **not** ordinary deobfuscated JUnit tests.
 The probes assert that `fml.deobfuscatedEnvironment` is false. Do not install them in a player's instance:
 server probes alter scripts/config temporarily, and probes stop their instance when finished.
 
+## Salis Arcana bracelet replacements
+
+Compile `BraceletReplacementChecks.java` with either `BraceletReplacementServerProbe.java` or
+`BraceletReplacementClientProbe.java`, using the SRG-first production classpath below. Install the resulting
+probe only in a disposable production instance; each probe stops its instance after finishing. Do not install
+both probes together. Add `bracelet-replacement.zs` to `scripts/` when both bracelet mods are installed.
+
+Cover Salis 1.1.71-GTNH with GTNH ModTweaker and Salis v2.6.0 with CurseForge ModTweaker, including GTNH and
+original Thaumic Bases, Thaumic Concilium, and runs with and without TC4Tweaks. NEI checks additionally need
+production NEI and Aspect Recipe Index (which requires TC4Tweaks' API); omit Aspect Recipe Index in clients
+without TC4Tweaks to exercise the optional integration guard. Require `TD_BRACELET_SERVER_PASS` / `TD_BRACELET_CLIENT_PASS`,
+no failed assertions, no script errors and no mixin application/injection failures; process exit status alone
+is not sufficient. Probes require an obfuscated runtime.
+
+Checks cover every registered bracelet variant in all nine recipe-input positions, direct recipe output/cost and
+research queries, unchanged rejected-item metadata/NBT, regular wand/staff/sceptre replacement, bracelet power
+slots, casting-item recognition, Vis storage/consumption, scripted capacity, and script reloads. Client checks
+also exercise both actual NEI handlers, ensuring bracelet recipes disappear while ordinary replacements remain.
+
 ## Baubles Expanded slots
 
 Compile `BaubleSlotChecks.java` with `BaubleSlotServerProbe.java` and `WitchingBaubleSlotChecks.java` for

@@ -19,6 +19,7 @@
     * Thaumic Horizons player vat infusion recipe modification
 * Configurable minimum Vis cost for casting and crafting, including Thaumic Bases bracelets
 * Scriptable Baubles Expanded slot assignments for ordinary items and existing baubles, including multiple allowed slot types and Witching Gadgets compatibility
+* Salis Arcana compatibility preventing wand cap/core replacement from changing Thaumic Bases and Thaumic Concilium bracelet variants
 * Thaumic Horizons self-infusion allowing the player to cast Witchery Mystic Branch spells using a keybind, with a creative grant item.
 
 Documentation can be found [here](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Documentation).

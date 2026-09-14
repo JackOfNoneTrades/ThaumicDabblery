@@ -236,3 +236,58 @@ not final-result evidence.
 Manual fixture: `tests/obfuscated/manual-bauble-slots.zs`. The prepared isolated client is
 `run/bauble-slots-test/`; launch with `bash run/bauble-slots-test/launch.sh`. Its README lists assignments,
 give commands, stack/reload checks and WG controls. Manual user verification is pending.
+
+## Salis Arcana bracelet replacement exclusion — 2026-09-14
+
+Production artifact: `thaumicdabblery-94be0ec-snapshot-master.2+fdf5fefac1-dirty.jar`
+
+SHA-256: `a796fe1d73861300bf4288fe0a62b75f506efd3b5597fab33f9e6c9f1a149268`
+
+| ModTweaker | Salis Arcana | Thaumic Bases | TC4Tweaks | Server checks | Client checks |
+| --- | --- | --- | --- | --- | --- |
+| 0.14.0 | 1.1.71-GTNH | 1.8.13 | 1.5.47 | 2476 | 1430 |
+| 0.9.6 | v2.6.0 | 1.3.1710.4 | 1.5.47 | 2476 | 1430 |
+| 0.14.0 | 1.1.71-GTNH | 1.8.13 | absent | 2476 | 1238 |
+| 0.9.6 | v2.6.0 | 1.3.1710.4 | absent | 2476 | 1238 |
+
+All runs also include Thaumic Concilium 1.1.1, Thaumic Tinkerer 2.12.31, Forbidden Magic 0.9.17-GTNH,
+Thaumcraft 4.2.3.5, CraftTweaker 3.4.8, Baubles Expanded 2.2.21, GTNHLib 0.11.23, UniMixins 0.3.1,
+and production IC2 2.2.828 for CraftTweaker's generated class registry. DummyCore is 1.20.0 for the GTNH
+set and 1.13 for the original set. Clients include NEI 2.8.130 and CodeChickenCore 1.4.17.
+The clients with TC4Tweaks additionally include Aspect Recipe Index 1.1.3 for the actual generated-recipe checks.
+Aspect Recipe Index requires TC4Tweaks' API, so it is omitted in the no-TC4Tweaks clients, also exercising
+the optional client-integration guard. Dedicated servers have neither NEI nor Aspect Recipe Index.
+
+Every probe asserts the obfuscated-environment flag. The four dedicated servers and four clients passed
+9904 server and 5336 client assertions in total, including repeated checks after script reloads.
+The client probes join disposable integrated worlds; this is not a remote multiplayer or manual GUI-click test.
+
+Coverage:
+
+- All 13 Thaumic Bases and 8 Concilium metadata entries in every one of the nine crafting-input slots.
+  This includes variants whose optional addons are absent; they are checked for rejection, not made playable.
+- Actual Salis cap/core recipe matching, direct output and aspect-cost queries, research queries, and unchanged
+  rejected bracelet metadata/NBT. Bracelet inputs cannot produce either replacement output.
+- Ordinary wand, staff, sceptre and staff/sceptre replacement remains functional, preserves custom NBT, and
+  retains Vis costs. A bracelet in the workbench power slot does not reject an otherwise valid replacement.
+- Bracelet casting-item recognition, Vis storage/consumption, scripted capacity and MineTweaker reloads remain
+  functional. Recipe APIs are exercised directly; no actual player crafting click is simulated.
+- Both real NEI replacement handlers return no bracelet usages but still generate ordinary replacement usages,
+  before and after reload. Original bracelet crafting recipes are not removed by the implementation.
+
+Final logs have no failed assertions, script compilation/execution errors or mixin application/injection failures.
+The previously documented IC2/CraftTweaker `WeightedItemStack is already defined in that package` registry
+message remains, along with unrelated Forge version-check, module-info discovery and missing-texture messages.
+An initial no-TC4Tweaks client fixture stopped at Forge's dependency screen because Aspect Recipe Index was
+installed without its required API; removing that addon from the fixture resolved startup without a mod-code change.
+
+Build (`spotlessApply build -x test`), `spotlessCheck`, and whitespace checks passed. The repository could not
+resolve its newly added FentLib `04136bd-snapshot` development runtime dependency, so a temporary Gradle init
+script supplied the cached jar of that exact version. Project dependency files were left unchanged. No
+deobfuscated runtime tests were used.
+
+Raw instances and logs: `/tmp/td-bracelet-replacement.hKXPD7/`, `final.log` in the four `server-*` directories
+and `verified.log` in the four `client-*` directories. Earlier attempts are retained separately.
+The manual client is `run/bracelet-replacement-test/`; launch its `launch.sh`. It contains the same tested
+production artifact and GTNH mod set, without automated probes or stat-changing scripts. Manual verification
+is pending; a `clankus` notification was sent when it became available.
