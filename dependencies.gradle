@@ -35,25 +35,27 @@
  */
 dependencies {
     // Pure runtime
-    runtimeOnlyNonPublishable("com.github.GTNewHorizons:Hodgepodge:2.7.187:dev")
-    runtimeOnlyNonPublishable("com.github.GTNewHorizons:NotEnoughItems:2.8.123-GTNH:dev")
-    runtimeOnlyNonPublishable("com.github.GTNewHorizons:Angelica:2.2.4:dev")
+    runtimeOnlyNonPublishable("com.github.GTNewHorizons:Hodgepodge:2.7.206:dev")
+    runtimeOnlyNonPublishable("com.github.GTNewHorizons:NotEnoughItems:2.8.140-GTNH:dev")
+    runtimeOnlyNonPublishable("com.github.GTNewHorizons:Angelica:2.2.13:dev")
     runtimeOnlyNonPublishable(rfg.deobf("maven.modrinth:bugtorch:1.2.14"))
     runtimeOnlyNonPublishable(rfg.deobf("curse.maven:catalogue-vintage-1465746:8384975")) // 1.0.8-1.7.10
+    runtimeOnlyNonPublishable("org.fentanylsolutions.fentlib:FentLib:04136bd-snapshot:dev")
+
 
     // Compile + runtime
     devOnlyNonPublishable("thaumcraft:Thaumcraft:1.7.10-4.2.3.5:dev")
-    devOnlyNonPublishable("com.github.GTNewHorizons:Baubles-Expanded:2.2.22-GTNH:dev")
+    devOnlyNonPublishable("com.github.GTNewHorizons:Baubles-Expanded:2.2.23-GTNH:dev")
     devOnlyNonPublishable("com.github.GTNewHorizons:CraftTweaker:3.4.8:dev")
     devOnlyNonPublishable("com.github.GTNewHorizons:ModTweaker:0.14.0:dev")
 
     // Optional integration
     devOnlyNonPublishable(rfg.deobf("curse.maven:witchery-69673:2234410"))
-    devOnlyNonPublishable("com.github.GTNewHorizons:ThaumicHorizons:1.8.21:dev")
+    devOnlyNonPublishable("com.github.GTNewHorizons:ThaumicHorizons:1.8.24:dev")
     devOnlyNonPublishable(rfg.deobf("curse.maven:tc4tweaks-431297:8668688")) // 1.5.47
-    devOnlyNonPublishable("com.github.GTNewHorizons:WitchingGadgets:1.8.49-GTNH:dev")
-    devOnlyNonPublishable("com.github.GTNewHorizons:ThaumicBases:1.8.13:dev") { transitive = false }
-    devOnlyNonPublishable("com.github.GTNewHorizons:DummyCore:1.20.0:dev") { transitive = false }
+    devOnlyNonPublishable("com.github.GTNewHorizons:WitchingGadgets:1.8.51-GTNH:dev")
+    devOnlyNonPublishable("com.github.GTNewHorizons:ThaumicBases:1.9.19:dev") { transitive = false }
+    devOnlyNonPublishable("com.github.GTNewHorizons:DummyCore:1.21.0:dev") { transitive = false }
     devOnlyNonPublishable("com.github.GTNewHorizons:Salis-Arcana:1.1.71-GTNH:dev") { transitive = false }
     devOnlyNonPublishable(rfg.deobf("maven.modrinth:contenttweaker:1.0.5"))
     runtimeOnlyNonPublishable(rfg.deobf("maven.modrinth:fluxed-core:1.0.9"))
