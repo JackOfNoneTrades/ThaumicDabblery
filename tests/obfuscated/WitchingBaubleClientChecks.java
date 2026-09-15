@@ -23,6 +23,7 @@ import witchinggadgets.common.util.WGKeyHandler;
 
 public final class WitchingBaubleClientChecks {
  public static void run(BaubleSlotChecks c, Minecraft mc) throws Exception {
+WitchingBaubleScriptChecks.run(c);
 EntityPlayer player=mc.field_71439_g;
 List<String> tooltip;
             if(Loader.isModLoaded("WitchingGadgets")) {
@@ -55,7 +56,7 @@ List<String> tooltip;
                 player.func_70095_a(true);
                 // EntityPlayerSP reads its movement input, not the server sneaking flag
                 mc.field_71439_g.field_71158_b.field_78899_d=true;
-                inv.func_70299_a(BaubleSlotChecks.slot("belt"),new ItemStack(WGContent.ItemMagicalBaubles,1,6));
+                inv.func_70299_a(BaubleSlotChecks.slot("belt"),new ItemStack(WGContent.ItemMagicalBaubles,1,WitchingBaubleScriptChecks.sniperMetadata()));
                 net.minecraftforge.client.event.FOVUpdateEvent fov=new net.minecraftforge.client.event.FOVUpdateEvent(mc.field_71439_g,1f);
                 new witchinggadgets.client.ClientEventHandler().onFOVUpdate(fov);
                 c.check(fov.newfov==.25f,"sniper zoom recognized in belt slot");
@@ -64,6 +65,8 @@ List<String> tooltip;
                 mc.field_71439_g.field_71158_b.field_78899_d=false;
                 inv.func_70299_a(BaubleSlotChecks.slot("belt"),null);
 
+                if (Loader.isModLoaded("TravellersGear")) WitchingBaubleLegacyClientChecks.run(c, mc);
+                else {
                 ItemStack raven=new ItemStack(WGContent.ItemKama,1,4);
                 org.fentanylsolutions.thaumicdabblery.feature.baubles.BaubleRules.Change change=
                     org.fentanylsolutions.thaumicdabblery.feature.baubles.BaubleRules.edit(raven,0,new String[]{"ring"});
@@ -92,6 +95,7 @@ List<String> tooltip;
                     BaubleSlotClientProbe.field(KeyBinding.class,"field_74513_e").setBoolean(WGKeyHandler.activateKey,false);
                     inv.func_70299_a(BaubleSlotChecks.slot("ring"),null);
                     change.undo();
+                }
                 }
             }
 

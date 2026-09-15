@@ -4,6 +4,10 @@ These are disposable Forge test mods, **not** ordinary deobfuscated JUnit tests.
 The probes assert that `fml.deobfuscatedEnvironment` is false. Do not install them in a player's instance:
 server probes alter scripts/config temporarily, and probes stop their instance when finished.
 
+Include the production `fentlib-04136bd-snapshot.jar` and GTNHLib 0.11.37 in automated instances.
+Leave FentLib's `terminalDepLoaderProgress` enabled (the default) to send dependency-loader progress to
+the terminal instead of opening popups. Never install its `-dev` artifact in these obfuscated runtimes.
+
 ## Salis Arcana bracelet replacements
 
 Compile `BraceletReplacementChecks.java` with either `BraceletReplacementServerProbe.java` or
@@ -25,6 +29,19 @@ also exercise both actual NEI handlers, ensuring bracelet recipes disappear whil
 
 ## Baubles Expanded slots
 
+Legacy Witching Gadgets coverage includes original 1.1.10 and KryptonCaptain 1.2.9 with Traveller's Gear 1.16.6.
+Also compile `WitchingBaubleScriptChecks.java` and `WitchingBaubleLegacyServerChecks.java` / `WitchingBaubleLegacyClientChecks.java` for the corresponding
+probe, with the production Traveller's Gear jar on the compilation classpath. Those helpers are not invoked
+in GTNH-only instances. Install `legacy-wg-Baubles.cfg` as `config/Baubles.cfg` in legacy test instances to
+explicitly enable expanded slots, which those WG versions do not create themselves. Keep GTNH regression runs
+without Traveller's Gear to check optional linkage. Use both ModTweaker forks, with and without TC4Tweaks.
+
+Legacy checks additionally cover native Traveller's Gear jump/haste and cloak discovery/storage, same-metadata
+native and moved cloaks, closing a moved bag after unequip, exact-item GUI selection and invalid slot rejection,
+wolf-event dispatch and cloak tick/unequip callbacks, raven glide, expanded-slot Vis amulets, the native ability
+wheel's IDs and packet serialization, and server-side activation including disabled/out-of-range cases.
+No real remote-client packet delivery is claimed; the native packet and receiver paths are exercised separately.
+
 Compile `BaubleSlotChecks.java` with `BaubleSlotServerProbe.java` and `WitchingBaubleSlotChecks.java` for
 the dedicated server, or with `BaubleSlotClientProbe.java` and `WitchingBaubleClientChecks.java` for the client.
 Use the SRG-first compilation classpath below, plus the production Witching Gadgets jar. Client compilation
@@ -32,7 +49,9 @@ also needs LWJGL, Botania's API and NEI's API; these compilation inputs are not 
 The optional Witching Gadgets test classes are deliberately separate so the common probe can load without WG.
 Never install both probes together, or either probe in a normal player's instance.
 
-Install `bauble-slots.zs` in `scripts/`, plus `bauble-slots-wg.zs` only when WG is installed. Run the production
+Install `bauble-slots.zs` in `scripts/`, plus `bauble-slots-wg.zs` only when WG is installed.
+Use `bauble-slots-wg-krypton.zs` instead of the WG script for KryptonCaptain 1.2.9: its sniper ring
+uses metadata 5, while original/GTNH WG use 6. Do not install both WG scripts. Run the production
 jar against ModTweaker 0.14.0 and 0.9.6, each with and without TC4Tweaks. Test both dedicated server and
 `runObfClient`; include a no-WG control and an older Baubles Expanded control. The probes require an
 obfuscated runtime. Clients automatically create/join a disposable creative world and stop after checking it.
@@ -49,6 +68,9 @@ a dedicated-server connection; manual multiplayer testing remains useful.
 For manual testing, use `manual-bauble-slots.zs` with WG installed. It needs no test probe and deliberately
 uses the same rules as the automated fixtures, plus a moved raven kama. Bind WG's activate key to test
 storage/glide controls. Verify items retain their contents across unequip/re-equip and save/rejoin.
+
+For original WG use `manual-legacy-witching-baubles.zs` and Traveller's Gear's active-abilities wheel.
+For KryptonCaptain 1.2.9 change the sniper-ring metadata in that manual script from 6 to 5.
 
 ## Custom aspects
 

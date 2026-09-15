@@ -21,8 +21,7 @@ public abstract class MixinFovBaubleSlots {
             value = "INVOKE",
             target = "Lnet/minecraftforge/oredict/OreDictionary;itemMatches(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;Z)Z"))
     private boolean td$sniperZoom(ItemStack expected, ItemStack actual, boolean strict, FOVUpdateEvent event) {
-        return BaubleSlotsFeature.isEnabled()
-            ? WitchingBaubleSlots.magic(BaublesApi.getBaubles(event.entity), 6) != null
+        return BaubleSlotsFeature.isEnabled() ? WitchingBaubleSlots.sniper(BaublesApi.getBaubles(event.entity)) != null
             : OreDictionary.itemMatches(expected, actual, strict);
     }
 }

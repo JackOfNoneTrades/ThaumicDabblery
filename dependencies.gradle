@@ -50,6 +50,7 @@ dependencies {
     devOnlyNonPublishable("com.github.GTNewHorizons:ModTweaker:0.14.0:dev")
 
     // Optional integration
+    compileOnly(rfg.deobf("curse.maven:travellers-gear-224440:2262112")) // legacy Witching Gadgets API only
     devOnlyNonPublishable(rfg.deobf("curse.maven:witchery-69673:2234410"))
     devOnlyNonPublishable("com.github.GTNewHorizons:ThaumicHorizons:1.8.24:dev")
     devOnlyNonPublishable(rfg.deobf("curse.maven:tc4tweaks-431297:8668688")) // 1.5.47

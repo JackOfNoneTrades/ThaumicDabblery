@@ -13,6 +13,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
+import baubles.api.BaubleType;
 import baubles.api.IBauble;
 import baubles.api.expanded.BaubleExpandedSlots;
 import baubles.api.expanded.IBaubleExpanded;
@@ -36,7 +37,8 @@ public final class BaubleRules {
             return types == null ? new String[0] : types.clone();
         }
         if (item instanceof IBauble) {
-            return new String[] { BaubleExpandedSlots.getTypeFromBaubleType(((IBauble) item).getBaubleType(stack)) };
+            BaubleType type = ((IBauble) item).getBaubleType(stack);
+            return type == null ? new String[0] : new String[] { BaubleExpandedSlots.getTypeFromBaubleType(type) };
         }
         return new String[0];
     }

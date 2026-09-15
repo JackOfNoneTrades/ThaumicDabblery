@@ -19,6 +19,10 @@ public final class BaubleSlotServerProbe {
         try {
             c.scripted(); c.validation();
             EntityPlayerMP player = FakePlayerFactory.getMinecraft(server.func_71218_a(0));
+            // Potion callbacks send packets; FakePlayerFactory supplies no connection by default.
+            player.field_71135_a = new net.minecraft.network.NetHandlerPlayServer(server, new net.minecraft.network.NetworkManager(false), player) {
+                @Override public void func_147359_a(net.minecraft.network.Packet packet) {}
+            };
             c.inventory(player);
             if (Loader.isModLoaded("WitchingGadgets")) WitchingBaubleSlotChecks.run(c, player);
             for (int i=0;i<3;i++) { MineTweakerImplementationAPI.reload(); c.scripted(); }

@@ -40,20 +40,37 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("baubles.MixinBaubleItemHelper");
             if (FMLLaunchHandler.side()
                 .isClient()) mixins.add("baubles.MixinGuiPlayerExpanded");
-            if (loadedMods.contains("WitchingGadgets") && hasExpandedWitchingGadgets()) {
-                mixins.add("witchinggadgets.MixinUtilitiesBaubles");
-                mixins.add("witchinggadgets.MixinEventHandlerBaubleSlots");
+            if (loadedMods.contains("WitchingGadgets")) {
+                boolean expanded = hasExpandedWitchingGadgets();
                 mixins.add("witchinggadgets.MixinPlayerTickBaubleSlots");
-                mixins.add("witchinggadgets.MixinCommonProxyBaubleSlots");
-                mixins.add("witchinggadgets.MixinKamaBaubleSlots");
                 mixins.add("witchinggadgets.FocusPouchAccessor");
                 mixins.add("witchinggadgets.MixinFocusPouchBaubleSlots");
                 if (FMLLaunchHandler.side()
-                    .isClient()) {
-                    mixins.add("witchinggadgets.MixinKeyHandlerBaubleSlots");
-                    mixins.add("witchinggadgets.MixinClientProxyBaubleSlots");
-                    mixins.add("witchinggadgets.MixinItemCloakBaubleSlots");
-                    mixins.add("witchinggadgets.MixinFovBaubleSlots");
+                    .isClient()) mixins.add("witchinggadgets.MixinFovBaubleSlots");
+                if (expanded) {
+                    mixins.add("witchinggadgets.MixinUtilitiesBaubles");
+                    mixins.add("witchinggadgets.MixinEventHandlerBaubleSlots");
+                    mixins.add("witchinggadgets.MixinCommonProxyBaubleSlots");
+                    mixins.add("witchinggadgets.MixinKamaBaubleSlots");
+                    if (FMLLaunchHandler.side()
+                        .isClient()) {
+                        mixins.add("witchinggadgets.MixinKeyHandlerBaubleSlots");
+                        mixins.add("witchinggadgets.MixinClientProxyBaubleSlots");
+                        mixins.add("witchinggadgets.MixinItemCloakBaubleSlots");
+                    }
+                } else if (loadedMods.contains("TravellersGear")) {
+                    mixins.add("witchinggadgets.legacy.MixinUtilitiesBaubles");
+                    mixins.add("witchinggadgets.legacy.MixinEventHandlerBaubleSlots");
+                    mixins.add("witchinggadgets.legacy.MixinItemCloakBauble");
+                    mixins.add("witchinggadgets.legacy.MixinCommonProxyBaubleSlots");
+                    mixins.add("witchinggadgets.legacy.MixinTravellersEvents");
+                    mixins.add("witchinggadgets.legacy.MixinTravellersAbility");
+                    if (FMLLaunchHandler.side()
+                        .isClient()) {
+                        mixins.add("witchinggadgets.legacy.MixinKeyHandlerBaubleSlots");
+                        mixins.add("witchinggadgets.legacy.MixinClientProxyBaubleSlots");
+                        mixins.add("witchinggadgets.legacy.MixinTravellersAbilityList");
+                    }
                 }
             }
         }

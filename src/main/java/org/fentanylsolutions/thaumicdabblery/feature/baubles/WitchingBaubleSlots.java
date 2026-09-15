@@ -8,10 +8,18 @@ import baubles.api.BaublesApi;
 import baubles.common.container.InventoryBaubles;
 import witchinggadgets.common.WGContent;
 import witchinggadgets.common.items.baubles.ItemCloak;
+import witchinggadgets.common.items.baubles.ItemMagicalBaubles;
 
 public final class WitchingBaubleSlots {
 
     private WitchingBaubleSlots() {}
+
+    public static ItemStack sniper(IInventory inv) {
+        // KryptonCaptain removed the title item and shifted this ring from metadata 6 to 5.
+        String[] names = ItemMagicalBaubles.subNames;
+        for (int i = 0; i < names.length; i++) if ("ringSniper".equals(names[i])) return magic(inv, i);
+        return null;
+    }
 
     public static ItemStack magic(IInventory inv, int metadata) {
         for (int i = 0; i < inv.getSizeInventory(); i++) {

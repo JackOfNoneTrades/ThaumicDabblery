@@ -291,3 +291,47 @@ and `verified.log` in the four `client-*` directories. Earlier attempts are reta
 The manual client is `run/bracelet-replacement-test/`; launch its `launch.sh`. It contains the same tested
 production artifact and GTNH mod set, without automated probes or stat-changing scripts. Manual verification
 is pending; a `clankus` notification was sent when it became available.
+
+## Legacy Witching Gadgets and FentLib snapshot — 2026-09-14
+
+Production artifact SHA-256: `89602663fb35968596f4d5b1d2eaffbe4eaa536103986444a8c791f7b77066a3`
+
+All 26 obfuscated runs passed: dedicated server and client for each of the following combinations,
+plus one server/client control without Witching Gadgets or Traveller's Gear.
+
+| Witching Gadgets | Traveller's Gear | ModTweaker | TC4Tweaks | Checks per server/client run |
+| --- | --- | --- | --- | --- |
+| Original 1.1.10 | 1.16.6 | 0.14.0 and 0.9.6 | 1.5.47 and absent | 126 / 56 |
+| KryptonCaptain 1.2.9 | 1.16.6 | 0.14.0 and 0.9.6 | 1.5.47 and absent | 126 / 56 |
+| GTNH 1.8.51 | absent | 0.14.0 and 0.9.6 | 1.5.47 and absent | 101 / 52 |
+| Absent control | absent | 0.14.0 | 1.5.47 | 75 / 38 |
+
+Runtime dependencies: FentLib **04136bd-snapshot** (production jar), GTNHLib **0.11.37**, Baubles Expanded
+2.2.23, CraftTweaker 3.4.8, Thaumcraft 4.2.3.5, UniMixins 0.3.1, and IC2 2.2.828 for CraftTweaker's generated
+registry. Every run logged `FentLib redirected FalsePattern DepLoader progress to the terminal.` Its
+`terminalDepLoaderProgress` option remained enabled, avoiding dependency-loader progress popups.
+No development jars were installed in the runtime instances. Normal Gradle dependency resolution now works;
+the client init script only selects the isolated working directory, with no dependency overrides.
+
+Coverage includes script application and reloads, moved jump/haste/sniper effects, real registered sniper
+metadata, cloak and kama discovery/storage, expanded focus pouches, native Traveller's Gear equipment,
+same-metadata native/moved storage isolation, closing a bag after unequip, exact storage GUI coordinates,
+expanded-slot wolf events, raven ability activation and glide, callbacks, expanded Vis amulets, and invalid
+slot/disabled-feature handling. Client checks exercise Traveller's Gear's ability-list IDs and native packet
+serialization; server checks exercise its receiver. This is not a remote multiplayer delivery test.
+
+All final game and MineTweaker logs were audited separately: no failed assertions, script execution/compilation
+errors, or mixin application/injection failures. The existing CraftTweaker `WeightedItemStack is already defined
+in that package` registry message remains, as do unrelated Forge signature, module-info discovery and test-item
+texture messages. The multi-target focus-pouch mixin also reports the expected absent alternate WG class.
+
+An earlier Krypton fixture used metadata 6 after that fork moved the sniper ring to 5. The corrected fixture
+and added full-script assertions passed the complete rerun above. Temporary runner log-path checks initially
+looked outside `logs/`; the final independent audit checked all 26 actual `logs/minetweaker.log` files.
+`spotlessApply assemble`, `spotlessCheck`, and whitespace checks passed. No deobfuscated runtime tests were used.
+
+Raw instances: `/tmp/td-wg-legacy.J91YHc/`, with final game output in each instance's `verified.log`.
+The manual client is `run/legacy-witching-gadgets-test/launch.sh`: original WG, Traveller's Gear, CurseForge
+ModTweaker, TC4Tweaks, the same production artifact and FentLib snapshot, and no automatic probes.
+Use Traveller's Gear's active-abilities wheel for moved cloaks. Manual verification remains pending;
+`clankus` notifications were sent when the instance was ready and after its FentLib update.

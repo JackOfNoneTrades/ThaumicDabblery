@@ -22,9 +22,8 @@ public abstract class MixinPlayerTickBaubleSlots {
             target = "Lnet/minecraftforge/oredict/OreDictionary;itemMatches(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;Z)Z"))
     private boolean td$sniperRing(ItemStack expected, ItemStack actual, boolean strict,
         TickEvent.PlayerTickEvent event) {
-        // WG's old literal 5 is a title, not its sniper ring (metadata 6).
-        return BaubleSlotsFeature.isEnabled()
-            ? WitchingBaubleSlots.magic(BaublesApi.getBaubles(event.player), 6) != null
+        // Resolve the actual ring, including forks whose hardcoded metadata is wrong.
+        return BaubleSlotsFeature.isEnabled() ? WitchingBaubleSlots.sniper(BaublesApi.getBaubles(event.player)) != null
             : OreDictionary.itemMatches(expected, actual, strict);
     }
 }

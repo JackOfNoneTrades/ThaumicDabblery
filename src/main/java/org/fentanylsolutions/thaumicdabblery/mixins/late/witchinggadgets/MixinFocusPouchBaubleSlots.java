@@ -8,6 +8,7 @@ import net.minecraft.world.World;
 import org.fentanylsolutions.thaumicdabblery.feature.baubles.BaubleSlotsFeature;
 import org.fentanylsolutions.thaumicdabblery.feature.baubles.WitchingBaubleSlots;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,7 +20,11 @@ import thaumcraft.common.container.ContainerFocusPouch;
 import thaumcraft.common.container.InventoryFocusPouch;
 import thaumcraft.common.items.wands.ItemFocusPouch;
 
-@Mixin(targets = "witchinggadgets.common.pouch.ContainerPatchedFocusPouch", remap = false)
+@Pseudo
+@Mixin(
+    targets = { "witchinggadgets.common.pouch.ContainerPatchedFocusPouch",
+        "witchinggadgets.asm.pouch.ContainerPatchedFocusPouch" },
+    remap = false)
 public abstract class MixinFocusPouchBaubleSlots {
 
     @ModifyConstant(method = "<init>", constant = @Constant(intValue = 4))

@@ -27,7 +27,6 @@ import witchinggadgets.common.WGContent;
 import witchinggadgets.common.CommonProxy;
 import witchinggadgets.common.gui.ContainerCloak;
 import witchinggadgets.common.items.baubles.ItemCloak;
-import witchinggadgets.common.pouch.ContainerPatchedFocusPouch;
 import witchinggadgets.common.util.Utilities;
 import witchinggadgets.common.util.Lib;
 import witchinggadgets.common.util.handler.EventHandler;
@@ -35,7 +34,21 @@ import witchinggadgets.common.util.handler.PlayerTickHandler;
 
 import static tdtest.BaubleSlotChecks.slot;
 public final class WitchingBaubleSlotChecks {
-    public static void run(BaubleSlotChecks c, EntityPlayer player) {
+    public static ItemStack[] stored(ItemStack stack) throws Exception {
+        // Read the persisted inventory: the accessor changed staticness, and legacy WG leaves client-only
+        // methods on ItemCloak, preventing getMethod() enumeration on a dedicated server.
+        ItemStack[] stored = new ItemStack[27];
+        if (!stack.func_77942_o()) return stored;
+        net.minecraft.nbt.NBTTagList list = stack.func_77978_p().func_150295_c("InternalInventory", 10);
+        for (int i = 0; i < list.func_74745_c(); i++) {
+            NBTTagCompound entry = list.func_150305_b(i);
+            int slot = entry.func_74771_c("Slot") & 255;
+            if (slot < stored.length) stored[slot] = ItemStack.func_77949_a(entry);
+        }
+        return stored;
+    }
+    public static void run(BaubleSlotChecks c, EntityPlayer player) throws Exception {
+        WitchingBaubleScriptChecks.run(c);
         c.empty(player);
         InventoryBaubles inv = (InventoryBaubles) BaublesApi.getBaubles(player);
         int ring = slot("ring"), amulet = slot("amulet"), belt = slot("belt"), charm = slot("charm");
@@ -47,7 +60,7 @@ public final class WitchingBaubleSlotChecks {
         new EventHandler().onPlayerBreaking(breaking);
         c.check(breaking.newSpeed == 5.0F, "moved haste vambrace still works");
         c.empty(player);
-        ItemStack sniper = new ItemStack(WGContent.ItemMagicalBaubles, 1, 6);
+        ItemStack sniper = new ItemStack(WGContent.ItemMagicalBaubles, 1, WitchingBaubleScriptChecks.sniperMetadata());
         inv.func_70299_a(belt, sniper);
         ItemStack bow = new ItemStack(Items.field_151031_f);
         player.field_71071_by.field_70462_a[0] = bow; player.func_71008_a(bow, 1000);
@@ -63,10 +76,10 @@ public final class WitchingBaubleSlotChecks {
         inv.func_70299_a(slot("cape"), otherCloak);
         c.check(Arrays.asList(Utilities.getActiveMagicalCloak(player)).contains(cloak), "moved cloak discovered");
         ContainerCloak bag = (ContainerCloak) new CommonProxy().getServerGuiElement(4, player, player.field_70170_p, 0, 5, 0);
-        bag.input.func_70299_a(0, new ItemStack(Items.field_151045_i));
+        ((net.minecraft.inventory.IInventory) bag.getClass().getField("input").get(bag)).func_70299_a(0, new ItemStack(Items.field_151045_i));
         bag.func_75134_a(player);
-        c.check(((ItemCloak) cloak.func_77973_b()).getStoredItems(cloak)[0].func_77973_b() == Items.field_151045_i, "moved storage cloak saves");
-        c.check(((ItemCloak) otherCloak.func_77973_b()).getStoredItems(otherCloak)[0] == null, "same-metadata cloak not overwritten");
+        c.check(stored(cloak)[0].func_77973_b() == Items.field_151045_i, "moved storage cloak saves");
+        c.check(stored(otherCloak)[0] == null, "same-metadata cloak not overwritten");
         c.empty(player);
         ItemStack kama = new ItemStack(WGContent.ItemKama, 1, 2); inv.func_70299_a(amulet, kama);
         c.check(WitchingBaubleSlots.storage(player, 5) == kama, "moved storage kama selected");
@@ -78,7 +91,11 @@ public final class WitchingBaubleSlotChecks {
         inv.func_70299_a(charm, pouch); inv.func_70299_a(belt, otherPouch);
         player.field_71071_by.field_70462_a[0] = heldPouch;
         c.check(charm >= 4, "pouch test uses expanded slot");
-        ContainerFocusPouch focusBag = new ContainerPatchedFocusPouch(player.field_71071_by, player.field_70170_p, 0, 5, 0);
+        String pouchClass = cpw.mods.fml.common.Loader.isModLoaded("TravellersGear")
+            ? "witchinggadgets.asm.pouch.ContainerPatchedFocusPouch" : "witchinggadgets.common.pouch.ContainerPatchedFocusPouch";
+        ContainerFocusPouch focusBag = (ContainerFocusPouch) Class.forName(pouchClass)
+            .getConstructor(net.minecraft.entity.player.InventoryPlayer.class, net.minecraft.world.World.class, int.class, int.class, int.class)
+            .newInstance(player.field_71071_by, player.field_70170_p, 0, 5, 0);
         focusBag.input.func_70299_a(0, new ItemStack(ConfigItems.itemFocusFire));
         focusBag.func_75134_a(player);
         ItemFocusPouch item = (ItemFocusPouch) pouch.func_77973_b();
@@ -86,5 +103,6 @@ public final class WitchingBaubleSlotChecks {
         c.check(item.getInventory(otherPouch)[0] == null && item.getInventory(heldPouch)[0] == null, "belt and held pouches not overwritten");
         c.check(player.field_71071_by.field_70462_a[0] == heldPouch && inv.func_70301_a(charm) == pouch, "no pouch replacement/duplication");
         c.empty(player);
+        if (cpw.mods.fml.common.Loader.isModLoaded("TravellersGear")) WitchingBaubleLegacyServerChecks.run(c, player);
     }
 }
