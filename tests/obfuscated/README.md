@@ -8,6 +8,31 @@ Include the production `fentlib-04136bd-snapshot.jar` and GTNHLib 0.11.37 in aut
 Leave FentLib's `terminalDepLoaderProgress` enabled (the default) to send dependency-loader progress to
 the terminal instead of opening popups. Never install its `-dev` artifact in these obfuscated runtimes.
 
+## Champion mobs
+
+Compile `ChampionChecks.java` with either `ChampionServerProbe.java` or `ChampionClientProbe.java` using
+the SRG-first production compilation classpath below (include LWJGL for the client). Install only the
+matching probe in an isolated production instance. Do not install these probes in a player's world.
+Use the default disabled champion config; the probe changes policy temporarily during its assertions.
+No ZenScript fixtures are required. Both probes stop their instance when done.
+
+Run both ModTweaker 0.14.0 and 0.9.6 with and without TC4Tweaks 1.5.47, on dedicated servers and clients.
+Require `TD_CHAMPION_SERVER_PASS` / `TD_CHAMPION_CLIENT_PASS` and no failed assertions or mixin injection
+failures. The intentional invalid-mode/ID and unsupported-entity warnings are expected. The client runs
+the common checks on its integrated server thread and verifies champion name/health/modifier synchronization
+over the actual local connection; this is not a remote dedicated-server multiplayer test.
+
+Coverage: native disabled passthrough; exact IDs versus inherited native eligibility; whitelist/blacklist and
+guaranteed precedence; fractional and 0/100 boundaries; difficulty, biome, Outer Lands and dangerous-room
+bonuses; native reduced-chance switch; addon weights; minimum base health; native creeper restriction;
+withers and a registered probe mob; missing-attribute rejection; disk NBT roundtrip and ordinary-mob NBT
+reload without rerolls; feature disable; real Forge world insertion; and no client-side conversion.
+The disk roundtrip is entity serialization, not a full world/server restart test.
+
+For manual testing, copy `champions-manual.cfg`'s champion section into the instance's existing config and
+restart. Spawn fresh zombies, creepers, silverfish and skeletons: the first three must be champions, while
+skeletons must remain ordinary. Existing mobs are not retroactively changed. Creepers must be Bold.
+
 ## Salis Arcana bracelet replacements
 
 Compile `BraceletReplacementChecks.java` with either `BraceletReplacementServerProbe.java` or

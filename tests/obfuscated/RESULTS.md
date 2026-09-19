@@ -335,3 +335,52 @@ The manual client is `run/legacy-witching-gadgets-test/launch.sh`: original WG, 
 ModTweaker, TC4Tweaks, the same production artifact and FentLib snapshot, and no automatic probes.
 Use Traveller's Gear's active-abilities wheel for moved cloaks. Manual verification remains pending;
 `clankus` notifications were sent when the instance was ready and after its FentLib update.
+
+## Champion mob configuration — 2026-09-16
+
+Production artifact SHA-256: `563b98142a0404f41c52e5cfec461322adbcd74e5d3ea2c4b05d20df1e8bbe09`
+
+All 12 obfuscated runs passed, with **41 dedicated-server assertions** and **46 client/integrated-server
+assertions** in each matching pair (522 assertions total):
+
+| ModTweaker | TC4Tweaks | Salis Arcana |
+| --- | --- | --- |
+| 0.14.0 | absent | absent |
+| 0.14.0 | 1.5.47 | absent |
+| 0.14.0 | 1.5.47 | 1.1.71-GTNH |
+| 0.9.6 | absent | absent |
+| 0.9.6 | 1.5.47 | absent |
+| 0.9.6 | 1.5.47 | v2.6.0 |
+
+All instances use production Forge 10.13.4.1614, Thaumcraft 4.2.3.5, Baubles Expanded 2.2.23, CraftTweaker
+3.4.8, IC2 2.2.828 for its generated class registry, UniMixins 0.3.1, GTNHLib 0.11.37 and FentLib
+04136bd-snapshot. Every log confirms FentLib's terminal DepLoader redirect. No development jars were installed
+in the instances; compilation uses the SRG-first classpath, and probes assert the obfuscated runtime flag.
+
+Checks invoke Thaumcraft's transformed `entitySpawns` handler, including its actual dangerous-room lookup,
+and also exercise a real Forge world insertion. Coverage includes exact versus inherited eligibility,
+whitelist/blacklist modes, guaranteed precedence, chance boundaries and fractions, vanilla difficulty/biome/
+Outer Lands/maze bonuses, the native reduced-chance switch, addon weights, base-health threshold, creeper
+modifier restriction, withers, a registered modded probe mob, and safe rejection of a missing attack attribute.
+Invalid configuration entries/mode and chance clamping are covered. Thaumcraft applies the actual champion
+buff/name; native modifier identity is retained for TC4Tweaks.
+
+Champion NBT is written to disk, read back and rejoined without duplicate buffs or stripping; checked ordinary
+mob NBT likewise retains its decision after config changes, including disabling our feature. This is an entity
+serialization roundtrip, not a full server/world restart assertion. Client probes run common checks on the
+integrated server thread, spawn a champion beside the logged-in player, and verify its synced modifier, health
+and name over the real local connection. Fresh client-side entities are not independently converted. Remote
+dedicated-server multiplayer delivery is not covered by these automated checks.
+
+Final logs have no failed assertions, script compilation/execution errors or mixin application/injection failures.
+The expected invalid-entry/mode/missing-attribute warnings are deliberate negative tests. Existing unrelated
+CraftTweaker `WeightedItemStack` registry, Forge signature/version-check, module-info discovery, optional-class
+and texture warnings remain. Early client fixtures could miss the spawned mob or pause on lost focus; the
+final probe creates its fixture on player login and disables pause-on-lost-focus, and all six clients were rerun.
+
+`spotlessApply assemble`, `spotlessCheck`, and whitespace checks passed. No deobfuscated runtime tests were used.
+Raw instances/logs: `/tmp/td-champions-obf.mlVDlY/`, each instance's `verified.log` and `logs/minetweaker.log`.
+The manual instance is `run/champion-mobs-test/launch.sh` with CurseForge ModTweaker and TC4Tweaks, the same
+production artifact and FentLib snapshot, and no automated probe. `champions-manual.cfg` guarantees fresh
+zombies, creepers and silverfish while excluding skeletons. A `clankus` alert was sent when ready.
+The user subsequently confirmed that the manual champion test worked.
