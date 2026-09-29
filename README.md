@@ -5,7 +5,7 @@
 ## Features
 
 * Extends ModTweaker Thaumcraft 4 compatibility
-    * Custom compound aspects with scripted names, icons, colors, components, and descriptions
+    * Custom primal and compound aspects with scripted names, icons, colors, components, and descriptions
     * Gadomancy Aura Pylon potion effects for custom or existing aspects, with multiple entity targets and reload-safe replacement of native effects
     * Vis discount modification for equippables (armor and baubles)
     * Per-aspect wand cap and fixed casting item Vis discount customization, including Thaumic Bases bracelets
@@ -88,3 +88,16 @@ descriptions, supply `gadomancy.aura.effect.<aspect tag>` in a language resource
 <br>
 
 ![license](images/license_small.png)
+
+
+### Primal aspects and component edits
+
+Startup scripts in `config/thaumicdabblery/aspects/` can use
+`mods.thaumcraft.CustomAspects.registerPrimal(tag, color, image, description, hiddenUntilScanned)` and
+`CustomAspects.setComponents(aspect, first, second)`. Optional scan-gated primals remain unknown until a successful
+item scan; discovery persists and synchronizes. Component edits preserve the aspect object and affect combination,
+scanning and decomposition. Cycles and ambiguous final pairs are rejected before applying the batch.
+
+Both operations require a client/server restart. Native wand recipe costs retain their original primals; explicit
+extra vis costs are shown on additional arcane-workbench pages. See the
+[custom-aspects guide](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Custom-Aspects) for examples and limits.

@@ -19,7 +19,7 @@ import minetweaker.MineTweakerImplementationAPI;
 public final class CustomAspectsFeature implements Feature {
 
     public static final String ID = "customAspects";
-    private static final String COMMENT = "Register compound aspects from config/thaumicdabblery/aspects/*.zs at startup. Requires a full restart.";
+    private static final String COMMENT = "Register aspects and edit their components from config/thaumicdabblery/aspects/*.zs at startup. Requires a full restart.";
 
     private boolean enabled;
 

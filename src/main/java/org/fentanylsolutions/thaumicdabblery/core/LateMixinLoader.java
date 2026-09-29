@@ -79,6 +79,12 @@ public class LateMixinLoader implements ILateMixinLoader {
             }
         }
         if (loadedMods.contains("Thaumcraft")) {
+            mixins.add("thaumcraft.MixinPrimalAspectLists");
+            mixins.add("thaumcraft.MixinPrimalRod");
+            mixins.add("thaumcraft.MixinPrimalKnowledge");
+            mixins.add("thaumcraft.MixinPrimalResearch");
+            mixins.add("thaumcraft.MixinPrimalScan");
+            mixins.add("thaumcraft.MixinNativePrimalCosts");
             mixins.add("thaumcraft.MixinChampionSpawns");
             mixins.add("thaumcraft.MixinItemWandCasting");
             mixins.add("thaumcraft.MixinItemWandCastingStats");
@@ -91,6 +97,12 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("thaumcraft.MixinScanManager");
             if (FMLLaunchHandler.side()
                 .isClient()) {
+                mixins.add("thaumcraft.MixinPrimalWorkbench");
+                mixins.add("thaumcraft.MixinPrimalWandTooltip");
+                mixins.add("thaumcraft.MixinPrimalWandHud");
+                mixins.add("thaumcraft.MixinPrimalSyncPacket");
+                mixins.add("thaumcraft.MixinPrimalDiscoveryPacket");
+                mixins.add("thaumcraft.MixinPrimalPoolPacket");
                 mixins.add("thaumcraft.MixinGuiResearchBrowser");
             }
             if (loadedMods.contains("modtweaker2")) {

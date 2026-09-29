@@ -31,15 +31,22 @@ public final class CustomAspectScriptLoader {
 
     private static List<Definition> collecting;
     private static boolean loaded;
+    private static List<CustomAspectRegistry.ComponentEdit> componentEdits;
 
     private CustomAspectScriptLoader() {}
 
     static void queue(Definition definition) {
         if (collecting == null) {
             throw new IllegalStateException(
-                "CustomAspects.register is startup-only: put definitions in config/thaumicdabblery/aspects/*.zs and restart Minecraft");
+                "CustomAspects registration is startup-only: put definitions in config/thaumicdabblery/aspects/*.zs and restart Minecraft");
         }
         collecting.add(definition);
+    }
+
+    static void queue(CustomAspectRegistry.ComponentEdit edit) {
+        if (collecting == null) throw new IllegalStateException(
+            "CustomAspects.setComponents is startup-only: put edits in config/thaumicdabblery/aspects/*.zs and restart Minecraft");
+        componentEdits.add(edit);
     }
 
     public static void load(Path directory) {
@@ -59,8 +66,10 @@ public final class CustomAspectScriptLoader {
                     .sorted()
                     .collect(Collectors.toList());
             }
+            componentEdits = new ArrayList<>();
             List<Definition> definitions = compileAndCollect(paths);
-            CustomAspectRegistry.registerAll(definitions);
+            CustomAspectRegistry.registerAll(definitions, componentEdits);
+            componentEdits = null;
             ThaumicDabblery.LOG.info("Registered {} custom aspects from {}", definitions.size(), directory);
             MineTweakerAPI.logInfo("Registered " + definitions.size() + " custom aspects from " + directory);
         } catch (IOException | RuntimeException | LinkageError exception) {

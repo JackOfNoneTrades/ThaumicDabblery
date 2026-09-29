@@ -237,3 +237,29 @@ For manual use, copy `manual-aura-pylon.zs` to an instance's ordinary scripts di
 Supply Aqua, Exanimis, and Aer to assembled pylons; verify player/undead/cow targeting.
 Remove the script and `/mt reload` to restore native behavior. Previously applied potions
 expire normally; wiping does not undo past world changes.
+
+## Primal aspects and component edits
+
+Compile `PrimalAspectChecks.java`, `PrimalAspectNetwork.java` and either `PrimalAspectServerProbe.java` or
+`PrimalAspectClientProbe.java` with the production SRG-first classpath described above. Client compilation also
+needs LWJGL. Install only one probe in an isolated instance; probes modify knowledge and stop the game when done.
+Copy `primal-aspects/*.zs` into `config/thaumicdabblery/aspects/` and `primal-aspects-usage.zs` into `scripts/`.
+The fixtures intentionally change Vacuos and add two primals. Do not use them in a player's world.
+
+Run both GTNH ModTweaker 0.14.0 and CurseForge ModTweaker 0.9.6, with and without TC4Tweaks/Salis Arcana.
+Require `TD_PRIMAL_SERVER_PASS` / `TD_PRIMAL_CLIENT_PASS`, no probe failures and no mixin errors. Server restarts
+read `primal-saved.dat` and require `TD_PRIMAL_RESTART_PASS`. The client creates a fresh test world for each run,
+checks the hidden state before the server scans a clock, and verifies discovered knowledge afterwards. It clicks
+through the actual arcane-workbench cost pages and saves screenshots of unknown/known costs in `screenshots/`.
+
+For separate multiplayer checks, launch the server with `-Dtd.primal.network=true` and its matching client with
+`-Dtd.primal.server=127.0.0.1:PORT`. Use a fresh player identity to check initial concealment; the server scans the
+seed item after 180 ticks. Require `TD_PRIMAL_NETWORK_SCAN` on the server and `TD_PRIMAL_CLIENT_PASS ... remote=true`
+on the client. The server stops on disconnect. Never expose this test server publicly.
+
+Coverage includes early registration/forward references, preserved existing-aspect identity, final-batch pair reuse,
+cycle rejection through existing aspects, failed-validation atomicity, edited combination/decomposition/centrifuge
+behavior, hidden/visible knowledge, blocked generic grants and fragments, failed scans, item/dropped-item scans,
+already-scanned-item recovery, per-player isolation, zero-point saved knowledge, wand storage and costs, native
+wand cost preservation, energized nodes, repeated script reloads, and client vis-amulet tooltip concealment.
+Also rerun the original compound-only probes to check existing behavior without any new primals.

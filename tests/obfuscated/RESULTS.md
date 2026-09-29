@@ -456,3 +456,69 @@ Raw instances and logs: `/tmp/td-pylon-test/`. Final server/client matrix logs a
 no-Gadomancy controls also use `passed.log`. Network evidence is in
 `network-*/network.log` and `remote-*/verified.log`; development evidence is in
 `dev-gtnh-original/test.log`. Initial-attempt logs are retained separately.
+
+# Primal aspects and component editing verification (2026-09-29)
+
+Production artifact: `thaumicdabblery-ac0f10e-snapshot-master.1+4361800230-dirty.jar`.
+SHA-256: `f697c75c0bc5b41a034e4e92192875f1ec3e56aa1decaaf812ceae95ed215d4b`.
+`./gradlew spotlessCheck build` passed. All production instances used identical copies of this jar.
+
+The production matrix used Java 8, Forge 1.7.10-10.13.4.1614, Thaumcraft 4.2.3.5, CraftTweaker 3.4.8,
+UniMixins 0.3.1, Baubles Expanded 2.2.21-GTNH, GTNHLib 0.11.52 and production FentLib 04136bd-snapshot.
+The probes require `fml.deobfuscatedEnvironment=false`.
+
+| ModTweaker | TC4Tweaks | Salis Arcana | Dedicated server | Integrated client |
+| --- | --- | --- | --- | --- |
+| GTNH 0.14.0 | absent | absent | 56 passed | 65 passed |
+| CurseForge 0.9.6 | absent | absent | 56 passed | 65 passed |
+| GTNH 0.14.0 | 1.5.47 | 1.1.71-GTNH | 56 passed | 65 passed |
+| CurseForge 0.9.6 | 1.5.47 | 1.1.71-GTNH | 56 passed | 65 passed |
+
+All final matrix runs also read the zero-point discovery NBT file saved by an earlier process and logged
+`TD_PRIMAL_RESTART_PASS`. This is a disk knowledge roundtrip across processes, not an automated GUI save/rejoin.
+The original compound-only server probes passed 121 assertions on each ModTweaker variant, including their
+existing disk restart check. A deobfuscated development server using MCP-translated disposable copies of the
+new probes passed 56 checks with GTNH ModTweaker; its environment assertion requires development mode.
+
+Separate production client/server processes also passed on both ModTweaker variants without the optional addons.
+Each dedicated server passed 56 checks; each remote client passed 9 checks over a real loopback TCP connection.
+The clients verified concealment before a delayed successful server item scan, then received discovery and positive
+research points, rendered the newly known cost, and checked the wand and vis-amulet tooltips. Both final pairs shut
+down normally. An earlier CurseForge attempt timed out during login; the final fresh-player run passed.
+
+Coverage includes two real custom primals, forward references, a disconnected compound rooted in a hidden primal,
+editing Vacuos without changing object identity, reusing its freed combination in the same startup batch, rejected
+cycles through new/existing aspects, duplicate/missing components, non-mutating validation failures, API aspect
+lists, native combination and reduction, centrifuge outputs, energized-node vis, native wand recipe costs, explicit
+primal vis spending, blocked initial/generic knowledge grants and fragments, failed scans, successful item and
+item-entity scans, recovery for already-scanned seed items, per-player discovery isolation, zero-point knowledge
+restoration and repeated ordinary-script reloads.
+
+Clients rendered both workbench pages before/after discovery, invoked the actual page-click handler, checked
+vis-amulet tooltip concealment and discovered wand tooltip output, and verified knowledge after a delayed server
+scan. Screenshots were inspected: unknown costs show a question mark, discovered costs show their icon, and the
+page label has a readable background. Extra workbench costs use native consumption modifiers, including the
+wood/iron wand surcharge visible in the fixture screenshots.
+
+Fixture corrections during development: multi-aspect ModTweaker strings need comma separators; client checks
+must capture aspect objects after startup registration; tooltip assertions must account for whether Shift is held;
+and initial-concealment checks need a fresh player/world rather than a player whose discovery was already saved.
+Screenshots must be taken after a rendered frame, not immediately after opening/closing a GUI in a tick callback.
+The fake-player harness also needed an embedded network channel: a dummy packet handler alone caused FML
+routing exceptions despite passing assertions. It now uses an embedded channel with a handler and no dispatcher,
+so fake-player packets are discarded without routing errors; separate real connections verify delivery.
+These fixture issues were corrected in the retained probes. Final runs have no probe failures, fake-player packet
+routing exceptions or mixin application/injection errors.
+
+Limits: original MineTweaker3 itself and original Salis Arcana releases were not tested; both ModTweaker variants
+ran on CraftTweaker 3.4.8, and the addon matrix used Salis 1.1.71-GTNH. GUI checks use constructed workbench tiles
+and call the real click/render handlers; they do not automate physical mouse input or crafting through the output
+slot. Primal-number/depth boundaries are validated in code but were not exhaustively stress-tested in live worlds.
+Vanilla knowledge API callers are gated; addons writing the public knowledge maps directly can bypass that gate.
+Baseline Forge update-endpoint/module-info warnings remain unrelated to this feature; the fixture scripts apply
+successfully.
+
+Raw instances, exported mixin classes and logs: `/tmp/td-primal-test/`. Final matrix logs are `final.log` in the four
+server and four `client-*` directories; compound regression runs use `regression-{gtnh,curse}/final.log`.
+Development evidence is `dev-gtnh-original/test.log`. Separate multiplayer logs are `network-{gtnh,curse}/final.log`
+and `remote-{gtnh,curse}/final.log`. Rendered screenshots are in each client's `screenshots/`.
