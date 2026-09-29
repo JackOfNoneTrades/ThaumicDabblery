@@ -6,6 +6,7 @@
 
 * Extends ModTweaker Thaumcraft 4 compatibility
     * Custom compound aspects with scripted names, icons, colors, components, and descriptions
+    * Gadomancy Aura Pylon potion effects for custom or existing aspects, with multiple entity targets and reload-safe replacement of native effects
     * Vis discount modification for equippables (armor and baubles)
     * Per-aspect wand cap and fixed casting item Vis discount customization, including Thaumic Bases bracelets
     * Wand cap/core assembly cost customization
@@ -24,6 +25,39 @@
 * Thaumic Horizons self-infusion allowing the player to cast Witchery Mystic Branch spells using a keybind, with a creative grant item.
 
 Documentation can be found [here](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Documentation).
+
+### Gadomancy Aura Pylon scripting
+
+With Gadomancy installed, put rules in ordinary `scripts/*.zs` files:
+
+```zenscript
+import mods.gadomancy.AuraPylon;
+
+AuraPylon.clear("aqua"); // Remove all native and earlier scripted behavior.
+AuraPylon.add("aqua", "players", 13); // Water breathing.
+AuraPylon.add("aqua", "players", 16); // Night vision, alongside water breathing.
+AuraPylon.add("aqua", "entity:Squid", 13);
+AuraPylon.removeCustom("aqua", "players", 16);
+```
+
+Targets are `players`, `living`, `undead`, or `entity:<registered ID>` (case sensitive).
+Aspect tags include custom aspects registered at startup. `add` preserves existing native
+behavior unless cleared first; `remove(aspect)` is an alias for `clear(aspect)`.
+`removeCustom` removes all scripted rules matching the aspect, target, and potion ID.
+Reloading after removing scripts restores the original effects.
+
+The extended overload is `add(aspect, target, potionId, amplifier, addedTicks, maxTicks,
+intervalTicks, range)`. Defaults are `0, 10, 1200, 4, 8`: level I, adding 10 duration
+ticks every 4 ticks up to 60 seconds, using Gadomancy's box range of 8 blocks.
+Amplifiers must be 0–127; range must be greater than 0 and at most 64. Instant potions
+are unsupported. Native potion immunity and same-potion merging still apply. Exact
+duplicate rules apply once; different overlapping rules can both add duration.
+
+Clearing stops future behavior, including native block effects; existing potions expire
+normally and past world changes remain. Native Lux spawn suppression can linger for
+up to 16 ticks. Gadomancy's aspect blacklist still applies. Disable the feature through
+`features.auraPylon.enabled` to restore native behavior. For new or changed research
+descriptions, supply `gadomancy.aura.effect.<aspect tag>` in a language resource pack.
 
 [![hub](images/badges/github.png)](https://github.com/JackOfNoneTrades/ThaumicDabblery/releases)
 [![modrinth](images/badges/modrinth.png)](https://modrinth.com/mod/thaumic-dabblery/settings/versions)

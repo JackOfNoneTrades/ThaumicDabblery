@@ -384,3 +384,75 @@ The manual instance is `run/champion-mobs-test/launch.sh` with CurseForge ModTwe
 production artifact and FentLib snapshot, and no automated probe. `champions-manual.cfg` guarantees fresh
 zombies, creepers and silverfish while excluding skeletons. A `clankus` alert was sent when ready.
 The user subsequently confirmed that the manual champion test worked.
+
+# Gadomancy Aura Pylon verification — 2026-09-29
+
+Production artifact: `thaumicdabblery-eb6538c-snapshot-master+eb6538cfc9-dirty.jar`.
+SHA-256: `9c44a8234a84f85c67faefbd11cca15f800de96cb8ddedf9bf70c021b92989fb`.
+`./gradlew spotlessApply build` passed, including compilation, reobfuscation and Checkstyle.
+
+All production runs used Forge 1.7.10-10.13.4.1614, Java 8, Thaumcraft 4.2.3.5,
+CraftTweaker 3.4.8, UniMixins 0.3.1, Baubles Expanded 2.2.21-GTNH, GTNHLib 0.11.52,
+and production FentLib 04136bd-snapshot. Probes assert `fml.deobfuscatedEnvironment=false`.
+
+| ModTweaker | Gadomancy | TC4Tweaks | Dedicated server | Integrated client |
+| --- | --- | --- | --- | --- |
+| GTNH 0.14.0 | Original 1.0.7.3 | absent | 198 passed | 201 passed |
+| CurseForge 0.9.6 | GTNH 1.5.16 | absent | 198 passed | 202 passed |
+| GTNH 0.14.0 | GTNH 1.5.16 | 1.5.47 | 198 passed | 201 passed |
+| CurseForge 0.9.6 | Original 1.0.7.3 | 1.5.47 | 198 passed | 201 passed |
+
+All four dedicated servers passed `TD_PYLON_DISK_RESTART_PASS` against a world saved by
+an earlier successful run. The extra client assertion in the CurseForge/GTNH case is
+also a saved-world restart check. Both ModTweaker versions additionally passed startup
+without Gadomancy and the explicit missing-mod diagnostic (`TD_PYLON_ABSENT_PASS`).
+The two diagonal combinations with TC4Tweaks also passed an earlier no-TC4Tweaks core run.
+
+Two separate dedicated-server/client connections passed live potion and aura-research
+synchronization and client localization: GTNH ModTweaker with original Gadomancy, and
+CurseForge ModTweaker with GTNH Gadomancy. Each server logged `TD_PYLON_NETWORK_READY`
+and its client logged `TD_PYLON_CLIENT_PASS ... remote=true`. Both servers stopped after
+client disconnect. These runs used the same production mod artifact; their common
+server checks predate the final additional unfueled/overlapping-rule assertions.
+
+A deobfuscated development server also passed 197 assertions with GTNH ModTweaker 0.14.0
+and original Gadomancy 1.0.7.3, using the project's dev dependencies and GradleStartServer.
+Its disposable probe copy was translated from SRG to MCP names using stable_12 CSVs,
+with its environment assertion inverted to require development mode. The committed
+production probes retain their obfuscated-environment requirement. Development launch
+and transformed sources are retained under the raw instance directory below.
+
+Coverage includes fueled/unfueled pylon updates, custom aspects, group/exact entity
+selection, exclusions, range, independent native/custom intervals, native block and
+entity callbacks, complete clear/redefine, selective scripted removal, duplicate and
+overlapping rules, duration caps/amplifiers/immunity, invalid input without mutation,
+configuration disable/re-enable, third-party registry replacement detection, repeated
+MineTweaker undo/replay, original object restoration, research ownership/cache updates,
+world persistence, and actual client packet delivery.
+
+Tests exposed and resolved TC4Tweaks retaining removed aura research in its cache. The
+integration also sends Thaumcraft's completion packet for newly discovered managed aura
+effects; native Gadomancy only sends a notification. Early fixture failures came from
+an unconnected fake player, reused tile counters, and granting research before the
+integrated client's initial player-data synchronization. Final fixtures correct these.
+
+No final pylon script errors, assertion failures, or mixin application/injection errors
+were found. The test stack emits a pre-existing MineTweaker bootstrap message,
+`WeightedItemStack is already defined in that package`, also reproduced in both
+no-Gadomancy controls; pylon scripts still compile/apply successfully. Other unrelated
+baseline warnings include Forge's obsolete update endpoint and scanning dependency
+`module-info.class` files. Remote clients deliberately exit after passing, producing a
+connection-reset message during server shutdown.
+
+Limits: probes construct the multiblock through blocks/NBT and keep its crystal heartbeat
+alive; they do not automate wand assembly or pipe delivery. Common checks manually tick
+real tiles, while live client fixtures use the normal world tick loop. Localization and
+research visibility are asserted through their game APIs, not a visual Thaumonomicon
+inspection. Original MineTweaker3 itself was not tested; both ModTweaker forks ran on
+CraftTweaker 3.4.8, matching the project's supported test stack.
+
+Raw instances and logs: `/tmp/td-pylon-test/`. Final server/client matrix logs are
+`passed.log` in the four matching server directories and `client-*` directories;
+no-Gadomancy controls also use `passed.log`. Network evidence is in
+`network-*/network.log` and `remote-*/verified.log`; development evidence is in
+`dev-gtnh-original/test.log`. Initial-attempt logs are retained separately.

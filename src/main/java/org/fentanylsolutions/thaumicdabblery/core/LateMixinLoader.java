@@ -33,6 +33,10 @@ public class LateMixinLoader implements ILateMixinLoader {
     @Override
     public List<String> getMixins(Set<String> loadedMods) {
         List<String> mixins = new ArrayList<>();
+        if (loadedMods.contains("gadomancy")) {
+            mixins.add("gadomancy.MixinAuraEffectHandler");
+            mixins.add("gadomancy.AuraEffectHandlerInvoker");
+        }
         if (loadedMods.contains("Baubles|Expanded")) {
             mixins.add("baubles.MixinSlotBauble");
             mixins.add("baubles.MixinInventoryBaubles");

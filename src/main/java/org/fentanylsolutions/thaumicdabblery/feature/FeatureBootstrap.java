@@ -18,6 +18,7 @@ final class FeatureBootstrap {
         FeatureManager.register(new org.fentanylsolutions.thaumicdabblery.feature.champions.ChampionMobsFeature());
         FeatureManager.register(new org.fentanylsolutions.thaumicdabblery.feature.baubles.BaubleSlotsFeature());
         FeatureManager.register(new CustomAspectsFeature());
+        FeatureManager.register(new org.fentanylsolutions.thaumicdabblery.feature.aurapylon.AuraPylonFeature());
         FeatureManager.register(new FocusUpgradesFeature());
         FeatureManager.register(new VisDiscountFeature());
         FeatureManager.register(new WandComponentVisDiscountFeature());

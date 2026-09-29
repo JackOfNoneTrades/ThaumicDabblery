@@ -194,3 +194,46 @@ feature disable/re-enable; active custom regeneration must remain visible.
 Run with production jars through `runObfClient`, in an isolated working directory. Require
 `TD_WAND_CLIENT_ALL_PASS` and no `TD_WAND_CLIENT_FAILED`. Cover Salis Arcana 1.1.71-GTNH and v2.6.0,
 plus a client startup with Concilium installed.
+
+## Gadomancy Aura Pylon
+
+Compile `AuraPylonChecks.java`, `AuraPylonNetwork.java`, and `AuraPylonServerProbe.java`
+using the SRG-first production classpath described above, including original Gadomancy
+1.0.7.3. The same probe runs on GTNH Gadomancy. For clients substitute
+`AuraPylonClientProbe.java` for the server entry point and include LWJGL. Package
+`aura-pylon-client-en_US.lang` as `assets/tdpylonclientprobe/lang/en_US.lang` in the client
+probe jar. Never install both entry points together or use these probes in player worlds.
+
+Copy `aura-pylon-aspect.zs` into `config/thaumicdabblery/aspects/` and `aura-pylon.zs`
+into `scripts/`. Use only these fixtures in the disposable instance. For the no-Gadomancy
+server control omit both scripts; it checks normal startup and the explicit missing-mod
+error. Both entry points reject a deobfuscated runtime.
+
+Run ModTweaker 0.14.0 and 0.9.6 crossed with Gadomancy 1.0.7.3 and 1.5.16, on dedicated
+servers and clients. Cover TC4Tweaks 1.5.47 and its absence. Require
+`TD_PYLON_SERVER_PASS`, `TD_PYLON_CLIENT_PASS`, or `TD_PYLON_ABSENT_PASS`, as applicable,
+with no `TD_PYLON_*_FAILED`, pylon script errors, or mixin injection/application failures.
+Launch a successful server again against the same world and additionally require
+`TD_PYLON_DISK_RESTART_PASS`. Client probes create/join their own integrated world and exit.
+
+Coverage includes real fueled and unfueled pylon tile updates; players/living/undead/exact
+entity selectors; exclusions and range; potion duration accumulation, cap, amplifier,
+immunity and overlapping rules; duplicate definitions; independent native/custom intervals
+and ranges; native entity and block callbacks; wipe/redefine and selective custom removal;
+validation; reverse-order/idempotent undo; third-party replacement detection; configuration
+toggle; research ownership and TC4Tweaks caches; repeated script reload/removal; actual saved
+world restart; and client potion/research synchronization and localization. Fake players in
+common checks capture outgoing packets; live connection checks below exercise actual delivery.
+
+For dedicated multiplayer, start the server with `-Dtd.pylon.network=true` and a free
+loopback-only port. It stays alive after its checks and creates a fueled pylon when a player
+joins. Start the client with `-Dtd.pylon.server=127.0.0.1:PORT`; require
+`TD_PYLON_NETWORK_READY` on the server and `TD_PYLON_CLIENT_PASS ... remote=true` on the
+client. The server stops when the client disconnects. Give both processes an external timeout.
+The fixture holds the pylon's crystal heartbeat and delays granting research prerequisites
+until initial player-data synchronization is complete; effect application uses normal world ticks.
+
+For manual use, copy `manual-aura-pylon.zs` to an instance's ordinary scripts directory.
+Supply Aqua, Exanimis, and Aer to assembled pylons; verify player/undead/cow targeting.
+Remove the script and `/mt reload` to restore native behavior. Previously applied potions
+expire normally; wiping does not undo past world changes.
