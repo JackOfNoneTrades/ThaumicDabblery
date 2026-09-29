@@ -54,11 +54,21 @@ public final class ChampionMobsFeature implements Feature {
     @Override
     public void configure(Configuration config) {
         String category = FeatureConfig.category(ID);
-        boolean enabled = FeatureConfig.getEnabled(
-            config,
-            ID,
+        String languageKey = ThaumicDabblery.MODID + ".config.feature." + ID;
+        config.setCategoryLanguageKey(category, languageKey);
+        config.getCategory(category)
+            .remove("enabled");
+        Property rulesProperty = config.get(
+            category,
+            "applyCustomRules",
             false,
-            "Customize future Thaumcraft champion checks. Disabled preserves original behaviour. Server-authoritative.");
+            "Apply custom champion mob rules from this section.\n"
+                + "false: Thaumcraft controls champions normally; champions can still spawn.\n"
+                + "true: Apply the eligibility lists and chance settings below.\n"
+                + "Only affects mobs that have not been checked yet. Existing mobs are unchanged.\n"
+                + "Uses the server's configuration, including in singleplayer.");
+        rulesProperty.setLanguageKey(languageKey + ".applyCustomRules");
+        boolean enabled = rulesProperty.getBoolean(false);
         Property modeProperty = config.get(
             category,
             "mode",

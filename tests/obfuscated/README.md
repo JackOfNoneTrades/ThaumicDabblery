@@ -13,7 +13,7 @@ the terminal instead of opening popups. Never install its `-dev` artifact in the
 Compile `ChampionChecks.java` with either `ChampionServerProbe.java` or `ChampionClientProbe.java` using
 the SRG-first production compilation classpath below (include LWJGL for the client). Install only the
 matching probe in an isolated production instance. Do not install these probes in a player's world.
-Use the default disabled champion config; the probe changes policy temporarily during its assertions.
+Leave `features.championmobs.applyCustomRules=false` (the default); the probe changes policy temporarily during its assertions.
 No ZenScript fixtures are required. Both probes stop their instance when done.
 
 Run both ModTweaker 0.14.0 and 0.9.6 with and without TC4Tweaks 1.5.47, on dedicated servers and clients.

@@ -38,7 +38,7 @@ public final class ChampionChecks {
     private void policy(boolean enabled, String mode, boolean existing, double chance, String[] entities, String... always) {
         Configuration c = new Configuration(new File("config/champion-probe-only.cfg"));
         String cat = "features.championMobs";
-        c.get(cat, "enabled", false).set(enabled);
+        c.get(cat, "applyCustomRules", false).set(enabled);
         c.get(cat, "mode", "whitelist").set(mode);
         c.get(cat, "includeExistingWhitelist", true).set(existing);
         c.get(cat, "baseChancePercent", 1.0).set(chance);
