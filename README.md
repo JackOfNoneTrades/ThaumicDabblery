@@ -18,6 +18,7 @@
     * Reload-safe Thaumonomicon tab ordering, including compatibility with TC4Tweaks
     * Focal Manipulator upgrade path customization
     * Thaumic Horizons player vat infusion recipe modification
+* Operator command `/td scanall [player]` to complete item/entity scans, discover aspects and reveal scan-dependent research without awarding research points
 * Configurable minimum Vis cost for casting and crafting, including Thaumic Bases bracelets
 * Configurable champion mob whitelist/blacklist, base spawn chance and guaranteed champions
 * Scriptable Baubles Expanded slot assignments for ordinary items and existing baubles, including multiple allowed slot types and GTNH/original Witching Gadgets compatibility

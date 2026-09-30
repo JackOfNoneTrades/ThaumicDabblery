@@ -151,6 +151,17 @@ public final class ScanGateRegistry {
         }
     }
 
+    /** Complete scan clauses without per-clause packets; the command synchronizes research once afterward. */
+    public static synchronized void completeAllScans(EntityPlayerMP player) {
+        for (Gate gate : GATES.values()) {
+            for (ClauseEntry entry : gate.clauses.values()) completeProgressMarker(player, entry.clause.marker);
+            if (!gate.clauses.isEmpty()) {
+                Thaumcraft.proxy.getResearchManager()
+                    .completeResearch(player, revealMarker(gate.researchKey));
+            }
+        }
+    }
+
     public static synchronized void reconcile(EntityPlayerMP player) {
         String playerName = player.getCommandSenderName();
         for (Gate gate : GATES.values()) {

@@ -79,6 +79,7 @@ public class LateMixinLoader implements ILateMixinLoader {
             }
         }
         if (loadedMods.contains("Thaumcraft")) {
+            mixins.add("thaumcraft.MixinAllScanHistory");
             mixins.add("thaumcraft.MixinPrimalAspectLists");
             mixins.add("thaumcraft.MixinPrimalRod");
             mixins.add("thaumcraft.MixinPrimalKnowledge");
@@ -97,6 +98,7 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("thaumcraft.MixinScanManager");
             if (FMLLaunchHandler.side()
                 .isClient()) {
+                mixins.add("thaumcraft.MixinAllScanSources");
                 mixins.add("thaumcraft.MixinPrimalWorkbench");
                 mixins.add("thaumcraft.MixinPrimalWandTooltip");
                 mixins.add("thaumcraft.MixinPrimalWandHud");

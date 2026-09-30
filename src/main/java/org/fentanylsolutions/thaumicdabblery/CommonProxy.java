@@ -4,6 +4,7 @@ import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.FurnacePagesZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ResearchTabsZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ThaumicHorizonsSelfInfusionZen;
 import org.fentanylsolutions.thaumicdabblery.feature.FeatureManager;
+import org.fentanylsolutions.thaumicdabblery.feature.scanall.ScanAllCommand;
 
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -45,6 +46,7 @@ public class CommonProxy {
 
     public void serverStarting(FMLServerStartingEvent event) {
         FeatureManager.serverStarting(event);
+        event.registerServerCommand(new ScanAllCommand());
     }
 
     public void onConfigReload() {

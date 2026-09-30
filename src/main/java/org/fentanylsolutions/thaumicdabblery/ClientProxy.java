@@ -1,6 +1,7 @@
 package org.fentanylsolutions.thaumicdabblery;
 
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ResearchTabOrderClientHandler;
+import org.fentanylsolutions.thaumicdabblery.feature.scanall.ScanAllSources;
 import org.fentanylsolutions.thaumicdabblery.feature.visdiscount.VisDiscountTooltipHandler;
 import org.fentanylsolutions.thaumicdabblery.feature.wandcomponents.WandComponentStatsTooltipHandler;
 import org.fentanylsolutions.thaumicdabblery.feature.witcherybranch.WitcheryBranchFeature;
@@ -14,6 +15,7 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void init(FMLInitializationEvent event) {
         super.init(event);
+        ScanAllSources.register();
         VisDiscountTooltipHandler.register();
         WandComponentStatsTooltipHandler.register();
         WitcheryBranchFeature.registerClientHandler();

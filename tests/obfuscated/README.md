@@ -286,3 +286,35 @@ For manual inspection, install **only** `manual-furnace-pages.zs`, without a pro
 `run/client/scripts/thaumicdabblery_furnace_demo.zs`. Open the Thaumonomicon's **Furnace Demo** tab and its automatically
 unlocked **Baked Treats** research: one wooden bowl smelts into two cookies. This is a demonstration recipe;
 remove the script and reload to restore normal recipes/research. The tracked fixture and dev copy should match.
+
+## Scan-all debug command
+
+Use `ScanAllChecks.java`, `ScanAllNetwork.java` and `ScanAllServerProbe.java` for a dedicated-server probe.
+For a client probe, replace `ScanAllServerProbe.java` with `ScanAllClientProbe.java`. Compile against SRG
+Minecraft first and the production mod/dependency jars, as above. Install `scan-all.zs` under `scripts/`
+and copy `scan-all-aspects/definitions.zs` to `config/thaumicdabblery/aspects/definitions.zs`.
+Use disposable instances: the tests change player knowledge and create test research.
+
+The server probe runs `/td scanall`, checks preservation of every existing aspect balance, discovery at zero
+points, native scan-triggered clues and scripted scan gates, item/entity variants, direct scan rejection,
+player isolation, node exclusion, compact packet encoding, repeat calls and native NBT persistence. It also
+checks a player whose research list was cleared separately, preventing Thaumcraft's lazy data load from
+replacing live balances. Reusing the same instance tests the saved `scanall-saved.dat` across processes.
+Success prints `TD_SCANALL_SERVER_PASS`, plus `TD_SCANALL_RESTART_PASS` on subsequent runs.
+
+The client creates a creative test world, runs the common checks, then applies the command to its real player
+through the server console. It verifies synced discoveries, unchanged points and scan flags, renders the native
+Thaumonomicon aspect pages, and checks that the scripted clock appears as a source with the right amount.
+A script reload must invalidate and rebuild the catalog while the page is open. Success prints
+`TD_SCANALL_CLIENT_PASS` and saves `screenshots/scan-all-aspects.png`.
+
+For a dedicated connection, start the server probe with `-Dtd.scanall.network=true` and the client with
+`-Dtd.scanall.server=127.0.0.1:PORT`. The client can start with no ordinary scripts to test script sync.
+Launch it again with the same username to verify reconnect persistence without rerunning the command;
+the server prints `TD_SCANALL_NETWORK_REJOIN`. Stop the server when finished.
+
+Run both CurseForge ModTweaker 0.9.6 and GTNH ModTweaker 0.14.0, with and without TC4Tweaks/Salis Arcana.
+For the optional-dependency control, remove MineTweaker, ModTweaker, the script and the aspect definitions;
+the probe supplies equivalent native fixtures using a compound aspect instead of a concealed primal.
+For development runs, remap the probe's SRG identifiers to MCP and invert its environment assertion.
+Also rerun the primal-aspect probes to verify ordinary scanning for players without the completion marker.

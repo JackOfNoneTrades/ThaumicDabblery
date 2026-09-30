@@ -34,3 +34,6 @@ thaumicdabblery.wand.potency=§5Innate Potency: +%s
 thaumicdabblery.wand.regeneration=§5%s: regenerates %s Vis every %s ticks (ceiling %s%%)
 
 thaumicdabblery.vis.page=Vis %s/%s (click)
+
+thaumicdabblery.scanall.complete=All item and entity scans completed. Discovered %s aspects; awarded 0 research points. Item source lists build in the background.
+thaumicdabblery.scanall.target=Completed all item and entity scans for %s without awarding research points.

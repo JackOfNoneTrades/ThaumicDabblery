@@ -3,6 +3,7 @@ package org.fentanylsolutions.thaumicdabblery.mixins.late.thaumcraft;
 import net.minecraft.entity.player.EntityPlayer;
 
 import org.fentanylsolutions.thaumicdabblery.feature.customaspects.PrimalDiscovery;
+import org.fentanylsolutions.thaumicdabblery.feature.scanall.ScanAll;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -42,7 +43,8 @@ public abstract class MixinPrimalScan {
     @Inject(method = "isValidScanTarget", at = @At("RETURN"), cancellable = true)
     private static void td$rescan(EntityPlayer player, ScanResult scan, String prefix,
         CallbackInfoReturnable<Boolean> cir) {
-        if (!cir.getReturnValueZ() && ScanManager.hasBeenScanned(player, scan)
+        if (!ScanAll.covers(player, scan) && !cir.getReturnValueZ()
+            && ScanManager.hasBeenScanned(player, scan)
             && PrimalDiscovery.hasUnknownPrimal(player, scan)
             && ScanManager.validScan(ScanManager.getScanAspects(scan, player.worldObj), player))
             cir.setReturnValue(true);
