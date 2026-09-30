@@ -318,3 +318,22 @@ For the optional-dependency control, remove MineTweaker, ModTweaker, the script 
 the probe supplies equivalent native fixtures using a compound aspect instead of a concealed primal.
 For development runs, remap the probe's SRG identifiers to MCP and invert its environment assertion.
 Also rerun the primal-aspect probes to verify ordinary scanning for players without the completion marker.
+
+## Research and tab removal
+
+Compile `ResearchRemovalChecks.java` with `ResearchRemovalServerProbe.java` for dedicated-server checks, or
+with `ResearchRemovalClientProbe.java` for client checks, using the SRG Minecraft jar and production dependencies
+as above. Install the resulting probe jar only in a disposable instance with MineTweaker and ModTweaker.
+The probe creates research fixtures and rewrites `scripts/zz-research-removal-test.zs`; no separate script is needed.
+
+The common checks exercise the actual `removeTab`, `removeResearch` and `orphanResearch` ZenScript operations
+through repeated MineTweaker reloads. They cover duplicate ordinary/hidden parents and siblings, links within and
+between tabs, multiple removed tabs, unrelated references, null/empty arrays, exact undo order and multiplicity,
+empty/missing tabs, later removal/movement of a dependent research, snapshot isolation and action reuse.
+Success prints `TD_REMOVAL_SERVER_PASS`. Missing-dependent restoration intentionally logs a warning.
+
+The client also renders the surviving Thaumonomicon tab after deletion, after undo, and after deleting multiple
+tabs, exercising the native browser's parent/sibling lookups. Success prints `TD_REMOVAL_CLIENT_PASS` and saves
+`screenshots/research-tab-removed.png`. Run with GTNH ModTweaker 0.14.0 and CurseForge ModTweaker 0.9.6, both with
+and without TC4Tweaks/Salis Arcana. The real reload lifecycle handles TC4Tweaks cache invalidation.
+For development runs, remap SRG names to MCP and invert the common probe's environment assertion.

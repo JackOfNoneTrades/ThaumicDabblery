@@ -1,9 +1,8 @@
 package org.fentanylsolutions.thaumicdabblery.mixins.late.modtweaker;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.BiConsumer;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -11,6 +10,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import minetweaker.MineTweakerAPI;
 import modtweaker2.mods.thaumcraft.research.OrphanResearch;
@@ -25,105 +25,81 @@ public abstract class MixinOrphanResearch {
     private String key;
 
     @Unique
-    private final Set<String> thaumicdabblery$children = new LinkedHashSet<>();
+    private final Map<String, String[]> thaumicdabblery$parents = new LinkedHashMap<>();
 
     @Unique
-    private final Set<String> thaumicdabblery$secretChildren = new LinkedHashSet<>();
+    private final Map<String, String[]> thaumicdabblery$hiddenParents = new LinkedHashMap<>();
 
     @Unique
-    private final Set<String> thaumicdabblery$siblings = new LinkedHashSet<>();
+    private final Map<String, String[]> thaumicdabblery$siblings = new LinkedHashMap<>();
 
-    @Inject(method = "apply", at = @At("HEAD"))
-    private void thaumicdabblery$captureReferences(CallbackInfo ci) {
-        thaumicdabblery$children.clear();
-        thaumicdabblery$secretChildren.clear();
+    @Inject(method = "apply", at = @At("HEAD"), cancellable = true)
+    private void thaumicdabblery$detachReferences(CallbackInfo ci) {
+        thaumicdabblery$parents.clear();
+        thaumicdabblery$hiddenParents.clear();
         thaumicdabblery$siblings.clear();
 
         for (ResearchCategoryList category : ResearchCategories.researchCategories.values()) {
             for (Map.Entry<String, ResearchItem> entry : category.research.entrySet()) {
                 ResearchItem research = entry.getValue();
-                if (thaumicdabblery$containsReference(research.parents)) {
-                    thaumicdabblery$children.add(entry.getKey());
-                }
-                if (thaumicdabblery$containsReference(research.parentsHidden)) {
-                    thaumicdabblery$secretChildren.add(entry.getKey());
-                }
-                if (thaumicdabblery$containsReference(research.siblings)) {
-                    thaumicdabblery$siblings.add(entry.getKey());
-                }
+                research.setParents(
+                    thaumicdabblery$removeReferences(entry.getKey(), research.parents, thaumicdabblery$parents));
+                research.setParentsHidden(
+                    thaumicdabblery$removeReferences(
+                        entry.getKey(),
+                        research.parentsHidden,
+                        thaumicdabblery$hiddenParents));
+                research.setSiblings(
+                    thaumicdabblery$removeReferences(entry.getKey(), research.siblings, thaumicdabblery$siblings));
             }
         }
+        // Both ModTweaker implementations remove only the first occurrence of a reference.
+        ci.cancel();
+    }
+
+    @Inject(method = "canUndo", at = @At("HEAD"), cancellable = true)
+    private void thaumicdabblery$hasSavedReferences(CallbackInfoReturnable<Boolean> cir) {
+        cir.setReturnValue(
+            !thaumicdabblery$parents.isEmpty() || !thaumicdabblery$hiddenParents.isEmpty()
+                || !thaumicdabblery$siblings.isEmpty());
     }
 
     @Inject(method = "undo", at = @At("HEAD"), cancellable = true)
     private void thaumicdabblery$restoreReferences(CallbackInfo ci) {
-        thaumicdabblery$restoreParents(thaumicdabblery$children, false);
-        thaumicdabblery$restoreParents(thaumicdabblery$secretChildren, true);
-        thaumicdabblery$restoreSiblings();
+        thaumicdabblery$restore(thaumicdabblery$parents, ResearchItem::setParents);
+        thaumicdabblery$restore(thaumicdabblery$hiddenParents, ResearchItem::setParentsHidden);
+        thaumicdabblery$restore(thaumicdabblery$siblings, ResearchItem::setSiblings);
         ci.cancel();
     }
 
     @Unique
-    private boolean thaumicdabblery$containsReference(String[] references) {
-        if (references == null) {
-            return false;
-        }
-        for (String reference : references) {
-            if (key == null ? reference == null : key.equals(reference)) {
-                return true;
-            }
-        }
-        return false;
+    private String[] thaumicdabblery$removeReferences(String researchKey, String[] references,
+        Map<String, String[]> originals) {
+        if (references == null || key == null) return references;
+        int matches = 0;
+        for (String reference : references) if (key.equals(reference)) matches++;
+        if (matches == 0) return references;
+
+        originals.put(researchKey, references.clone());
+        String[] remaining = new String[references.length - matches];
+        int index = 0;
+        for (String reference : references) if (!key.equals(reference)) remaining[index++] = reference;
+        return remaining;
     }
 
     @Unique
-    private void thaumicdabblery$restoreParents(Set<String> researchKeys, boolean hidden) {
-        for (String researchKey : researchKeys) {
-            ResearchItem research = thaumicdabblery$getResearch(researchKey);
+    private void thaumicdabblery$restore(Map<String, String[]> originals, BiConsumer<ResearchItem, String[]> setter) {
+        for (Map.Entry<String, String[]> entry : originals.entrySet()) {
+            ResearchItem research = ResearchCategories.getResearch(entry.getKey());
             if (research == null) {
-                continue;
-            }
-            if (hidden) {
-                research.setParentsHidden(thaumicdabblery$appendReference(research.parentsHidden));
+                MineTweakerAPI.logWarning(
+                    "Could not reattach missing Thaumcraft research " + entry.getKey() + " to " + key + ".");
             } else {
-                research.setParents(thaumicdabblery$appendReference(research.parents));
+                setter.accept(
+                    research,
+                    entry.getValue()
+                        .clone());
             }
         }
-    }
-
-    @Unique
-    private void thaumicdabblery$restoreSiblings() {
-        for (String researchKey : thaumicdabblery$siblings) {
-            ResearchItem research = thaumicdabblery$getResearch(researchKey);
-            if (research != null) {
-                research.setSiblings(thaumicdabblery$appendReference(research.siblings));
-            }
-        }
-    }
-
-    @Unique
-    private ResearchItem thaumicdabblery$getResearch(String researchKey) {
-        ResearchItem research = ResearchCategories.getResearch(researchKey);
-        if (research == null) {
-            MineTweakerAPI
-                .logWarning("Could not reattach missing Thaumcraft research " + researchKey + " to " + key + ".");
-        }
-        return research;
-    }
-
-    @Unique
-    private String[] thaumicdabblery$appendReference(String[] references) {
-        if (references != null) {
-            for (String reference : references) {
-                if (key == null ? reference == null : key.equals(reference)) {
-                    return references;
-                }
-            }
-        }
-
-        int oldLength = references == null ? 0 : references.length;
-        String[] restored = references == null ? new String[1] : Arrays.copyOf(references, oldLength + 1);
-        restored[oldLength] = key;
-        return restored;
     }
 }
