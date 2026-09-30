@@ -101,3 +101,17 @@ scanning and decomposition. Cycles and ambiguous final pairs are rejected before
 Both operations require a client/server restart. Native wand recipe costs retain their original primals; explicit
 extra vis costs are shown on additional arcane-workbench pages. See the
 [custom-aspects guide](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Custom-Aspects) for examples and limits.
+
+### Furnace research pages
+
+With either supported ModTweaker fork, add native smelting pages in ordinary `scripts/*.zs` files:
+
+```zenscript
+// The research must exist. Pass the furnace input.
+mods.thaumcraft.Research.addFurnacePage("MY_RESEARCH", <minecraft:iron_ore>);
+```
+
+Register custom furnace recipes with `furnace.addRecipe(output, input, xp)` before adding their pages.
+Page changes support `/mt reload`; smelting itself does not require research.
+See the [research wiki](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Research#furnace-recipe-pages)
+and the runnable [demo script](tests/obfuscated/manual-furnace-pages.zs).

@@ -263,3 +263,26 @@ behavior, hidden/visible knowledge, blocked generic grants and fragments, failed
 already-scanned-item recovery, per-player isolation, zero-point saved knowledge, wand storage and costs, native
 wand cost preservation, energized nodes, repeated script reloads, and client vis-amulet tooltip concealment.
 Also rerun the original compound-only probes to check existing behavior without any new primals.
+
+## Furnace research pages
+
+Use `FurnacePageChecks.java` with `FurnacePageServerProbe.java` for the dedicated-server probe, or with
+`FurnacePageClientProbe.java` for the integrated/remote client probe. Put `manual-furnace-pages.zs` in the disposable
+instance's `scripts/` directory using that exact filename. These tests rewrite a second fixture script, temporarily
+remove/restore the demo script, and repeatedly reload scripts. Do not run the probes in a player's instance.
+
+Compile against the SRG Minecraft jar first, followed by the production mod/dependency jars as described above.
+The common checks require an obfuscated environment and exercise the actual ZenScript method, furnace output,
+page arrays, invalid inputs, final recipe replacement/removal, page/research edits and rollback. Successful dedicated
+runs print `TD_FURNACE_SERVER_PASS`; client runs print `TD_FURNACE_CLIENT_PASS` and save
+`screenshots/furnace-page.png` after rendering the native Thaumonomicon page. A client also checks automatic unlock
+and recipe click-through lookup using its real player.
+
+For a separate connection, start the dedicated probe with `-Dtd.furnace.network=true` to keep it running, then start
+the client with `-Dtd.furnace.server=127.0.0.1:PORT`. The remote client may start with an empty scripts directory to
+verify normal MineTweaker script synchronization. Stop the dedicated server after the client finishes.
+
+For manual inspection, install **only** `manual-furnace-pages.zs`, without a probe jar. The dev copy is
+`run/client/scripts/thaumicdabblery_furnace_demo.zs`. Open the Thaumonomicon's **Furnace Demo** tab and its automatically
+unlocked **Baked Treats** research: one wooden bowl smelts into two cookies. This is a demonstration recipe;
+remove the script and reload to restore normal recipes/research. The tracked fixture and dev copy should match.

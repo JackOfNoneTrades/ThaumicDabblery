@@ -522,3 +522,60 @@ Raw instances, exported mixin classes and logs: `/tmp/td-primal-test/`. Final ma
 server and four `client-*` directories; compound regression runs use `regression-{gtnh,curse}/final.log`.
 Development evidence is `dev-gtnh-original/test.log`. Separate multiplayer logs are `network-{gtnh,curse}/final.log`
 and `remote-{gtnh,curse}/final.log`. Rendered screenshots are in each client's `screenshots/`.
+
+# Furnace research page verification (2026-09-30)
+
+Production artifact: `thaumicdabblery-4361800-snapshot-master.1+dbcffde423-dirty.jar`.
+SHA-256: `8506cc8db720157d41186becff124498895985f69b035824a83b395aa12e4bfa`.
+`./gradlew spotlessCheck build` passed. The same production jar was used throughout the matrix.
+
+The production instances used Java 8, Forge 1.7.10-10.13.4.1614, Thaumcraft 4.2.3.5, CraftTweaker 3.4.8,
+UniMixins 0.3.1, Baubles Expanded 2.2.21-GTNH, GTNHLib 0.11.52 and FentLib 04136bd-snapshot.
+The retained probes assert `fml.deobfuscatedEnvironment=false`.
+
+| ModTweaker | Optional addons | Dedicated server | Integrated client |
+| --- | --- | --- | --- |
+| GTNH 0.14.0 | none | 56 passed | 65 passed |
+| CurseForge 0.9.6 | none | 56 passed | 65 passed |
+| GTNH 0.14.0 | TC4Tweaks 1.5.47, Salis Arcana 1.1.71-GTNH | 56 passed | 65 passed |
+| CurseForge 0.9.6 | TC4Tweaks 1.5.47, Salis Arcana 1.1.71-GTNH | 56 passed | 65 passed |
+
+A development server with GTNH ModTweaker passed 56 checks using disposable MCP-translated copies of the probes
+and the built dev jar. Its environment assertion requires development mode. The initial translation needed two
+1.7.10 mapping overrides (`smelting` and `getItemDamage`); no production change was needed.
+
+Separate production client/server pairs also passed on both ModTweaker variants without the optional addons.
+Each server passed 56 checks and each remote client passed 9 checks. Remote clients began with empty script
+folders and received the demo through MineTweaker synchronization; they verified the recipe, automatic unlock,
+click-through target and rendered page. These logs are `network-{gtnh,curse}/final.log` and
+`remote-{gtnh,curse}/final.log` under the raw test directory.
+
+Coverage includes ZenScript static expansion on both forks, vanilla iron smelting, the native balanced-shard recipe,
+a scripted bowl-to-two-cookies recipe, actual furnace input consumption/output, multiple pages, ordering and object
+identity, null page lists, metadata-specific inputs sharing an output, invalid arguments/missing recipes/research,
+three repeat reloads, clearPages before/after addition, research movement/removal, detached/replaced research objects,
+preservation of unrelated pages, later recipe replacement/removal, and full demo script removal/reinstallation.
+Native Basic Alchemy pages remain unchanged. Deliberately invalid fixture calls log expected validation errors;
+final logs contain no probe failures, ZenScript compilation/execution failures or mixin application errors.
+
+Clients confirmed automatic research unlock for a real player and recipe click-through lookup, then rendered the
+native page. Screenshots were inspected: the left page describes the demo, while the right page shows the native
+smelting graphic with one bowl and two cookies. The dev client demo matches the tested tracked fixture byte for byte.
+
+Limits: physical mouse navigation/tooltips and timed fuel burning were not automated. Furnace checks call the real
+smelt operation directly. Original MineTweaker3 and original Salis Arcana releases were not tested; both ModTweaker
+forks ran with CraftTweaker 3.4.8. Arbitrary recipe mutations outside the script lifecycle are not monitored. Baseline
+Forge update-endpoint and dependency module-info warnings remain unrelated to the feature.
+
+Raw instances and logs: `/tmp/td-furnace-test/`. Matrix results are `final.log` in the four server and four `client-*`
+directories. Development evidence is `dev-gtnh-original/test.log`; rendered evidence is `screenshots/furnace-page.png`
+in each client instance. The probes and manual fixture are retained under `tests/obfuscated/`.
+
+A subsequent launch of the user's actual `runClient25 --username=Developer` failed before script loading.
+The local `run/client/mods` folder contained old production copies of nine mods already supplied by Gradle,
+including NEI and CodeChickenCore. FML registered NEI's transformer twice; the second pass failed to find the
+original tooltip instructions in `GuiContainer.drawScreen` (`Needle not found in Haystack`). The isolated
+feature-test instances did not contain these duplicates and therefore did not catch this local setup issue.
+The duplicate jars were moved intact to `run/client/disabled-mods-2026-09-30/`; the standalone IC2 API jar stayed
+in `mods`. Relaunching the actual Java 25 development task completed loading and rendering without that crash.
+Evidence: `/tmp/td-furnace-test/dev-client-before-fix.log` and `dev-client-relaunch.log`.
