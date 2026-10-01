@@ -17,7 +17,7 @@
     * Reload-safe Thaumonomicon tab name, icon, and background overrides
     * Reload-safe Thaumonomicon tab ordering, including compatibility with TC4Tweaks
     * Focal Manipulator upgrade path customization
-    * Thaumic Horizons player vat infusion recipe modification
+    * Thaumic Horizons player and creature vat recipe modification, custom mob transformations and configurable Thaumonomicon display items
 * Operator command `/td scanall [player]` to complete item/entity scans, discover aspects and reveal scan-dependent research without awarding research points
 * Configurable minimum Vis cost for casting and crafting, including Thaumic Bases bracelets
 * Configurable champion mob whitelist/blacklist, base spawn chance and guaranteed champions

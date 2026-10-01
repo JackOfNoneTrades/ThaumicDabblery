@@ -8,6 +8,90 @@ Include the production `fentlib-04136bd-snapshot.jar` and GTNHLib 0.11.37 in aut
 Leave FentLib's `terminalDepLoaderProgress` enabled (the default) to send dependency-loader progress to
 the terminal instead of opening popups. Never install its `-dev` artifact in these obfuscated runtimes.
 
+## Thaumic Horizons creature infusions
+
+Compile `CreatureInfusionChecks.java` with `CreatureInfusionServerProbe.java` or
+`CreatureInfusionClientProbe.java`, adding the production Thaumic Horizons 1.8.24 jar to the SRG-first
+classpath below. Client compilation also needs the normal client libraries. Use disposable instances only;
+probes write `scripts/zz-creature-test.zs`, reload scripts, alter a test world and stop the game on completion.
+Do not install both probes together. No separate script fixture is needed.
+
+Run GTNH ModTweaker 0.14.0 and CurseForge ModTweaker 0.9.6, each with and without TC4Tweaks 1.5.47 and
+Salis Arcana 1.1.71-GTNH. Require `TD_CREATURE_SERVER_PASS` or `TD_CREATURE_CLIENT_PASS` and no probe or
+mixin failures. Invalid-script errors are intentional in validation cases. Process exit status alone is insufficient.
+
+Coverage includes all 30 native recipe keys and their pages; preserved creature inputs, effect IDs and NBT;
+research gating; per-pedestal stack normalization; repeated aspect costs; removal and redefinition;
+exact recipe priority and page-array restoration; invalid-key/cost rejection; research/page removal ordering;
+and the recipe-list command. Real vats start edited Diamond Skin and Chocolate Cow recipes, retain captured
+costs through a script reload, and complete with their original native results. Completion is invoked directly
+after recipe selection; this does not simulate the entire essentia-delivery and instability tick sequence.
+The native Mooshroom recipe is checked for editing and page updates, not full vat completion.
+
+Clients additionally render edited upgrade, transformation, both Sheeder and Nightmare pages, then removed
+and restored pages. Screenshots are saved as `creature-page-*.png`. Common checks run on the integrated
+server; this is not a remote dedicated-server networking test. A remapped MCP copy of the server probe can
+also run in development, with its environment assertion inverted.
+
+Verified on 2026-09-30 with Forge 1614, Java 8, Thaumcraft 4.2.3.5, CraftTweaker 3.4.8,
+Thaumic Horizons 1.8.24 and GTNHLib 0.11.52:
+
+| Runtime | ModTweaker | TC4Tweaks + Salis | Assertions |
+| --- | --- | --- | --- |
+| Production server | 0.14.0 / 0.9.6 | absent | 13,432 each |
+| Production server | 0.14.0 / 0.9.6 | present | 13,628 each |
+| Production client | 0.14.0 / 0.9.6 | absent | 13,712 each |
+| Production client | 0.14.0 / 0.9.6 | present | 13,912 each |
+| Development server | 0.14.0 | absent | 13,432 |
+
+Separate startup probes also passed without Horizons, without MineTweaker/ModTweaker, and without either.
+Raw logs and screenshots from this run are in `/tmp/td-creature-test/` on the development machine.
+
+## Custom creature transformations
+
+Compile `CreatureInfusionChecks.java` and `CustomCreatureChecks.java` with either
+`CustomCreatureServerProbe.java` or `CustomCreatureClientProbe.java`. Use the same production classpath,
+Horizons jar and four ModTweaker/addon combinations described above. These probes include the native
+recipe-editing regression checks. Their optional `after:tc4tweak` dependency ensures TC4Tweaks has initialized
+its networked infusion-matching configuration before tests run in `FMLServerStartedEvent`.
+
+Require `TD_CUSTOM_CREATURE_SERVER_PASS` / `TD_CUSTOM_CREATURE_CLIENT_PASS`, with no probe or mixin
+failures. Deliberately invalid recipes and one unavailable saved output generate expected errors. The
+common probe writes `pending-custom-vat.dat` and temporarily changes scripts and the disposable world.
+
+Custom checks cover registration, duplicate keys, multiple recipes for one mob pair, exact entity matching,
+research gates, linked display metadata/NBT names, multiple linked pages, edits/removals and exact undo,
+priority relative to native recipes, validation and missing-output recovery. They start recipes through
+the real wand activation method, pay essentia through the vat's container API, consume pedestal items
+through native crafting cycles, and verify vanilla/modded transformations and output attributes/name/costs.
+Instability is set to zero for deterministic cycle checks; essentia transport from external jars is not simulated.
+Undead inputs work only for matching custom transformations, and native upgrades stay blocked on undead.
+A native upgrade is also completed in the same vat after a custom transformation to check output-label cleanup.
+
+The client additionally places a real vat near its player and checks that the transformed mob and custom
+name arrive through the normal tile update packets. It renders the chosen book icons, edited page and
+removed page, saving `custom-creature-*.png`. This uses a real client/integrated-server connection, not a
+remote dedicated-server connection.
+
+For restart coverage, compile `CustomCreatureSavedVatProbe.java` alone. Copy `pending-custom-vat.dat` from
+the server probe into another disposable production server, remove MineTweaker and ModTweaker, and
+install only this probe. It must print `TD_CUSTOM_CREATURE_RESTART_PASS`: the saved transformation must
+finish with the original output, consume its ingredient, retain the custom name and use the output's own
+attributes. Both Horizons and Dabblery remain installed. The probe stops the server when finished.
+
+Verified on 2026-09-30 with the same Forge/Thaumcraft/Horizons versions listed above:
+
+| Runtime | ModTweaker | TC4Tweaks + Salis | Assertions |
+| --- | --- | --- | --- |
+| Production server | 0.14.0 / 0.9.6 | absent | 13,512 each |
+| Production server | 0.14.0 / 0.9.6 | present | 13,708 each |
+| Production client | 0.14.0 / 0.9.6 | absent | 13,519 each |
+| Production client | 0.14.0 / 0.9.6 | present | 13,715 each |
+| Development server | 0.14.0 | absent | 13,512 |
+
+The separate restart without scripting mods and all three optional-dependency startup combinations also passed.
+Raw logs, saved vat NBT and screenshots are in `/tmp/td-custom-creature-test/` on the development machine.
+
 ## Champion mobs
 
 Compile `ChampionChecks.java` with either `ChampionServerProbe.java` or `ChampionClientProbe.java` using

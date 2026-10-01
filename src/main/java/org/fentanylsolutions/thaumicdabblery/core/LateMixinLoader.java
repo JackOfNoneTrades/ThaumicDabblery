@@ -153,6 +153,7 @@ public class LateMixinLoader implements ILateMixinLoader {
                 mixins.add("witchinggadgets.MixinMessageClientNotifierHandler");
             }
         }
+        if (loadedMods.contains("ThaumicHorizons")) mixins.add("thaumichorizons.MixinTileVatCreatureRecipes");
         if (loadedMods.contains("ThaumicHorizons") && loadedMods.contains("witchery")) {
             mixins.add("thaumichorizons.MixinItemInfusionSelfCheat");
             mixins.add("witchery.MixinItemMysticBranch");

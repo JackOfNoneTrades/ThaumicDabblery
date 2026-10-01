@@ -1,5 +1,6 @@
 package org.fentanylsolutions.thaumicdabblery;
 
+import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.CreatureInfusionZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.FurnacePagesZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ResearchTabsZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ThaumicHorizonsSelfInfusionZen;
@@ -32,6 +33,7 @@ public class CommonProxy {
             FurnacePagesZen.register();
             if (Loader.isModLoaded("ThaumicHorizons")) {
                 ThaumicHorizonsSelfInfusionZen.register();
+                CreatureInfusionZen.register();
             }
         }
     }
@@ -41,12 +43,15 @@ public class CommonProxy {
         if (Loader.isModLoaded("MineTweaker3") && Loader.isModLoaded("modtweaker2")
             && Loader.isModLoaded("ThaumicHorizons")) {
             ThaumicHorizonsSelfInfusionZen.initializeDisplayPages();
+            CreatureInfusionZen.initialize();
         }
     }
 
     public void serverStarting(FMLServerStartingEvent event) {
         FeatureManager.serverStarting(event);
         event.registerServerCommand(new ScanAllCommand());
+        if (Loader.isModLoaded("MineTweaker3") && Loader.isModLoaded("modtweaker2")
+            && Loader.isModLoaded("ThaumicHorizons")) CreatureInfusionZen.registerCommand();
     }
 
     public void onConfigReload() {
