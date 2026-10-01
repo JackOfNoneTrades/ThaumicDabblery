@@ -5,6 +5,7 @@ import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.FurnacePagesZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ResearchTabsZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ThaumicHorizonsSelfInfusionZen;
 import org.fentanylsolutions.thaumicdabblery.feature.FeatureManager;
+import org.fentanylsolutions.thaumicdabblery.feature.researcheditor.ResearchEditor;
 import org.fentanylsolutions.thaumicdabblery.feature.scanall.ScanAllCommand;
 
 import cpw.mods.fml.common.Loader;
@@ -31,6 +32,7 @@ public class CommonProxy {
         if (Loader.isModLoaded("MineTweaker3") && Loader.isModLoaded("modtweaker2")) {
             ResearchTabsZen.register();
             FurnacePagesZen.register();
+            ResearchEditor.register();
             if (Loader.isModLoaded("ThaumicHorizons")) {
                 ThaumicHorizonsSelfInfusionZen.register();
                 CreatureInfusionZen.register();
@@ -52,6 +54,10 @@ public class CommonProxy {
         event.registerServerCommand(new ScanAllCommand());
         if (Loader.isModLoaded("MineTweaker3") && Loader.isModLoaded("modtweaker2")
             && Loader.isModLoaded("ThaumicHorizons")) CreatureInfusionZen.registerCommand();
+    }
+
+    public boolean toggleResearchEditor() {
+        throw new IllegalArgumentException("Thaumonomicon editing is only available in single-player.");
     }
 
     public void onConfigReload() {

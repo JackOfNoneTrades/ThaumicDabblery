@@ -7,6 +7,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ResearchTabGateRegistry;
+import org.fentanylsolutions.thaumicdabblery.feature.researcheditor.BookEditorInput;
+import org.fentanylsolutions.thaumicdabblery.feature.researcheditor.ResearchEditorClient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,6 +27,12 @@ public abstract class MixinGuiResearchBrowser {
 
     @Inject(method = "updateResearch", at = @At("HEAD"))
     private void thaumicdabblery$selectVisibleCategory(CallbackInfo ci) {
+        if (BookEditorInput.active()) {
+            Set<String> all = thaumicdabblery$getCategoryKeys();
+            if (!all.isEmpty() && !all.contains(selectedCategory)) selectedCategory = all.iterator()
+                .next();
+            return;
+        }
         Set<String> visible = ResearchTabGateRegistry
             .getVisibleCategories(thaumicdabblery$getCategoryKeys(), thaumicdabblery$getPlayerName());
         if (!visible.isEmpty() && !visible.contains(selectedCategory)) {
@@ -39,6 +47,7 @@ public abstract class MixinGuiResearchBrowser {
         at = @At(value = "INVOKE", target = "Ljava/util/LinkedHashMap;keySet()Ljava/util/Set;"),
         require = 4)
     private Set<String> thaumicdabblery$hideResearchCategories(LinkedHashMap<String, ResearchCategoryList> categories) {
+        if (BookEditorInput.active()) return ResearchEditorClient.visibleTabs();
         return ResearchTabGateRegistry.getVisibleCategories(categories.keySet(), thaumicdabblery$getPlayerName());
     }
 

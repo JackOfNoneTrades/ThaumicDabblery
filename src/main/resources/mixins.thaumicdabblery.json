@@ -9,7 +9,8 @@
     "MixinEntityPlayer"
   ],
   "client": [
-    "MixinMinecraft"
+    "MixinMinecraft",
+    "MixinGuiScreenResearchEditor"
   ],
   "server": []
 }

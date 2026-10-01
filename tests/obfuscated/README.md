@@ -421,3 +421,31 @@ tabs, exercising the native browser's parent/sibling lookups. Success prints `TD
 `screenshots/research-tab-removed.png`. Run with GTNH ModTweaker 0.14.0 and CurseForge ModTweaker 0.9.6, both with
 and without TC4Tweaks/Salis Arcana. The real reload lifecycle handles TC4Tweaks cache invalidation.
 For development runs, remap SRG names to MCP and invert the common probe's environment assertion.
+
+## Thaumonomicon editor
+
+Compile `ResearchEditorChecks` and `ResearchEditorServerProbe` into a small probe mod for a disposable
+production server. Run CurseForge ModTweaker 0.9.6 and GTNH ModTweaker 0.14.0, each with and without
+TC4Tweaks 1.5.47 and Salis Arcana 1.1.71. Require `TD_EDITOR_SERVER_PASS` (80 checks per combination).
+The fixtures exercise compact script output, swaps within and between tabs, nearest-free placement,
+all five true/false flags, hidden prerequisites, cycle/duplicate/self rejection, exact deletion undo,
+TC4Tweaks lookup caches, ordinary-script ordering, multiple reloads, external-file conflicts and atomic
+file replacement. Dedicated servers must refuse editor activation while applying generated scripts normally.
+The same fixture also runs in a development server with SRG calls remapped to MCP names.
+
+`ResearchEditorClientProbe` runs in real production clients with the same four dependency combinations.
+Require `TD_EDITOR_CLIENT_PASS` (38 checks without addons, 42 with addons). Mouse and keyboard events are supplied through
+LWJGL's event fields and the actual stock screen's input methods, exercising the input mixin before native
+and Salis Arcana handlers. The screen must remain exactly `GuiResearchBrowser`, including when toggled
+with the same book instance open. Checks include drag/pan separation, native rendering, menu properties,
+parent picking, cross-tab swaps, deletion, undo/redo buttons and shortcuts, point/knowledge preservation,
+key and mouse bindings, recipe-page entry, Salis saved-page preservation, tab pagination, script reload and
+minimum-size geometry. Pixel comparisons check that TC4Tweaks' completion counter and search box draw nothing over
+the editor header and render again after Done. Enable Salis' **Save Thaumonomicon Page** option for the addon runs. Screenshots are
+written under the instance's `screenshots/` folder for the stock book, properties menu, drag preview,
+tab/parent selection and narrow layout.
+
+`ResearchEditorOptionalClientProbe` checks client and integrated-server startup with both MineTweaker and
+ModTweaker absent, command refusal, and normal stock book rendering. Require
+`TD_EDITOR_OPTIONAL_CLIENT_PASS`. All instances must be disposable: the fixtures create research tabs,
+change scripts, and generate temporary worlds. Never run them in a user's pack or existing save.

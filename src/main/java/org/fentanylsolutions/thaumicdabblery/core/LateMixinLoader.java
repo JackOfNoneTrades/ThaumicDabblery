@@ -113,6 +113,7 @@ public class LateMixinLoader implements ILateMixinLoader {
                 if (FMLLaunchHandler.side()
                     .isClient()) {
                     mixins.add("thaumcraft.MixinGuiFocalManipulator");
+                    mixins.add("thaumcraft.MixinResearchEditorBrowser");
                 }
                 mixins.add("modtweaker.MixinAddPage");
                 mixins.add("modtweaker.MixinAddPrereq");
@@ -129,6 +130,11 @@ public class LateMixinLoader implements ILateMixinLoader {
             }
             if (loadedMods.contains("tc4tweak")) {
                 mixins.add("tc4tweaks.MixinGetResearch");
+                if (FMLLaunchHandler.side()
+                    .isClient()) {
+                    mixins.add("tc4tweaks.MixinResearchCompletionCounter");
+                    mixins.add("tc4tweaks.MixinResearchEditorSearch");
+                }
             }
             if (loadedMods.contains("thaumicbases")) {
                 mixins.add("thaumicbases.MixinItemCastingBracelet");
