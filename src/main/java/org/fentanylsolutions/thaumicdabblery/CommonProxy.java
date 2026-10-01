@@ -2,6 +2,7 @@ package org.fentanylsolutions.thaumicdabblery;
 
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.CreatureInfusionZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.FurnacePagesZen;
+import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ResearchPrerequisitesZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ResearchTabsZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ThaumicHorizonsSelfInfusionZen;
 import org.fentanylsolutions.thaumicdabblery.feature.FeatureManager;
@@ -32,6 +33,7 @@ public class CommonProxy {
         if (Loader.isModLoaded("MineTweaker3") && Loader.isModLoaded("modtweaker2")) {
             ResearchTabsZen.register();
             FurnacePagesZen.register();
+            ResearchPrerequisitesZen.register();
             ResearchEditor.register();
             if (Loader.isModLoaded("ThaumicHorizons")) {
                 ThaumicHorizonsSelfInfusionZen.register();

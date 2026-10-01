@@ -1,5 +1,6 @@
 package org.fentanylsolutions.thaumicdabblery.mixins.late.modtweaker;
 
+import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ResearchPrerequisitesZen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -8,61 +9,39 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import minetweaker.MineTweakerAPI;
+import minetweaker.IUndoableAction;
 import modtweaker2.mods.thaumcraft.research.AddPrereq;
-import thaumcraft.api.research.ResearchCategories;
-import thaumcraft.api.research.ResearchItem;
 
 @Mixin(value = AddPrereq.class, remap = false)
 public abstract class MixinAddPrereq {
 
     @Unique
-    private boolean thaumicdabblery$ignoredMissingResearch;
+    private IUndoableAction thaumicdabblery$change;
 
     @Shadow
     private String key;
 
     @Shadow
-    private String[] oldPrereqs;
+    private String prereq;
 
     @Shadow
     private boolean hidden;
 
-    @Inject(method = "apply", at = @At("HEAD"), cancellable = true)
-    private void thaumicdabblery$rejectMissingResearch(CallbackInfo ci) {
-        if (ResearchCategories.getResearch(key) == null) {
-            thaumicdabblery$ignoredMissingResearch = true;
-            MineTweakerAPI.logError(
-                "Cannot add a prerequisite to missing Thaumcraft research " + key + ". The action was ignored.");
-            ci.cancel();
-        }
+    @Inject(method = "apply", at = @At("HEAD"), cancellable = true, require = 1)
+    private void thaumicdabblery$setPrerequisite(CallbackInfo ci) {
+        thaumicdabblery$change = ResearchPrerequisitesZen.update(key, prereq, hidden);
+        thaumicdabblery$change.apply();
+        ci.cancel();
     }
 
-    @Inject(method = "canUndo", at = @At("HEAD"), cancellable = true)
-    private void thaumicdabblery$allowIgnoredActionCleanup(CallbackInfoReturnable<Boolean> cir) {
-        if (thaumicdabblery$ignoredMissingResearch) {
-            cir.setReturnValue(true);
-        }
+    @Inject(method = "canUndo", at = @At("HEAD"), cancellable = true, require = 1)
+    private void thaumicdabblery$allowActionCleanup(CallbackInfoReturnable<Boolean> cir) {
+        cir.setReturnValue(true);
     }
 
-    @Inject(method = "undo", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "undo", at = @At("HEAD"), cancellable = true, require = 1)
     private void thaumicdabblery$restorePrerequisites(CallbackInfo ci) {
-        if (thaumicdabblery$ignoredMissingResearch) {
-            ci.cancel();
-            return;
-        }
-
-        ResearchItem research = ResearchCategories.getResearch(key);
-        if (research == null) {
-            MineTweakerAPI.logWarning(
-                "Could not restore prerequisites for missing Thaumcraft research " + key + ". The undo was skipped.");
-        } else if (oldPrereqs != null) {
-            if (hidden) {
-                research.setParentsHidden(oldPrereqs);
-            } else {
-                research.setParents(oldPrereqs);
-            }
-        }
+        if (thaumicdabblery$change != null) thaumicdabblery$change.undo();
         ci.cancel();
     }
 }

@@ -41,10 +41,10 @@ public final class ResearchLayout {
             tab = item.category;
             x = item.displayColumn;
             y = item.displayRow;
-            flags = (item.isLost() ? 1 : 0) | (item.isHidden() ? 2 : 0)
-                | (item.isSecondary() ? 4 : 0)
-                | (item.isRound() ? 8 : 0)
-                | (item.isSpecial() ? 16 : 0);
+            // Addon getters may depend on a client player. Capture the stored flags we also restore in apply().
+            for (int i = 0; i < FIELDS.length; i++)
+                if (Boolean.TRUE.equals(ReflectionHelper.getPrivateValue(ResearchItem.class, item, FIELDS[i])))
+                    flags |= 1 << i;
             parents = copy(item.parents);
             hidden = copy(item.parentsHidden);
             siblings = copy(item.siblings);

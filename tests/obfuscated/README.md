@@ -422,15 +422,31 @@ tabs, exercising the native browser's parent/sibling lookups. Success prints `TD
 and without TC4Tweaks/Salis Arcana. The real reload lifecycle handles TC4Tweaks cache invalidation.
 For development runs, remap SRG names to MCP and invert the common probe's environment assertion.
 
+## Individual research prerequisites
+
+Compile `ResearchPrerequisiteChecks` and `ResearchPrerequisiteServerProbe` into a disposable probe mod.
+Run actual ZenScript reloads on production servers with CurseForge ModTweaker 0.9.6 and GTNH ModTweaker
+0.14.0, each with and without TC4Tweaks 1.5.47 and Salis Arcana 1.1.71. Require
+`TD_PREREQUISITE_PASS` (102 checks per combination). Run the same fixture in development with SRG names
+remapped to MCP names and the environment assertion inverted.
+
+The checks cover visible/hidden replacement in both directions, duplicate cleanup, repeated calls/reloads,
+single-link removal from both lists, missing links and targets, unchanged siblings and unrelated duplicates,
+last-call ordering, null versus empty arrays, tab moves, later research deletion, composition with
+`clearPrereqs`, and exact rollback after removing scripts. Missing children during undo must not crash.
+All tests use temporary scripts and research categories in disposable instances.
+
 ## Thaumonomicon editor
 
 Compile `ResearchEditorChecks` and `ResearchEditorServerProbe` into a small probe mod for a disposable
 production server. Run CurseForge ModTweaker 0.9.6 and GTNH ModTweaker 0.14.0, each with and without
-TC4Tweaks 1.5.47 and Salis Arcana 1.1.71. Require `TD_EDITOR_SERVER_PASS` (80 checks per combination).
+TC4Tweaks 1.5.47 and Salis Arcana 1.1.71. Require `TD_EDITOR_SERVER_PASS` (84 checks per combination).
 The fixtures exercise compact script output, swaps within and between tabs, nearest-free placement,
 all five true/false flags, hidden prerequisites, cycle/duplicate/self rejection, exact deletion undo,
 TC4Tweaks lookup caches, ordinary-script ordering, multiple reloads, external-file conflicts and atomic
-file replacement. Dedicated servers must refuse editor activation while applying generated scripts normally.
+file replacement. A research subclass whose five flag getters throw verifies that capture, script replay and
+rollback use stored flags without invoking player-dependent addon code. Dedicated servers must refuse editor
+activation while applying generated scripts normally.
 The same fixture also runs in a development server with SRG calls remapped to MCP names.
 
 `ResearchEditorClientProbe` runs in real production clients with the same four dependency combinations.
@@ -444,6 +460,10 @@ minimum-size geometry. Pixel comparisons check that TC4Tweaks' completion counte
 the editor header and render again after Done. Enable Salis' **Save Thaumonomicon Page** option for the addon runs. Screenshots are
 written under the instance's `screenshots/` folder for the stock book, properties menu, drag preview,
 tab/parent selection and narrow layout.
+
+Also run the client matrix with Gadomancy 1.0.7.3 in the base runs and Gadomancy 1.5.15 in the addon runs.
+World startup must complete before a client player exists: Gadomancy's `IfAnyParentResearchItem.isHidden()`
+dereferences that player, so snapshots must never invoke it. Continue through the full editor checks and reload.
 
 `ResearchEditorOptionalClientProbe` checks client and integrated-server startup with both MineTweaker and
 ModTweaker absent, command refusal, and normal stock book rendering. Require

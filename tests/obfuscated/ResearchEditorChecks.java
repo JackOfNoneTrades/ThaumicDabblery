@@ -33,6 +33,7 @@ public final class ResearchEditorChecks {
  public void run()throws Exception {
   check(Boolean.FALSE.equals(Launch.blackboard.get("fml.deobfuscatedEnvironment")),"production runtime");
   setup();
+  overriddenFlags();
   check(ResearchEditor.problem()==null,"ready after reload");
   ResearchPage[] pages=items.get("TD_A").getPages();
   for(int i=1;i<=8;i++){final int x=i;ResearchEditor.edit("move",l->l.move("TD_A",TAB,x,4));}
@@ -120,6 +121,25 @@ public final class ResearchEditorChecks {
   Files.delete(temp.resolve("test.zs"));try{file.write("third");throw new AssertionError("external deletion ignored");}catch(java.io.IOException expected){checks++;}
   try(java.util.stream.Stream<Path> stream=Files.list(temp)){check(stream.count()==0,"no temporary files remain");}Files.delete(temp);
   check(ResearchEditor.problem()==null,"final clean baseline");
+ }
+ private void overriddenFlags()throws Exception {
+  // Gadomancy's isHidden() reads the client player, which does not exist during world startup.
+  ResearchItem dynamic=new ResearchItem("TD_DYNAMIC",TAB,new AspectList(),20,20,1,new ResourceLocation("thaumcraft","textures/aspects/ordo.png")){
+   @Override public boolean isLost(){throw new AssertionError("dynamic isLost called");}
+   @Override public boolean isHidden(){throw new AssertionError("dynamic isHidden called");}
+   @Override public boolean isSecondary(){throw new AssertionError("dynamic isSecondary called");}
+   @Override public boolean isRound(){throw new AssertionError("dynamic isRound called");}
+   @Override public boolean isSpecial(){throw new AssertionError("dynamic isSpecial called");}
+  };
+  dynamic.setHidden().setRound().registerResearchItem();
+  script("");
+  check(ResearchEditor.layout().require("TD_DYNAMIC").flags==10,"capture stored flags without invoking addon getters");
+  ResearchEditor.edit("dynamic flags",l->l.require("TD_DYNAMIC").flags=21);
+  check(ResearchLayout.capture().require("TD_DYNAMIC").flags==21,"apply stored flags without invoking addon getters");
+  MineTweakerImplementationAPI.reload();
+  check(ResearchEditor.layout().require("TD_DYNAMIC").flags==21,"dynamic research flag script replays");
+  script("");
+  check(ResearchLayout.capture().require("TD_DYNAMIC").flags==10,"rollback restores stored flags without invoking addon getters");
  }
  public interface Checked{void run()throws Exception;}
  private void expectInvalid(String label,Checked action)throws Exception{String before=saved();try{action.run();throw new AssertionError("accepted "+label);}catch(IllegalArgumentException expected){checks++;}check(saved().equals(before),"invalid "+label+" leaves file unchanged");}
