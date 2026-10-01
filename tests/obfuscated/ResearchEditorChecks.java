@@ -27,6 +27,7 @@ public final class ResearchEditorChecks {
   make("TD_A",TAB,0,0);make("TD_B",TAB,2,0);make("TD_C",TAB,0,2);make("TD_D",OTHER,0,0);
   items.get("TD_C").setParents("TD_A","TD_A").setParentsHidden("TD_B").setSiblings("TD_A","TD_A","TD_B");
   items.get("TD_D").setLost().setHidden().setRound().setSpecial().setSecondary();
+  make("TD_V",OTHER,4,4);items.get("TD_V").setVirtual();
   script("");
  }
  private void make(String key,String tab,int x,int y){ResearchItem r=new ResearchItem(key,tab,new AspectList().add(Aspect.ORDER,1),x,y,1,new ResourceLocation("thaumcraft","textures/aspects/ordo.png"));r.setPages(new ResearchPage("Editor test"));r.registerResearchItem();items.put(key,r);}
@@ -34,6 +35,7 @@ public final class ResearchEditorChecks {
   check(Boolean.FALSE.equals(Launch.blackboard.get("fml.deobfuscatedEnvironment")),"production runtime");
   setup();
   overriddenFlags();
+  warp();
   check(ResearchEditor.problem()==null,"ready after reload");
   ResearchPage[] pages=items.get("TD_A").getPages();
   for(int i=1;i<=8;i++){final int x=i;ResearchEditor.edit("move",l->l.move("TD_A",TAB,x,4));}
@@ -59,6 +61,15 @@ public final class ResearchEditorChecks {
   ResearchEditor.edit("move to occupied tab",l->l.moveToTab("TD_A",OTHER));
   ResearchLayout.Entry a=ResearchEditor.layout().require("TD_A");
   check(a.tab.equals(OTHER)&&(a.x!=0||a.y!=0)&&Math.abs(a.x)<=1&&Math.abs(a.y)<=1,"move tab chooses nearest free ring");
+  for(int edge:new int[]{-10000,10000}){
+   ResearchLayout boundary=ResearchEditor.layout();
+   boundary.require("TD_A").x=boundary.require("TD_D").x=edge;
+   boundary.require("TD_A").y=boundary.require("TD_D").y=-10000;
+   boundary.require("TD_A").tab=TAB;
+   boundary.moveToTab("TD_A",OTHER);
+   ResearchLayout.Entry placed=boundary.require("TD_A");
+   check(placed.tab.equals(OTHER)&&Math.abs(placed.x)<=10000&&Math.abs(placed.y)<=10000&&(placed.x!=edge||placed.y!=-10000),"occupied position at coordinate boundary finds valid free cell");
+  }
   ResearchEditor.undo();check(ResearchEditor.redoName()!=null,"redo available");
   ResearchEditor.edit("branch",l->l.require("TD_A").flags|=1);
   check(ResearchEditor.redoName()==null,"new action clears redo");
@@ -74,6 +85,25 @@ public final class ResearchEditorChecks {
    check(!ResearchEditor.layout().require("TD_D").hasFlag(i),"original true flag can be cleared "+i);
    ResearchEditor.undo();check(ResearchEditor.layout().require("TD_D").hasFlag(i),"exact true flag restored "+i);
   }
+  script("");
+  ResearchEditor.edit("virtual placement",l->{l.toggleFlag("TD_A",5);l.move("TD_A",TAB,2,0);});
+  check(items.get("TD_A").isVirtual()&&items.get("TD_A").displayColumn==2,"pending virtual flag permits overlap before applying");
+  MineTweakerImplementationAPI.reload();
+  check(items.get("TD_A").isVirtual()&&items.get("TD_A").displayColumn==2,"virtual overlap survives generated move-before-flag script");
+  ResearchEditor.edit("make visible",l->l.toggleFlag("TD_A",5));
+  check(!items.get("TD_A").isVirtual()&&(items.get("TD_A").displayColumn!=2||items.get("TD_A").displayRow!=0),"clearing virtual finds a free cell");
+  ResearchEditor.undo();check(items.get("TD_A").isVirtual()&&items.get("TD_A").displayColumn==2&&items.get("TD_A").displayRow==0,"undo restores virtual flag and overlapping position together");
+  ResearchEditor.redo();check(!items.get("TD_A").isVirtual(),"redo clears virtual");
+  MineTweakerImplementationAPI.reload();check(!items.get("TD_A").isVirtual()&&items.get("TD_A").displayRow!=0,"devirtualized placement survives reload");
+  script("");
+  ResearchEditor.edit("virtual destination occupant",l->{l.toggleFlag("TD_B",5);l.move("TD_A",TAB,2,0);});
+  check(items.get("TD_B").isVirtual()&&items.get("TD_A").displayColumn==2,"collision check sees pending virtual flag on occupant");
+  script("");
+  ResearchEditor.edit("clear original virtual",l->l.toggleFlag("TD_V",5));
+  check(!items.get("TD_V").isVirtual()&&saved().contains("\"Virtual\", false"),"original virtual flag can be cleared and saved");
+  MineTweakerImplementationAPI.reload();check(!items.get("TD_V").isVirtual(),"original virtual cleared after reload");
+  ResearchEditor.edit("restore original virtual",l->l.toggleFlag("TD_V",5));
+  check(items.get("TD_V").isVirtual()&&!saved().contains("ResearchEditor.flag"),"restoring virtual baseline compacts script");
   script("");
   ResearchEditor.edit("add cross tab parent",l->l.parent("TD_B",null,"TD_D",false));
   check(Arrays.equals(items.get("TD_B").parents,new String[]{"TD_D"}),"cross tab parent");
@@ -121,6 +151,36 @@ public final class ResearchEditorChecks {
   Files.delete(temp.resolve("test.zs"));try{file.write("third");throw new AssertionError("external deletion ignored");}catch(java.io.IOException expected){checks++;}
   try(java.util.stream.Stream<Path> stream=Files.list(temp)){check(stream.count()==0,"no temporary files remain");}Files.delete(temp);
   check(ResearchEditor.problem()==null,"final clean baseline");
+ }
+ private void warp()throws Exception {
+  Map<Object,Integer> map=cpw.mods.fml.relauncher.ReflectionHelper.getPrivateValue(thaumcraft.api.ThaumcraftApi.class,null,"warpMap");
+  check(!map.containsKey("TD_A"),"fixture starts without research warp");
+  for(int amount:new int[]{1,3,8})ResearchEditor.edit("warp",l->l.setWarp("TD_A",amount));
+  check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==8&&saved().split("ResearchEditor.warp",-1).length==2,"repeated warp edits compact to final value");
+  MineTweakerImplementationAPI.reload();check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==8,"warp script replay");
+  ResearchEditor.edit("clear warp",l->l.setWarp("TD_A",0));
+  check(!map.containsKey("TD_A")&&!saved().contains("ResearchEditor.warp"),"zero clears warp and original-state edit compacts away");
+  ResearchEditor.undo();check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==8,"warp undo");
+  ResearchEditor.redo();check(!map.containsKey("TD_A"),"warp redo");
+  expectInvalid("negative warp",()->ResearchEditor.edit("bad",l->l.setWarp("TD_A",-1)));
+  script("");
+  Path late=Paths.get("scripts/zzzz-warp-baseline.zs");
+  Files.write(late,"mods.thaumcraft.Warp.addToResearch(\"TD_A\", 4);\n".getBytes(StandardCharsets.UTF_8));
+  script("mods.thaumicdabblery.ResearchEditor.warp(\"TD_A\", 9);\n");
+  check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==9,"editor warp applies after ordinary scripts");
+  ResearchEditor.edit("restore scripted warp",l->l.setWarp("TD_A",4));
+  check(!saved().contains("ResearchEditor.warp"),"scripted warp is editor baseline");
+  script("mods.thaumicdabblery.ResearchEditor.warp(\"TD_A\", 0);\n");
+  check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==0,"zero overrides existing scripted warp");
+  script("");check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==4,"removing editor override restores scripted warp");
+  Files.delete(late);script("");check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==0,"ordinary warp undo runs after editor undo");
+  ResearchEditor.edit("warp before delete",l->l.setWarp("TD_A",7));ResearchEditor.edit("delete",l->l.delete("TD_A"));
+  check(!map.containsKey("TD_A")&&!saved().contains("ResearchEditor.warp"),"deletion supersedes warp edit");
+  ResearchEditor.undo();check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==7,"deletion undo restores warp");
+  script("");
+  script("mods.thaumicdabblery.ResearchEditor.warp(\"TD_A\", -1);\n");
+  check(ResearchEditor.problem()!=null&&thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==0,"negative scripted warp rejected atomically");
+  script("");
  }
  private void overriddenFlags()throws Exception {
   // Gadomancy's isHidden() reads the client player, which does not exist during world startup.

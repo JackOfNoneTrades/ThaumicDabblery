@@ -18,6 +18,7 @@ import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import thaumcraft.api.research.ResearchCategories;
@@ -209,6 +210,13 @@ public final class ResearchEditorClient implements BookEditorInput.Handler {
         if (overlay == null) return false;
         if (Keyboard.getEventKeyState()) overlay.keyTyped(Keyboard.getEventCharacter(), Keyboard.getEventKey());
         return true;
+    }
+
+    @SubscribeEvent
+    public void tick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.END && enabled()
+            && overlay != null
+            && Minecraft.getMinecraft().currentScreen == overlay.browser) overlay.updateScreen();
     }
 
     @SubscribeEvent

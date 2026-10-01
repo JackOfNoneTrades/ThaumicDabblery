@@ -24,8 +24,8 @@ import thaumcraft.api.research.ResearchItem;
 /** A complete editable projection. Pages, recipe requirements and player knowledge are never changed. */
 public final class ResearchLayout {
 
-    public static final String[] FLAGS = { "Lost", "Hidden", "Secondary", "Round", "Spiky" };
-    private static final String[] FIELDS = { "isLost", "isHidden", "isSecondary", "isRound", "isSpecial" };
+    public static final String[] FLAGS = { "Lost", "Hidden", "Secondary", "Round", "Spiky", "Virtual" };
+    private static final String[] FIELDS = { "isLost", "isHidden", "isSecondary", "isRound", "isSpecial", "isVirtual" };
     public final Map<String, Entry> entries = new LinkedHashMap<>();
 
     public static final class Entry {
@@ -33,6 +33,7 @@ public final class ResearchLayout {
         public final ResearchItem research;
         public String tab;
         public int x, y, flags;
+        public Integer warp;
         public String[] parents, hidden, siblings;
         public boolean deleted;
 
@@ -41,6 +42,7 @@ public final class ResearchLayout {
             tab = item.category;
             x = item.displayColumn;
             y = item.displayRow;
+            warp = warpMap().get(item.key);
             // Addon getters may depend on a client player. Capture the stored flags we also restore in apply().
             for (int i = 0; i < FIELDS.length; i++)
                 if (Boolean.TRUE.equals(ReflectionHelper.getPrivateValue(ResearchItem.class, item, FIELDS[i])))
@@ -56,6 +58,7 @@ public final class ResearchLayout {
             x = source.x;
             y = source.y;
             flags = source.flags;
+            warp = source.warp;
             parents = copy(source.parents);
             hidden = copy(source.hidden);
             siblings = copy(source.siblings);
@@ -64,6 +67,14 @@ public final class ResearchLayout {
 
         public boolean hasFlag(int index) {
             return (flags & (1 << index)) != 0;
+        }
+
+        public boolean isVirtual() {
+            return hasFlag(5);
+        }
+
+        public int getWarp() {
+            return warp == null ? 0 : warp;
         }
     }
 
@@ -91,12 +102,12 @@ public final class ResearchLayout {
 
     public boolean occupied(String key, String tab, int x, int y) {
         Entry moving = require(key);
-        if (moving.research.isVirtual()) return false;
+        if (moving.isVirtual()) return false;
         for (Map.Entry<String, Entry> pair : entries.entrySet()) {
             Entry entry = pair.getValue();
             if (!pair.getKey()
                 .equals(key) && !entry.deleted
-                && !entry.research.isVirtual()
+                && !entry.isVirtual()
                 && entry.tab.equals(tab)
                 && entry.x == x
                 && entry.y == y) return true;
@@ -118,13 +129,19 @@ public final class ResearchLayout {
     }
 
     public void moveToTab(String key, String tab) {
+        if (!ResearchCategories.researchCategories.containsKey(tab))
+            throw new IllegalArgumentException("Missing tab: " + tab);
         Entry entry = require(key);
+        int originX = Math.max(-10000, Math.min(10000, entry.x));
+        int originY = Math.max(-10000, Math.min(10000, entry.y));
         for (int radius = 0; radius <= 1000; radius++) {
             for (int dy = -radius; dy <= radius; dy++) {
                 for (int dx = -radius; dx <= radius; dx++) {
                     if (Math.abs(dx) != radius && Math.abs(dy) != radius) continue;
-                    if (!occupied(key, tab, entry.x + dx, entry.y + dy)) {
-                        move(key, tab, entry.x + dx, entry.y + dy);
+                    int x = originX + dx, y = originY + dy;
+                    if (Math.abs(x) > 10000 || Math.abs(y) > 10000) continue;
+                    if (!occupied(key, tab, x, y)) {
+                        move(key, tab, x, y);
                         return;
                     }
                 }
@@ -143,6 +160,21 @@ public final class ResearchLayout {
         b.tab = tab;
         b.x = x;
         b.y = y;
+    }
+
+    public void toggleFlag(String key, int index) {
+        Entry entry = require(key);
+        entry.flags ^= 1 << index;
+        if (index == 5 && !entry.isVirtual()) moveToTab(key, entry.tab);
+    }
+
+    public void setWarp(String key, int amount) {
+        if (amount < 0) throw new IllegalArgumentException("Forbidden knowledge must be a non-negative whole number");
+        require(key).warp = amount == 0 ? null : amount;
+    }
+
+    private static Map<Object, Integer> warpMap() {
+        return ReflectionHelper.getPrivateValue(ThaumcraftApi.class, null, "warpMap");
     }
 
     public void parent(String child, String previous, String parent, boolean hiddenLink) {
@@ -200,7 +232,10 @@ public final class ResearchLayout {
             if (entry.deleted) continue;
             if (!ResearchCategories.researchCategories.containsKey(entry.tab))
                 throw new IllegalArgumentException("Missing tab: " + entry.tab);
-            if (original == null || !entry.tab.equals(original.tab) || entry.x != original.x || entry.y != original.y) {
+            if (original == null || !entry.tab.equals(original.tab)
+                || entry.x != original.x
+                || entry.y != original.y
+                || original.isVirtual() && !entry.isVirtual()) {
                 if (Math.abs((long) entry.x) > 10000 || Math.abs((long) entry.y) > 10000)
                     throw new IllegalArgumentException("Position out of range: " + key);
                 if (occupied(key, entry.tab, entry.x, entry.y))
@@ -218,12 +253,15 @@ public final class ResearchLayout {
 
     /** All placements happen together so swapping occupied positions needs no temporary research coordinates. */
     public void apply() {
+        Map<Object, Integer> warp = warpMap();
         for (ResearchCategoryList category : ResearchCategories.researchCategories.values()) {
             for (String key : entries.keySet()) category.research.remove(key);
         }
         for (Map.Entry<String, Entry> pair : entries.entrySet()) {
             Entry entry = pair.getValue();
             ResearchItem research = entry.research;
+            if (entry.deleted || entry.warp == null) warp.remove(pair.getKey());
+            else warp.put(pair.getKey(), entry.warp);
             MoveResearchCompat.setPositionAndCategory(research, entry.x, entry.y, entry.tab);
             research.parents = copy(entry.parents);
             research.parentsHidden = copy(entry.hidden);
@@ -284,6 +322,11 @@ public final class ResearchLayout {
                     .append(", ")
                     .append(entry.hasFlag(i))
                     .append(");\n");
+            if (entry.getWarp() != original.getWarp()) script.append("ResearchEditor.warp(")
+                .append(quote(key))
+                .append(", ")
+                .append(entry.getWarp())
+                .append(");\n");
             if (!Arrays.equals(entry.parents, original.parents) || !Arrays.equals(entry.hidden, original.hidden))
                 script.append("ResearchEditor.parents(")
                     .append(quote(key))

@@ -46,9 +46,10 @@ public final class ResearchEditorClientProbe {
  private int sy(int y)throws Exception{return (Integer)call(overlay(),"screenY","screenY",new Class[]{int.class},y);}
  private void menu(int row)throws Exception{Object g=overlay();click((Integer)field(g,"menuX")+12,(Integer)field(g,"menuY")+34+row*16,0);}
  private void toolbar(String button)throws Exception{Object g=overlay();int x=button.equals("Done")?(Integer)field(g,"right")-45:button.equals("Undo")?(Integer)field(g,"left")+40:(Integer)field(g,"left")+90;int y=(Integer)field(g,"toolbarY")+6;click(x,y,0);if(ResearchEditorClient.enabled())release(x,y);}
- private void type(int key)throws Exception{
+ private void type(int key)throws Exception{type(key,' ');}
+ private void type(int key,char character)throws Exception{
   Object event=field(Keyboard.class,"current_event");String[] names={"key","state","character"};Object[] old=new Object[names.length];for(int i=0;i<names.length;i++)old[i]=field(event,names[i]);
-  try{set(event,"key",key);set(event,"state",true);set(event,"character",32);Minecraft.func_71410_x().field_71462_r.func_146282_l();}finally{for(int i=0;i<names.length;i++)set(event,names[i],old[i]);}
+  try{set(event,"key",key);set(event,"state",true);set(event,"character",(int)character);Minecraft.func_71410_x().field_71462_r.func_146282_l();}finally{for(int i=0;i<names.length;i++)set(event,names[i],old[i]);}
  }
  private void shortcut(int key,boolean shift)throws Exception {
   java.nio.ByteBuffer keys=(java.nio.ByteBuffer)field(Keyboard.class,"keyDownBuffer");int[] codes={29,219,42};byte[] old=new byte[codes.length];for(int i=0;i<codes.length;i++){old[i]=keys.get(codes[i]);keys.put(codes[i],(byte)(i==2&&!shift?0:1));}
@@ -113,21 +114,42 @@ public final class ResearchEditorClientProbe {
     toolbar("Redo");checks.check(checks.items.get("TD_A").displayColumn==1,"redo button repeats drag");
     click(sx(1),sy(1),1);menu(3);
    }else if(stage==3){
-    shot("editor-properties");Object menuOverlay=overlay();click((Integer)field(menuOverlay,"menuX")+12,(Integer)field(menuOverlay,"menuY")+34,1);checks.check(ResearchEditor.layout().require("TD_A").flags==0,"right-click does not execute a context-menu item");for(int i=0;i<5;i++)menu(i);type(1);
-    checks.check(ResearchEditor.layout().require("TD_A").flags==31,"all five property controls work together");
-    shortcut(44,false);checks.check(ResearchEditor.layout().require("TD_A").flags==15,"Ctrl/Cmd+Z undoes a property edit");
-    shortcut(44,true);checks.check(ResearchEditor.layout().require("TD_A").flags==31,"Ctrl/Cmd+Shift+Z redoes a property edit");
+    shot("editor-properties");Object menuOverlay=overlay();click((Integer)field(menuOverlay,"menuX")+12,(Integer)field(menuOverlay,"menuY")+34,1);checks.check(ResearchEditor.layout().require("TD_A").flags==0,"right-click does not execute a context-menu item");for(int i=0;i<6;i++)menu(i);type(1);
+    checks.check(ResearchEditor.layout().require("TD_A").flags==63&&checks.items.get("TD_A").isVirtual(),"all six property controls work together");
+    shortcut(44,false);checks.check(ResearchEditor.layout().require("TD_A").flags==31&&!checks.items.get("TD_A").isVirtual(),"Ctrl/Cmd+Z undoes Virtual");
+    shortcut(44,true);checks.check(ResearchEditor.layout().require("TD_A").flags==63&&checks.items.get("TD_A").isVirtual(),"Ctrl/Cmd+Shift+Z redoes Virtual");
+    click(sx(1),sy(1),1);menu(3);menu(5);type(1);
+    checks.check(!checks.items.get("TD_A").isVirtual(),"Virtual checkbox clears flag");
+    click(sx(1),sy(1),1);menu(3);menu(6);type(6,'5');type(28);
+    checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5&&field(overlay(),"warpKey")==null,"forbidden knowledge input applies entered amount");
+    toolbar("Undo");checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==0,"warp UI undo");
+    toolbar("Redo");checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5,"warp UI redo");
+    click(sx(1),sy(1),1);menu(3);menu(6);type(12,'-');type(28);
+    checks.check(field(overlay(),"warpKey")!=null&&thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5,"invalid warp input stays open without applying");type(1);
+    click(sx(1),sy(1),1);menu(3);menu(6);type(2,'1');
+   }else if(stage==4){
+    Object input=field(overlay(),"warpInput");int cursor=(Integer)field(input,"field_146214_l");
+    for(int i=0;i<100;i++)ResearchEditorClient.beginFrame((GuiResearchBrowser)mc.field_71462_r);
+    checks.check((Integer)field(input,"field_146214_l")==cursor,"render and input preparation do not accelerate cursor blink");
+    ResearchEditorClient handler=new ResearchEditorClient();handler.tick(new TickEvent.ClientTickEvent(TickEvent.Phase.START));
+    checks.check((Integer)field(input,"field_146214_l")==cursor,"start phase does not double-tick cursor");
+    handler.tick(new TickEvent.ClientTickEvent(TickEvent.Phase.END));
+    checks.check((Integer)field(input,"field_146214_l")==cursor+1,"cursor advances once per client tick");
+    shot("editor-forbidden-knowledge");type(1);
+    checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5,"Escape cancels unapplied warp value");
+    ResearchEditor.edit("occupy destination",l->l.move("TD_D",ResearchEditorChecks.OTHER,1,1));
     checks.check(field(mc.field_71462_r,"currentHighlight")==null,"native purchase and creative hover target stays empty");
     click(sx(1),sy(1),1);menu(1);
-   }else if(stage==4){
-    shot("editor-select-tab");tab(ResearchEditorChecks.OTHER);checks.check(checks.items.get("TD_A").category.equals(ResearchEditorChecks.OTHER),"tab click moves selected entry");
+   }else if(stage==5){
+    shot("editor-select-tab");tab(ResearchEditorChecks.OTHER);checks.check(checks.items.get("TD_A").category.equals(ResearchEditorChecks.OTHER),"tab click moves selected entry into occupied destination tab");
+    checks.check(checks.items.get("TD_A").displayColumn==0&&checks.items.get("TD_A").displayRow==0,"occupied destination relocates to first free cell");
     checks.check(field(overlay(),"tab").equals(ResearchEditorChecks.OTHER),"move focuses destination tab");
-    click(sx(1),sy(1),1);menu(2);tab(ResearchEditorChecks.TAB);click(sx(2),sy(0),0);
+    click(sx(0),sy(0),1);menu(2);tab(ResearchEditorChecks.TAB);click(sx(2),sy(0),0);
     checks.check(checks.items.get("TD_A").category.equals(ResearchEditorChecks.TAB)&&checks.items.get("TD_B").category.equals(ResearchEditorChecks.OTHER),"cross-tab swap target selection");
     toolbar("Undo");checks.check(checks.items.get("TD_B").category.equals(ResearchEditorChecks.TAB),"swap is single undo action");
     click(sx(2),sy(0),1);menu(0);menu(0);tab(ResearchEditorChecks.OTHER);
-   }else if(stage==5){
-    shot("editor-select-parent");click(sx(0),sy(0),0);checks.check(Arrays.equals(checks.items.get("TD_B").parents,new String[]{"TD_D"}),"parent picker works across tabs");
+   }else if(stage==6){
+    shot("editor-select-parent");click(sx(1),sy(1),0);checks.check(Arrays.equals(checks.items.get("TD_B").parents,new String[]{"TD_D"}),"parent picker works across tabs");
     tab(ResearchEditorChecks.TAB);click(sx(2),sy(0),1);menu(0);menu(1);menu(2);type(1);
     checks.check(Arrays.equals(checks.items.get("TD_B").parentsHidden,new String[]{"TD_D"}),"parent context hidden-link control");
     click(sx(2),sy(0),1);menu(4);checks.check(ResearchCategories.getResearch("TD_B")==null&&checks.items.get("TD_C").parentsHidden.length==0,"delete UI detaches hidden links");
@@ -138,7 +160,7 @@ public final class ResearchEditorClientProbe {
     checks.check(knowledge.equals(knowledge()),"all editor actions preserve player knowledge and points");
     type(1);checks.check(mc.field_71462_r==null&&ResearchEditorClient.enabled(),"closing book preserves toggle state");mc.func_147108_a(new GuiResearchBrowser());checks.check(mc.field_71462_r.getClass()==GuiResearchBrowser.class&&ResearchEditorClient.enabled(),"reopen resumes editor");
     toolbar("Done");checks.check(mc.field_71462_r instanceof GuiResearchBrowser&&!ResearchEditorClient.enabled(),"Done returns to normal book and disables editing");
-   }else if(stage==6){
+   }else if(stage==7){
     shot("editor-native-after");completionCounter(true);GuiScreen stock=mc.field_71462_r;
     key.func_151462_b(68);type(68);checks.check(mc.field_71462_r==stock&&ResearchEditorClient.enabled(),"bound key edits the same stock GUI instance");
     type(68);checks.check(mc.field_71462_r==stock&&!ResearchEditorClient.enabled(),"bound key leaves same stock GUI instance");
@@ -149,15 +171,28 @@ public final class ResearchEditorClientProbe {
     type(68);key.func_151462_b(0);
     new ScanAllCommand().func_71515_b(mc.field_71439_g,new String[]{"edit"});mc.func_147108_a(new GuiResearchBrowser());
     mc.field_71462_r.func_146280_a(mc,320,240);
-   }else if(stage==7){
+   }else if(stage==8){
     shot("editor-small-screen");checks.check(mc.field_71462_r.getClass()==GuiResearchBrowser.class&&ResearchEditorClient.enabled(),"minimum-size editor renders");
     checks.check(ResearchEditor.undoName()!=null,"history survives closing book");
     for(int i=0;i<35;i++)ResearchCategories.registerCategory("TD_EXTRA"+i,new net.minecraft.util.ResourceLocation("thaumcraft","textures/aspects/ordo.png"),new net.minecraft.util.ResourceLocation("thaumcraft","textures/gui/gui_researchback.png"));
     Object g=overlay();Set<String> page=ResearchEditorClient.visibleTabs();click((Integer)field(g,"right")-9,(Integer)field(g,"toolbarY")+6,0);checks.check(!page.equals(ResearchEditorClient.visibleTabs()),"native tab page arrow works with many tabs");
     tab("TD_EXTRA34");checks.check("TD_EXTRA34".equals(ResearchEditorClient.selectedTab()),"last tab page remains selectable");mc.field_71462_r.func_73863_a(0,0,0);tab(ResearchEditorChecks.TAB);
+    // Bottom tabs can overlap the toolbar vertically. Their outer edge must still select/move tabs.
+    ResearchEditorClient.turnPage(-10000);
+    int last=ResearchEditorClient.tabsPerSide()-1;
+    String edgeTab=new ArrayList<>(ResearchEditorClient.visibleTabs()).get(last);
+    int tabTop=(Integer)field(g,"top")-17+last*24,toolbarY=(Integer)field(g,"toolbarY");
+    if(toolbarY>=tabTop&&toolbarY<tabTop+24){
+     click(sx(0),sy(2),1);menu(1);ResearchEditorClient.turnPage(-10000);
+     click((Integer)field(g,"left")-28,toolbarY,0);
+     checks.check(checks.items.get("TD_C").category.equals(edgeTab),"tab click in toolbar-height band moves research");
+     checks.check(field(g,"tab").equals(edgeTab),"tab-edge move focuses destination");
+     toolbar("Undo");
+    }
     MineTweakerImplementationAPI.reload();
    }else{
     checks.check(ResearchEditor.undoName()==null,"reload clears UI history");checks.check(checks.items.get("TD_A").category.equals(ResearchEditorChecks.OTHER),"saved file replay restores GUI changes");
+    checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5,"saved forbidden knowledge survives client reload");
     System.out.println("TD_EDITOR_CLIENT_PASS checks="+checks.checks);done=true;mc.func_71400_g();
    }
    stage++;

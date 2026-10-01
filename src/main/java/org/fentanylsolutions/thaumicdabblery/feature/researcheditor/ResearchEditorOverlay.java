@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
 
 import org.lwjgl.input.Keyboard;
@@ -49,6 +50,8 @@ public final class ResearchEditorOverlay extends GuiScreen {
     private String menuTitle, menuKey;
     private int menuX, menuY, menuWidth, menuScroll;
     private GuiButton undo, redo;
+    private GuiTextField warpInput;
+    private String warpKey, warpError;
 
     public ResearchEditorOverlay(GuiResearchBrowser browser) {
         this.browser = browser;
@@ -81,7 +84,7 @@ public final class ResearchEditorOverlay extends GuiScreen {
             button.visible = false;
         }
         tab = ResearchEditorClient.selectedTab();
-        updateScreen();
+        refreshState();
     }
 
     public void detach() {
@@ -120,6 +123,10 @@ public final class ResearchEditorOverlay extends GuiScreen {
 
     @Override
     public void updateScreen() {
+        if (warpInput != null) warpInput.updateCursorCounter();
+    }
+
+    private void refreshState() {
         if (!ResearchEditorClient.enabled()) {
             ResearchEditorClient.done(tab);
             return;
@@ -202,9 +209,9 @@ public final class ResearchEditorOverlay extends GuiScreen {
                 || pair.getKey()
                     .equals(source))
                 border(x - 13, y - 13, 26, 26, 0xff63d9e0);
-            if (entry.hasFlag(0) || entry.hasFlag(1) || entry.research.isVirtual()) {
+            if (entry.hasFlag(0) || entry.hasFlag(1) || entry.isVirtual()) {
                 String badge = (entry.hasFlag(0) ? "L" : "") + (entry.hasFlag(1) ? "H" : "")
-                    + (entry.research.isVirtual() ? "V" : "");
+                    + (entry.isVirtual() ? "V" : "");
                 fontRendererObj.drawStringWithShadow(badge, x - 11, y + 5, 0xffffe8a4);
             }
         }
@@ -249,7 +256,8 @@ public final class ResearchEditorOverlay extends GuiScreen {
                 bottom - 22 + i * 10,
                 saveFailed ? 0xffff9393 : 0xffd7e2d7);
         }
-        if (!menu.isEmpty()) drawMenu(mx, my);
+        if (warpKey != null) drawWarp();
+        else if (!menu.isEmpty()) drawMenu(mx, my);
         else if (!dragging && !panning) {
             String target = hit(mx, my);
             if (target != null) {
@@ -258,7 +266,7 @@ public final class ResearchEditorOverlay extends GuiScreen {
                     Arrays.asList(name(target), target, entry.tab + " (" + entry.x + ", " + entry.y + ")"));
                 for (int i = 0; i < ResearchLayout.FLAGS.length; i++)
                     if (entry.hasFlag(i)) tooltip.add(ResearchLayout.FLAGS[i]);
-                if (entry.research.isVirtual()) tooltip.add("Virtual research");
+                if (entry.getWarp() != 0) tooltip.add("Forbidden knowledge: " + entry.getWarp());
                 if (pick == Pick.PARENT) {
                     try {
                         layout.copy()
@@ -356,7 +364,7 @@ public final class ResearchEditorOverlay extends GuiScreen {
                 && Math.abs(y - screenY(entry.y)) <= 11) {
                 if (pair.getKey()
                     .equals(selected)) return selected;
-                if (fallback == null || !entry.research.isVirtual()) fallback = pair.getKey();
+                if (fallback == null || !entry.isVirtual()) fallback = pair.getKey();
             }
         }
         return fallback;
@@ -390,6 +398,16 @@ public final class ResearchEditorOverlay extends GuiScreen {
             ResearchEditorClient.done(tab);
             return;
         }
+        if (warpKey != null) {
+            if (button != 0) return;
+            int left = (width - 220) / 2, top = (height - 104) / 2;
+            warpInput.mouseClicked(x, y, button);
+            if (y >= top + 62 && y < top + 80) {
+                if (x >= left + 12 && x < left + 106) applyWarp();
+                else if (x >= left + 114 && x < left + 208) cancel();
+            }
+            return;
+        }
         if (!menu.isEmpty()) {
             if (x >= menuX && x <= menuX + menuWidth && y >= menuY && y < menuY + 30 + menuRows() * ROW) {
                 if (button != 0) return;
@@ -404,7 +422,7 @@ public final class ResearchEditorOverlay extends GuiScreen {
             menu.clear();
             return;
         }
-        if (button == 0 && y >= toolbarY && y < toolbarY + 13) {
+        if (button == 0 && x >= left && x < right && y >= toolbarY && y < toolbarY + 13) {
             undo.enabled = ResearchEditor.undoName() != null;
             redo.enabled = ResearchEditor.redoName() != null;
             super.mouseClicked(x, y, button);
@@ -494,6 +512,7 @@ public final class ResearchEditorOverlay extends GuiScreen {
     }
 
     public void scroll(int x, int direction) {
+        if (warpKey != null) return;
         if (!menu.isEmpty()) menuScroll = Math.max(0, Math.min(menuScroll + direction, menu.size() - menuRows()));
         else if (x < left || x >= right) ResearchEditorClient.turnPage(direction);
         else geometry
@@ -517,6 +536,12 @@ public final class ResearchEditorOverlay extends GuiScreen {
             ResearchEditorClient.done(tab);
             return;
         }
+        if (warpKey != null) {
+            if (key == Keyboard.KEY_ESCAPE) cancel();
+            else if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) applyWarp();
+            else warpInput.textboxKeyTyped(character, key);
+            return;
+        }
         if (key == Keyboard.KEY_ESCAPE) {
             if (!menu.isEmpty() || pick != Pick.NONE || dragging || panning) cancel();
             else mc.displayGuiScreen(null);
@@ -531,6 +556,8 @@ public final class ResearchEditorOverlay extends GuiScreen {
     }
 
     private void cancel() {
+        warpKey = warpError = null;
+        warpInput = null;
         menu.clear();
         dragging = panning = false;
         pick = Pick.NONE;
@@ -589,11 +616,54 @@ public final class ResearchEditorOverlay extends GuiScreen {
             menu.add(new MenuItem((entry.hasFlag(i) ? "[x] " : "[ ] ") + ResearchLayout.FLAGS[i], () -> {
                 edit(
                     "Changed " + ResearchLayout.FLAGS[index] + " for " + name(key),
-                    next -> next.require(key).flags ^= 1 << index);
+                    next -> next.toggleFlag(key, index));
                 propertiesMenu(key);
             }));
         }
+        menu.add(new MenuItem("Forbidden knowledge: " + entry.getWarp() + "...", () -> {
+            warpKey = key;
+            warpError = null;
+            warpInput = new GuiTextField(fontRendererObj, (width - 220) / 2 + 12, (height - 104) / 2 + 36, 196, 18);
+            warpInput.setMaxStringLength(10);
+            warpInput.setText(Integer.toString(entry.getWarp()));
+            warpInput.setFocused(true);
+            warpInput.setSelectionPos(0);
+        }));
         menu.add(new MenuItem("< Back", () -> rootMenu(key, menuX, menuY)));
+    }
+
+    private void drawWarp() {
+        int left = (width - 220) / 2, top = (height - 104) / 2;
+        drawRect(0, 0, width, height, 0x99000000);
+        drawRect(left, top, left + 220, top + 104, 0xff202936);
+        border(left, top, 220, 104, 0xff97a5b8);
+        drawString(fontRendererObj, "Forbidden knowledge", left + 12, top + 8, 0xffffdf9c);
+        drawString(fontRendererObj, "Research warp amount (0 to clear)", left + 12, top + 22, 0xffd7e2d7);
+        warpInput.xPosition = left + 12;
+        warpInput.yPosition = top + 36;
+        warpInput.drawTextBox();
+        drawRect(left + 12, top + 62, left + 106, top + 80, 0xff465b70);
+        drawRect(left + 114, top + 62, left + 208, top + 80, 0xff465b70);
+        drawCenteredString(fontRendererObj, "Apply", left + 59, top + 67, 0xffeef0ec);
+        drawCenteredString(fontRendererObj, "Cancel", left + 161, top + 67, 0xffeef0ec);
+        if (warpError != null) drawString(fontRendererObj, fit(warpError, 196), left + 12, top + 88, 0xffff9393);
+    }
+
+    private void applyWarp() {
+        final int amount;
+        try {
+            amount = Integer.parseInt(
+                warpInput.getText()
+                    .trim());
+            if (amount < 0) throw new NumberFormatException();
+        } catch (NumberFormatException exception) {
+            warpError = "Enter a non-negative whole number.";
+            return;
+        }
+        String key = warpKey;
+        edit("Changed forbidden knowledge for " + name(key), next -> next.setWarp(key, amount));
+        if (saveFailed) warpError = notice;
+        else cancel();
     }
 
     private void parentsMenu(String key) {

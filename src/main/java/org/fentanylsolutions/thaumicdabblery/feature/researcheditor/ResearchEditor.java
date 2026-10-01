@@ -90,6 +90,11 @@ public final class ResearchEditor {
     }
 
     @ZenMethod
+    public static synchronized void warp(String key, int amount) {
+        PATCHES.add(layout -> layout.setWarp(key, amount));
+    }
+
+    @ZenMethod
     public static synchronized void parents(String key, String[] visible, String[] hidden) {
         final String[] normalCopy = visible == null ? null : visible.clone();
         final String[] hiddenCopy = hidden == null ? null : hidden.clone();
