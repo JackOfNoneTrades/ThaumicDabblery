@@ -28,7 +28,7 @@ public final class ResearchRemovalChecks {
   ResearchItem r=new ResearchItem(key,tab,new AspectList().add(Aspect.ORDER,1),column,0,1,new ResourceLocation("thaumcraft","textures/aspects/ordo.png"));
   r.setAutoUnlock();r.setPages(new ResearchPage("Removal regression fixture"));r.registerResearchItem();items.put(key,r);return r;
  }
- private void setup(){
+ private void setup()throws Exception{
   category(REMOVED);category(SURVIVES);category(SECOND);category("TD_EMPTY");
   ResearchItem a=research("TD_A",REMOVED,0),b=research("TD_B",REMOVED,2),keep=research("TD_KEEP",SURVIVES,0),other=research("TD_OTHER",SURVIVES,2),c=research("TD_C",SECOND,0);
   a.setSiblings("TD_B","TD_B");b.setParents("TD_A","TD_A").setParentsHidden("TD_A");
@@ -37,6 +37,27 @@ public final class ResearchRemovalChecks {
    .setParentsHidden("TD_B","TD_A","TD_B","TD_A")
    .setSiblings("TD_A","TD_B","TD_KEEP","TD_A","TD_B","TD_C");
   keep.setParentsHidden(new String[0]);
+  // Addon setters can reject null (WGResearchItem) or rewrite already stored keys.
+  // Exercise both untouched null lists and modified lists without invoking those setters.
+  for(int i=0;i<2;i++){
+   ResearchItem guarded=new ResearchItem("TD_GUARDED_"+i,SURVIVES,new AspectList(),10+i*2,0,1,new ResourceLocation("thaumcraft","textures/aspects/ordo.png")){
+    @Override public ResearchItem setParents(String... keys){throw new AssertionError("addon parent setter called");}
+    @Override public ResearchItem setParentsHidden(String... keys){throw new AssertionError("addon hidden-parent setter called");}
+    @Override public ResearchItem setSiblings(String... keys){throw new AssertionError("addon sibling setter called");}
+   };
+   if(i==1){guarded.parents=new String[]{"TD_A","TD_KEEP","TD_A"};guarded.parentsHidden=new String[]{"TD_B","TD_A","TD_B"};guarded.siblings=new String[]{"TD_A","TD_B","TD_KEEP"};}
+   guarded.setPages(new ResearchPage("Addon setter regression"));guarded.registerResearchItem();items.put(guarded.key,guarded);
+  }
+  if(cpw.mods.fml.common.Loader.isModLoaded("WitchingGadgets")){
+   Class<?> type=Class.forName("witchinggadgets.common.util.research.WGResearchItem");
+   for(int i=0;i<2;i++){
+    ResearchItem wg=(ResearchItem)type.getConstructor(String.class,String.class,AspectList.class,int.class,int.class,int.class,ResourceLocation.class)
+     .newInstance("TD_WG_"+i,SURVIVES,new AspectList(),16+i*2,0,1,new ResourceLocation("thaumcraft","textures/aspects/ordo.png"));
+    wg.parents=new String[]{"TD_KEEP"};
+    if(i==1){wg.parents=new String[]{"TD_A","TD_KEEP","TD_A"};wg.parentsHidden=new String[]{"TD_B","TD_A","TD_B"};wg.siblings=new String[]{"TD_A","TD_B"};}
+    wg.setPages(new ResearchPage("Real Witching Gadgets regression"));wg.registerResearchItem();items.put(wg.key,wg);
+   }
+  }
   for(ResearchItem r:items.values())originals.put(r.key,new String[][]{copy(r.parents),copy(r.parentsHidden),copy(r.siblings)});
  }
  private String[] filtered(String[] values,Set<String> removed){return values==null?null:Arrays.stream(values).filter(v->!removed.contains(v)).toArray(String[]::new);}
@@ -59,6 +80,10 @@ public final class ResearchRemovalChecks {
   // Clear the previous run's script before registering this process's fixtures.
   script("");setup();script("");verifyRestored();
   try{
+   // The reported first failing call must not touch an unrelated addon's null lists or abort the next move.
+   script(command("orphanResearch","TKFAKECRUCIBLE")+"mods.thaumcraft.Research.moveResearch(\"TD_OTHER\", \"TD_SURVIVES\", 4, 4);\n");
+   check(items.get("TD_OTHER").displayColumn==4&&items.get("TD_OTHER").displayRow==4,"script continues after reported orphanResearch call");
+   script("");verifyRestored();
    for(int cycle=0;cycle<3;cycle++){
     script(command("removeTab",REMOVED));
     check(ResearchCategories.getResearchList(REMOVED)==null&&ResearchCategories.getResearch("TD_A")==null,"tab and research lookup removed");

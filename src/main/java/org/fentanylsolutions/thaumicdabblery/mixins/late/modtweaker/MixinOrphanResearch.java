@@ -42,15 +42,19 @@ public abstract class MixinOrphanResearch {
         for (ResearchCategoryList category : ResearchCategories.researchCategories.values()) {
             for (Map.Entry<String, ResearchItem> entry : category.research.entrySet()) {
                 ResearchItem research = entry.getValue();
-                research.setParents(
-                    thaumicdabblery$removeReferences(entry.getKey(), research.parents, thaumicdabblery$parents));
-                research.setParentsHidden(
-                    thaumicdabblery$removeReferences(
-                        entry.getKey(),
-                        research.parentsHidden,
-                        thaumicdabblery$hiddenParents));
-                research.setSiblings(
-                    thaumicdabblery$removeReferences(entry.getKey(), research.siblings, thaumicdabblery$siblings));
+                // Addon setters may reject null or rewrite keys. Preserve the stored lists directly.
+                research.parents = thaumicdabblery$removeReferences(
+                    entry.getKey(),
+                    research.parents,
+                    thaumicdabblery$parents);
+                research.parentsHidden = thaumicdabblery$removeReferences(
+                    entry.getKey(),
+                    research.parentsHidden,
+                    thaumicdabblery$hiddenParents);
+                research.siblings = thaumicdabblery$removeReferences(
+                    entry.getKey(),
+                    research.siblings,
+                    thaumicdabblery$siblings);
             }
         }
         // Both ModTweaker implementations remove only the first occurrence of a reference.
@@ -66,9 +70,9 @@ public abstract class MixinOrphanResearch {
 
     @Inject(method = "undo", at = @At("HEAD"), cancellable = true)
     private void thaumicdabblery$restoreReferences(CallbackInfo ci) {
-        thaumicdabblery$restore(thaumicdabblery$parents, ResearchItem::setParents);
-        thaumicdabblery$restore(thaumicdabblery$hiddenParents, ResearchItem::setParentsHidden);
-        thaumicdabblery$restore(thaumicdabblery$siblings, ResearchItem::setSiblings);
+        thaumicdabblery$restore(thaumicdabblery$parents, (research, values) -> research.parents = values);
+        thaumicdabblery$restore(thaumicdabblery$hiddenParents, (research, values) -> research.parentsHidden = values);
+        thaumicdabblery$restore(thaumicdabblery$siblings, (research, values) -> research.siblings = values);
         ci.cancel();
     }
 

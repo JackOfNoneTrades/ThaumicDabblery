@@ -414,6 +414,12 @@ The common checks exercise the actual `removeTab`, `removeResearch` and `orphanR
 through repeated MineTweaker reloads. They cover duplicate ordinary/hidden parents and siblings, links within and
 between tabs, multiple removed tabs, unrelated references, null/empty arrays, exact undo order and multiplicity,
 empty/missing tabs, later removal/movement of a dependent research, snapshot isolation and action reuse.
+Research subclasses whose link setters throw verify that cleanup and undo operate on stored arrays, including
+untouched null lists. The reported `orphanResearch("TKFAKECRUCIBLE")` call must allow a following move to execute.
+Require 582 checks in the base matrix. With Witching Gadgets 1.2.9 and Traveller's Gear 1.16.6 installed,
+the fixture also creates actual `WGResearchItem` instances with null and populated hidden-parent lists;
+require 744 checks with each ModTweaker fork. This covers the null-array script crash and exact restoration
+without invoking Witching Gadgets' prerequisite validation during undo.
 Success prints `TD_REMOVAL_SERVER_PASS`. Missing-dependent restoration intentionally logs a warning.
 
 The client also renders the surviving Thaumonomicon tab after deletion, after undo, and after deleting multiple
