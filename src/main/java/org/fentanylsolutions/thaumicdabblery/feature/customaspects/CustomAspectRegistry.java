@@ -57,10 +57,8 @@ public final class CustomAspectRegistry {
             Aspect aspect = new ScriptedAspect(definition);
             OWNED.put(definition.tag, aspect);
             EXPECTED.put(definition.tag, definition.components());
-            if (definition.first == null) {
-                if (definition.hiddenUntilScanned) HIDDEN.add(aspect);
-                else VISIBLE_PRIMALS.add(aspect);
-            }
+            if (definition.hiddenUntilScanned) HIDDEN.add(aspect);
+            else if (definition.first == null) VISIBLE_PRIMALS.add(aspect);
         }
         for (ComponentEdit edit : edits) {
             OWNED.put(edit.tag, Aspect.getAspect(edit.tag));
@@ -208,11 +206,11 @@ public final class CustomAspectRegistry {
             this(tag, color, image, null, null, description, hiddenUntilScanned);
         }
 
-        private Definition(String tag, int color, String image, String first, String second, String description,
+        public Definition(String tag, int color, String image, String first, String second, String description,
             boolean hiddenUntilScanned) {
             this.tag = requireTag(tag);
-            this.first = first;
-            this.second = second;
+            this.first = first == null && second == null ? null : requireTag(first);
+            this.second = first == null && second == null ? null : requireTag(second);
             if (color < 0 || color > 0xFFFFFF)
                 throw new IllegalArgumentException("Aspect color must be an RGB integer from 0x000000 to 0xFFFFFF");
             if (image == null || !image.matches("[a-z0-9_.-]+:[a-z0-9_][a-z0-9_./-]*\\.png") || image.contains(".."))

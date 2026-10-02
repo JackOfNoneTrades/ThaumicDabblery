@@ -45,7 +45,7 @@ public abstract class MixinPrimalScan {
         CallbackInfoReturnable<Boolean> cir) {
         if (!ScanAll.covers(player, scan) && !cir.getReturnValueZ()
             && ScanManager.hasBeenScanned(player, scan)
-            && PrimalDiscovery.hasUnknownPrimal(player, scan)
+            && PrimalDiscovery.hasUnknownAspect(player, scan)
             && ScanManager.validScan(ScanManager.getScanAspects(scan, player.worldObj), player))
             cir.setReturnValue(true);
     }
@@ -53,6 +53,6 @@ public abstract class MixinPrimalScan {
     @Inject(method = "completeScan", at = @At("RETURN"))
     private static void td$recovery(EntityPlayer player, ScanResult scan, String prefix,
         CallbackInfoReturnable<Boolean> cir) {
-        if (cir.getReturnValueZ()) PrimalDiscovery.revealScannedPrimals(player, scan, prefix);
+        if (cir.getReturnValueZ()) PrimalDiscovery.revealScannedAspects(player, scan, prefix);
     }
 }

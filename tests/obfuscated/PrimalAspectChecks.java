@@ -108,5 +108,59 @@ public final class PrimalAspectChecks {
         if(Files.exists(disk)){k.wipePlayerKnowledge(name);ResearchManager.loadAspectNBT(CompressedStreamTools.func_74797_a(disk.toFile()),p);check(k.hasDiscoveredAspect(name,hidden),"disk process restart");System.out.println("TD_PRIMAL_RESTART_PASS");}
         CompressedStreamTools.func_74795_b(saved,disk.toFile());
         for(int i=0;i<2;i++){MineTweakerImplementationAPI.reload();check(Aspect.VOID.getComponents()[0]==hidden && Aspect.getAspect("tdhidden")==hidden,"reload retains startup graph");}
+        gatedCompound(world,p);
     }
+    private void combine(EntityPlayerMP player, Aspect a, Aspect b, boolean bonus) throws Exception {
+        cpw.mods.fml.common.network.simpleimpl.MessageContext context;
+        java.lang.reflect.Constructor<?> ctor=cpw.mods.fml.common.network.simpleimpl.MessageContext.class.getDeclaredConstructors()[0];ctor.setAccessible(true);
+        context=(cpw.mods.fml.common.network.simpleimpl.MessageContext)ctor.newInstance(player.field_71135_a,cpw.mods.fml.relauncher.Side.SERVER);
+        thaumcraft.common.lib.network.playerdata.PacketAspectCombinationToServer packet=new thaumcraft.common.lib.network.playerdata.PacketAspectCombinationToServer(player,40,80,40,a,b,bonus,bonus,true);
+        packet.onMessage(packet,context);
+    }
+    private void gatedCompound(WorldServer world, EntityPlayerMP p) throws Exception {
+        Aspect gated=Aspect.getAspect("tdgated"),child=Aspect.getAspect("tdgatedchild");
+        PlayerKnowledge k=Thaumcraft.proxy.getPlayerKnowledge();String name=p.func_70005_c_();k.wipePlayerKnowledge(name);
+        check(gated!=null&&!gated.isPrimal()&&CustomAspectRegistry.isHidden(gated),"compound opt-in registration");
+        check(!CustomAspectRegistry.isHidden(child)&&!CustomAspectRegistry.isHidden(island),"false and omitted arguments preserve normal compounds");
+        check(ResearchManager.getCombinationResult(visible,Aspect.ORDER)==gated,"gated recipe remains in global graph");
+        check(ResearchManager.reduceToPrimals(new AspectList().add(gated,2)).getAmount(visible)==2,"gated decomposition unchanged");
+        k.getAspectsDiscovered(name);k.setAspectPool(name,visible,(short)10);k.setAspectPool(name,Aspect.ORDER,(short)10);
+        check(!k.addDiscoveredAspect(name,gated)&&!k.addAspectPool(name,gated,(short)3)&&!k.setAspectPool(name,gated,(short)3),"compound generic grants blocked");
+        check(ScanManager.checkAndSyncAspectKnowledge(p,gated,5)==0,"compound non-scan notifications blocked");
+        check(world.func_72838_d(p)&&world.func_73045_a(p.func_145782_y())==p,"combination fixture player registered");
+        try {
+            world.func_147465_d(40,80,40,thaumcraft.common.config.ConfigBlocks.blockTable,2,3);
+            TileResearchTable table=new TileResearchTable();world.func_147455_a(40,80,40,table);
+            check(world.func_147438_o(40,80,40)==table,"combination fixture table registered");
+            combine(p,visible,Aspect.ORDER,false);combine(p,Aspect.ORDER,visible,false);
+            check(!k.hasDiscoveredAspect(name,gated),"both combination orders blocked before scan");
+            check(k.getAspectPoolFor(name,visible)==10&&k.getAspectPoolFor(name,Aspect.ORDER)==10,"blocked combinations preserve personal points");
+            table.bonusAspects=new AspectList().add(visible,3).add(Aspect.ORDER,3);
+            k.setAspectPool(name,visible,(short)0);k.setAspectPool(name,Aspect.ORDER,(short)0);
+            combine(p,visible,Aspect.ORDER,true);
+            check(table.bonusAspects.getAmount(visible)==3&&table.bonusAspects.getAmount(Aspect.ORDER)==3,"blocked combination preserves table bonus points");
+            ScanResult mixed=new ScanResult((byte)1,net.minecraft.item.Item.func_150891_b(Items.field_151122_aG),0,null,"");
+            check(!ScanManager.completeScan(p,mixed,"@")&&!k.hasDiscoveredAspect(name,gated),"failed compound seed scan grants nothing");
+            ScanResult seed=new ScanResult((byte)1,net.minecraft.item.Item.func_150891_b(Items.field_151121_aF),0,null,"");
+            check(ScanManager.completeScan(p,seed,"@")&&k.hasDiscoveredAspect(name,gated),"successful item scan unlocks compound");
+            k.setAspectPool(name,visible,(short)0);k.setAspectPool(name,Aspect.ORDER,(short)0);
+            int points=k.getAspectPoolFor(name,gated);combine(p,visible,Aspect.ORDER,true);
+            check(k.getAspectPoolFor(name,gated)==points+1&&table.bonusAspects.getAmount(visible)==2&&table.bonusAspects.getAmount(Aspect.ORDER)==2,"discovered compound combines using table bonus: result="+k.getAspectPoolFor(name,gated)+" before="+points+" bonus="+table.bonusAspects+" pools="+k.getAspectPoolFor(name,visible)+","+k.getAspectPoolFor(name,Aspect.ORDER));
+            k.setAspectPool(name,visible,(short)10);k.setAspectPool(name,Aspect.ORDER,(short)10);points=k.getAspectPoolFor(name,gated);
+            combine(p,Aspect.ORDER,visible,false);
+            check(k.getAspectPoolFor(name,gated)==points+1&&k.getAspectPoolFor(name,visible)==9&&k.getAspectPoolFor(name,Aspect.ORDER)==9,"discovered compound combines using personal points");
+            check(!k.hasDiscoveredAspect("unscanned player",gated),"compound discovery per player");
+            check(ScanManager.completeScan(p,mixed,"@")&&k.hasDiscoveredAspect(name,child),"descendant scan works after gated parent discovery");
+            k.setAspectPool(name,gated,(short)0);
+            NBTTagCompound saved=new NBTTagCompound();NBTTagList list=new NBTTagList();NBTTagCompound entry=new NBTTagCompound();entry.func_74778_a("key",gated.getTag());entry.func_74777_a("amount",(short)0);list.func_74742_a(entry);saved.func_74782_a("THAUMCRAFT.ASPECTS",list);
+            k.wipePlayerKnowledge(name);ResearchManager.loadAspectNBT(saved,p);
+            check(k.hasDiscoveredAspect(name,gated)&&k.getAspectPoolFor(name,gated)==0,"zero-point compound discovery restored from save");
+            k.wipePlayerKnowledge(name);k.objectsScanned.put(name,new ArrayList<>(Arrays.asList("@"+ScanManager.generateItemHash(Items.field_151121_aF,0))));
+            check(ScanManager.isValidScanTarget(p,seed,"@")&&ScanManager.completeScan(p,seed,"@")&&k.hasDiscoveredAspect(name,gated),"already-scanned item recovers compound discovery");
+            k.wipePlayerKnowledge(name);EntityItem dropped=new EntityItem(world,0,80,0,new ItemStack(Items.field_151121_aF));
+            check(ScanManager.completeScan(p,new ScanResult((byte)2,0,0,dropped,""),"@")&&k.hasDiscoveredAspect(name,gated),"dropped item reveals compound");
+            MineTweakerImplementationAPI.reload();check(CustomAspectRegistry.isHidden(gated)&&k.hasDiscoveredAspect(name,gated),"reload preserves compound gate and discovery");
+        } finally {world.func_72900_e(p);world.func_147475_p(40,80,40);}
+    }
+
 }

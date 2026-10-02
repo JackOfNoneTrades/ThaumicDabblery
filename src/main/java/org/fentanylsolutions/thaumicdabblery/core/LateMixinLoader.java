@@ -85,6 +85,7 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("thaumcraft.MixinPrimalKnowledge");
             mixins.add("thaumcraft.MixinPrimalResearch");
             mixins.add("thaumcraft.MixinPrimalScan");
+            mixins.add("thaumcraft.MixinAspectCombination");
             mixins.add("thaumcraft.MixinNativePrimalCosts");
             mixins.add("thaumcraft.MixinChampionSpawns");
             mixins.add("thaumcraft.MixinItemWandCasting");

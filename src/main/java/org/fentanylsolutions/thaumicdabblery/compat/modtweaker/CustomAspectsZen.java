@@ -29,4 +29,13 @@ public final class CustomAspectsZen {
     public static void register(String tag, int color, String image, String first, String second, String description) {
         CustomAspectScriptLoader.queue(new Definition(tag, color, image, first, second, description));
     }
+
+    @ZenMethod
+    public static void register(String tag, int color, String image, String first, String second, String description,
+        boolean hiddenUntilScanned) {
+        if (first == null || second == null) throw new IllegalArgumentException("Compound aspects need two components");
+        CustomAspectScriptLoader
+            .queue(new Definition(tag, color, image, first, second, description, hiddenUntilScanned));
+    }
+
 }

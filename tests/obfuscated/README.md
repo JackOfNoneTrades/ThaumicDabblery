@@ -322,23 +322,28 @@ Supply Aqua, Exanimis, and Aer to assembled pylons; verify player/undead/cow tar
 Remove the script and `/mt reload` to restore native behavior. Previously applied potions
 expire normally; wiping does not undo past world changes.
 
-## Primal aspects and component edits
+## Primal aspects, scan-gated compounds and component edits
 
 Compile `PrimalAspectChecks.java`, `PrimalAspectNetwork.java` and either `PrimalAspectServerProbe.java` or
 `PrimalAspectClientProbe.java` with the production SRG-first classpath described above. Client compilation also
 needs LWJGL. Install only one probe in an isolated instance; probes modify knowledge and stop the game when done.
 Copy `primal-aspects/*.zs` into `config/thaumicdabblery/aspects/` and `primal-aspects-usage.zs` into `scripts/`.
-The fixtures intentionally change Vacuos and add two primals. Do not use them in a player's world.
+The fixtures intentionally change Vacuos, add two primals and a scan-gated compound with a descendant. Do not use them in a player's world.
+
+Compound checks execute the real combination packet handler in both component orders before discovery, verify
+personal and table bonus points are preserved, and check normal point consumption after scanning. They also cover
+legacy/false registration, unchanged decomposition, generic grant rejection, failed mixed scans, item/dropped-item
+scans, descendant discovery, per-player isolation, zero-point saved discovery, recovery scans and reload.
 
 Run both GTNH ModTweaker 0.14.0 and CurseForge ModTweaker 0.9.6, with and without TC4Tweaks/Salis Arcana.
 Require `TD_PRIMAL_SERVER_PASS` / `TD_PRIMAL_CLIENT_PASS`, no probe failures and no mixin errors. Server restarts
 read `primal-saved.dat` and require `TD_PRIMAL_RESTART_PASS`. The client creates a fresh test world for each run,
-checks the hidden state before the server scans a clock, and verifies discovered knowledge afterwards. It clicks
+checks hidden primal/compound state before the server scans a clock and paper, and verifies discovered knowledge afterwards. It clicks
 through the actual arcane-workbench cost pages and saves screenshots of unknown/known costs in `screenshots/`.
 
 For separate multiplayer checks, launch the server with `-Dtd.primal.network=true` and its matching client with
 `-Dtd.primal.server=127.0.0.1:PORT`. Use a fresh player identity to check initial concealment; the server scans the
-seed item after 180 ticks. Require `TD_PRIMAL_NETWORK_SCAN` on the server and `TD_PRIMAL_CLIENT_PASS ... remote=true`
+seed items after 180 ticks. Require `TD_PRIMAL_NETWORK_SCAN` on the server and `TD_PRIMAL_CLIENT_PASS ... remote=true`
 on the client. The server stops on disconnect. Never expose this test server publicly.
 
 Coverage includes early registration/forward references, preserved existing-aspect identity, final-batch pair reuse,

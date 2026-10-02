@@ -40,8 +40,10 @@ public final class PrimalAspectClientProbe {
    if(mc.field_71439_g==null||mc.field_71441_e==null)return;
    if(System.getProperty("td.primal.server")==null&&!serverDone)return;
    String name=mc.field_71439_g.func_70005_c_();PlayerKnowledge k=Thaumcraft.proxy.getPlayerKnowledge();
-   if(!prechecked){checks.check(!k.hasDiscoveredAspect(name,checks.hidden),"client primal unknown before scan");prechecked=true;renderWorkbench(mc);}
+   if(!prechecked){checks.check(!k.hasDiscoveredAspect(name,checks.hidden),"client primal unknown before scan");checks.check(!k.hasDiscoveredAspect(name,Aspect.getAspect("tdgated")),"client compound unknown before scan");prechecked=true;renderWorkbench(mc);}
    if(!k.hasDiscoveredAspect(name,checks.hidden)||k.getAspectPoolFor(name,checks.hidden)<=0)return;
+   if(!k.hasDiscoveredAspect(name,Aspect.getAspect("tdgated"))||k.getAspectPoolFor(name,Aspect.getAspect("tdgated"))<=0)return;
+   checks.check(true,"scanned compound discovery and points synchronized");
    checks.check(k.hasDiscoveredAspect(name,checks.visible),"visible primal client knowledge");
    ItemStack wand=new ItemStack(ConfigItems.itemWandCasting);ItemWandCasting w=(ItemWandCasting)wand.func_77973_b();w.addVis(wand,checks.hidden,6,true);
    List<String> lines=new ArrayList<>();w.func_77624_a(wand,mc.field_71439_g,lines,true);checks.check(lines.toString().contains("\u00a7f6"),"discovered primal in wand tooltip");

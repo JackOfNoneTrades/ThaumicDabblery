@@ -45,7 +45,7 @@ public final class PrimalDiscovery {
         return scan.type == 1 || scan.type == 2 && scan.entity instanceof EntityItem;
     }
 
-    public static boolean hasUnknownPrimal(EntityPlayer player, ScanResult scan) {
+    public static boolean hasUnknownAspect(EntityPlayer player, ScanResult scan) {
         if (!itemScan(scan)) return false;
         AspectList aspects = ScanManager.getScanAspects(scan, player.worldObj);
         if (aspects == null) return false;
@@ -54,7 +54,7 @@ public final class PrimalDiscovery {
         return false;
     }
 
-    public static void revealScannedPrimals(EntityPlayer player, ScanResult scan, String prefix) {
+    public static void revealScannedAspects(EntityPlayer player, ScanResult scan, String prefix) {
         if (player.worldObj.isRemote || !itemScan(scan)) return;
         AspectList aspects = ScanManager.getScanAspects(scan, player.worldObj);
         if (!ScanManager.validScan(aspects, player)) return;

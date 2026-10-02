@@ -39,3 +39,5 @@ thaumicdabblery.scanall.complete=All item and entity scans completed. Discovered
 thaumicdabblery.scanall.target=Completed all item and entity scans for %s without awarding research points.
 
 key.thaumicdabblery.researchEditor=Toggle Thaumonomicon Edit Mode (book only)
+
+thaumicdabblery.aspect.scanBeforeCombining=Scan an item containing this aspect before combining it. No research points were spent.
