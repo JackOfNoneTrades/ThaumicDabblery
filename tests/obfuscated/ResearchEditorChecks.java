@@ -34,6 +34,7 @@ public final class ResearchEditorChecks {
  public void run()throws Exception {
   check(Boolean.FALSE.equals(Launch.blackboard.get("fml.deobfuscatedEnvironment")),"production runtime");
   setup();
+  collectedScripts();
   overriddenFlags();
   warp();
   check(ResearchEditor.problem()==null,"ready after reload");
@@ -203,4 +204,36 @@ public final class ResearchEditorChecks {
  }
  public interface Checked{void run()throws Exception;}
  private void expectInvalid(String label,Checked action)throws Exception{String before=saved();try{action.run();throw new AssertionError("accepted "+label);}catch(IllegalArgumentException expected){checks++;}check(saved().equals(before),"invalid "+label+" leaves file unchanged");}
+ private void collectedScripts()throws Exception {
+  for(int mode=0;mode<3;mode++){
+   final int kind=mode;final boolean[] closed={false};final byte[] bytes=kind==1?new byte[0]:"// collected script".getBytes(StandardCharsets.UTF_8);
+   java.io.InputStream stream=new java.io.InputStream(){int offset;
+    public int available(){return bytes.length-offset;}
+    public int read()throws java.io.IOException{if(kind==2)throw new java.io.IOException("injected read failure");return offset<bytes.length?bytes[offset++]&255:-1;}
+    public void close(){closed[0]=true;}
+   };
+   byte[] packed=minetweaker.runtime.providers.ScriptProviderMemory.collect(singleStream(stream));
+   check(closed[0],"script collection closes "+(kind==0?"successful":kind==1?"empty":"failed")+" input");
+   if(kind==0){minetweaker.runtime.IScriptIterator restored=new minetweaker.runtime.providers.ScriptProviderMemory(packed).getScripts().next();check(restored.next(),"collected script remains present");try(java.io.InputStream input=restored.open()){check(Arrays.equals(minetweaker.util.FileUtil.read(input),bytes),"collected script bytes unchanged");}}
+  }
+  // Retain the actual file stream so GC cannot conceal a leaked Windows file handle.
+  try(java.io.FileInputStream input=new java.io.FileInputStream(FILE.toFile())){
+   minetweaker.runtime.providers.ScriptProviderMemory.collect(singleStream(input));
+   try{input.available();throw new AssertionError("script file handle retained after collection");}catch(java.io.IOException closed){check(true,"actual script file handle released immediately");}
+  }
+  for(int i=0;i<3;i++){
+   script("");
+   ResearchEditor.edit("parent after reload",l->l.parent("TD_A",null,"TD_B",false));
+   check(Arrays.equals(items.get("TD_A").parents,new String[]{"TD_B"})&&saved().contains("ResearchEditor.parents"),"first parent edit after reload saves");
+  }
+  script("");
+ }
+ private minetweaker.runtime.IScriptProvider singleStream(final java.io.InputStream input){
+  return ()->Collections.<minetweaker.runtime.IScriptIterator>singletonList(new minetweaker.runtime.IScriptIterator(){boolean first=true;
+   public String getGroupName(){return "collected.zs";}public String getName(){return "collected.zs";}
+   public boolean next(){boolean result=first;first=false;return result;}
+   public java.io.InputStream open(){return input;}
+  }).iterator();
+ }
+
 }

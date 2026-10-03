@@ -33,6 +33,7 @@ public class LateMixinLoader implements ILateMixinLoader {
     @Override
     public List<String> getMixins(Set<String> loadedMods) {
         List<String> mixins = new ArrayList<>();
+        if (loadedMods.contains("MineTweaker3")) mixins.add("minetweaker.MixinScriptProviderMemory");
         if (loadedMods.contains("gadomancy")) {
             mixins.add("gadomancy.MixinAuraEffectHandler");
             mixins.add("gadomancy.AuraEffectHandlerInvoker");

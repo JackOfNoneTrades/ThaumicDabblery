@@ -137,6 +137,10 @@ public final class ResearchEditorClientProbe {
     checks.check((Integer)field(input,"field_146214_l")==cursor+1,"cursor advances once per client tick");
     shot("editor-forbidden-knowledge");type(1);
     checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5,"Escape cancels unapplied warp value");
+    Object failed=overlay();
+    call(failed,"failure","failure",new Class[]{Exception.class},new java.nio.file.FileSystemException("scripts/.research-editor-test-123.tmp","scripts/thaumicdabblery_research_editor.zs","TD_TEST_SHARING_VIOLATION"));
+    checks.check("Save failed".equals(field(failed,"status"))&&((String)field(failed,"notice")).contains("game log")&&!((String)field(failed,"notice")).contains(".tmp"),"filesystem errors show a short actionable message");
+    call(failed,"saved","saved",new Class[]{String.class},"Diagnostic test finished");
     ResearchEditor.edit("occupy destination",l->l.move("TD_D",ResearchEditorChecks.OTHER,1,1));
     checks.check(field(mc.field_71462_r,"currentHighlight")==null,"native purchase and creative hover target stays empty");
     click(sx(1),sy(1),1);menu(1);

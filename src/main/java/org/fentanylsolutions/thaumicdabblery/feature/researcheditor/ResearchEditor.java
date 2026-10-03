@@ -8,6 +8,8 @@ import java.util.Deque;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.fentanylsolutions.thaumicdabblery.ThaumicDabblery;
+
 import cpw.mods.fml.relauncher.FMLInjectionData;
 import minetweaker.IUndoableAction;
 import minetweaker.MineTweakerAPI;
@@ -46,7 +48,8 @@ public final class ResearchEditor {
             file = new EditorFile(new File(new File(directory, "scripts"), FILE_NAME).toPath());
         } catch (IOException exception) {
             file = null;
-            problem = exception.getMessage();
+            ThaumicDabblery.LOG.error("Could not read Thaumonomicon editor script " + FILE_NAME, exception);
+            problem = EditorFile.failureMessage(exception);
         }
     }
 

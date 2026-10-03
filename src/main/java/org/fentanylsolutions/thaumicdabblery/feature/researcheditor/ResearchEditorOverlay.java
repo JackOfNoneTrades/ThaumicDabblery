@@ -14,6 +14,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
 
+import org.fentanylsolutions.thaumicdabblery.ThaumicDabblery;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -189,7 +190,11 @@ public final class ResearchEditorOverlay extends GuiScreen {
     private void failure(Exception exception) {
         status = exception instanceof IOException ? "Save failed" : "Not applied";
         saveFailed = true;
-        notice = exception.getMessage();
+        if (exception instanceof IOException) {
+            ThaumicDabblery.LOG
+                .error("Could not save Thaumonomicon editor script " + ResearchEditor.FILE_NAME, exception);
+            notice = EditorFile.failureMessage((IOException) exception);
+        } else notice = exception.getMessage();
     }
 
     @Override

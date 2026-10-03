@@ -451,7 +451,7 @@ All tests use temporary scripts and research categories in disposable instances.
 
 Compile `ResearchEditorChecks` and `ResearchEditorServerProbe` into a small probe mod for a disposable
 production server. Run CurseForge ModTweaker 0.9.6 and GTNH ModTweaker 0.14.0, each with and without
-TC4Tweaks 1.5.47 and Salis Arcana 1.1.71. Require `TD_EDITOR_SERVER_PASS` (112 checks per combination).
+TC4Tweaks 1.5.47 and Salis Arcana 1.1.71. Require `TD_EDITOR_SERVER_PASS` (121 checks per combination).
 The fixtures exercise compact script output, swaps within and between tabs, nearest-free placement,
 all six true/false flags, hidden prerequisites, cycle/duplicate/self rejection, exact deletion undo,
 TC4Tweaks lookup caches, ordinary-script ordering, multiple reloads, external-file conflicts and atomic
@@ -459,19 +459,24 @@ file replacement. A research subclass whose five flag getters throw verifies tha
 rollback use stored flags without invoking player-dependent addon code. Dedicated servers must refuse editor
 activation while applying generated scripts normally.
 The same fixture also runs in a development server with SRG calls remapped to MCP names.
+Script-sync checks retain the input streams and verify immediate closure for normal, empty and failed reads,
+including an actual file stream that cannot be garbage-collected during the assertion. Repeated reloads followed
+by the first prerequisite edit must save successfully. These checks reproduce the handle leak on non-Windows
+systems; native Windows sharing-lock behavior still needs a Windows runtime.
 Virtual tests cover overlapping placement, final-state collision checks before applying flag changes,
 clearing an original virtual flag, automatic relocation when clearing Virtual, compact script output,
 reload, undo and redo. Forbidden knowledge checks cover setting and clearing warp, compact output,
 ordinary-script ordering, deletion, negative-value rejection and exact rollback. Occupied destinations at both coordinate boundaries must find valid free positions.
 
 `ResearchEditorClientProbe` runs in real production clients with the same four dependency combinations.
-Require `TD_EDITOR_CLIENT_PASS` (51 checks without addons, 55 with addons). Mouse and keyboard events are supplied through
+Require `TD_EDITOR_CLIENT_PASS` (52 checks without addons, 56 with addons). Mouse and keyboard events are supplied through
 LWJGL's event fields and the actual stock screen's input methods, exercising the input mixin before native
 and Salis Arcana handlers. The screen must remain exactly `GuiResearchBrowser`, including when toggled
 with the same book instance open. Checks include drag/pan separation, native rendering, menu properties,
 parent picking, moving into an occupied destination tab, cross-tab swaps, deletion, undo/redo buttons and shortcuts, point/knowledge preservation,
 key and mouse bindings, recipe-page entry, Salis saved-page preservation, tab pagination, script reload and
-minimum-size geometry, tab clicks beside the toolbar, and forbidden-knowledge input validation and cancellation. Cursor checks ensure frame/input preparation never advances the blink counter
+minimum-size geometry, tab clicks beside the toolbar, and forbidden-knowledge input validation and cancellation. A simulated filesystem failure must show a concise notice without temporary-file paths; `logs/fml-client-latest.log` must contain
+`TD_TEST_SHARING_VIOLATION`, both paths and the full exception. Cursor checks ensure frame/input preparation never advances the blink counter
 and only the end of each client tick advances it once. Pixel comparisons check that TC4Tweaks' completion counter and search box draw nothing over
 the editor header and render again after Done. Enable Salis' **Save Thaumonomicon Page** option for the addon runs. Screenshots are
 written under the instance's `screenshots/` folder for the stock book, properties menu, drag preview,
