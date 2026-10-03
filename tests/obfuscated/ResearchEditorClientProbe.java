@@ -25,7 +25,7 @@ import thaumcraft.common.Thaumcraft;
 public final class ResearchEditorClientProbe {
  private final ResearchEditorChecks checks=new ResearchEditorChecks();
  private int ticks,frames,stage;private boolean launched,done;private volatile boolean serverDone;private volatile Throwable failure;
- private String knowledge;private KeyBinding key;
+ private String knowledge,exported;private KeyBinding key;
  @Mod.EventHandler public void ready(FMLLoadCompleteEvent event){FMLCommonHandler.instance().bus().register(this);}
  @Mod.EventHandler public void started(FMLServerStartedEvent event){try{checks.setup();}catch(Throwable t){failure=t;}finally{serverDone=true;}}
  private Object field(Object obj,String name)throws Exception{Class<?> c=obj instanceof Class?(Class<?>)obj:obj.getClass();Field f=c.getDeclaredField(name);f.setAccessible(true);return f.get(obj instanceof Class?null:obj);}
@@ -194,9 +194,17 @@ public final class ResearchEditorClientProbe {
      toolbar("Undo");
     }
     MineTweakerImplementationAPI.reload();
-   }else{
+   }else if(stage==9){
     checks.check(ResearchEditor.undoName()==null,"reload clears UI history");checks.check(checks.items.get("TD_A").category.equals(ResearchEditorChecks.OTHER),"saved file replay restores GUI changes");
     checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5,"saved forbidden knowledge survives client reload");
+    exported=checks.saved();java.nio.file.Files.write(java.nio.file.Paths.get("scripts/zzzz-exported-editor.zs"),exported.getBytes(java.nio.charset.StandardCharsets.UTF_8));checks.script("");
+   }else{
+    tab(ResearchEditorChecks.OTHER);call(overlay(),"focus","focus",new Class[]{String.class},"TD_A");
+    checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5&&checks.items.get("TD_A").category.equals(ResearchEditorChecks.OTHER),"exported UI changes remain after reload");
+    click(sx(0),sy(0),1);menu(3);menu(6);type(9,'8');type(28);
+    checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==8&&checks.saved().contains("ResearchEditor.warp(\"TD_A\", 8)")&&!checks.saved().contains("ResearchEditor.move")&&!checks.saved().contains("ResearchEditor.flag")&&!checks.saved().contains("ResearchEditor.parents"),"next UI save emits only new overrides after export");
+    toolbar("Undo");checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5&&!checks.saved().contains("ResearchEditor."),"UI undo preserves exported baseline");
+    checks.check(new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("scripts/zzzz-exported-editor.zs")),java.nio.charset.StandardCharsets.UTF_8).equals(exported),"UI saves leave exported script unchanged");
     System.out.println("TD_EDITOR_CLIENT_PASS checks="+checks.checks);done=true;mc.func_71400_g();
    }
    stage++;

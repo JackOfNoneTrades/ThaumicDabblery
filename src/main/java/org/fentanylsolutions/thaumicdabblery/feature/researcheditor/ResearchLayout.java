@@ -293,7 +293,8 @@ public final class ResearchLayout {
         ResearchLayout base = baseline.copy();
         // Deletions already detach all incoming links; do not serialize those incidental changes again.
         for (Map.Entry<String, Entry> pair : new TreeMap<>(entries).entrySet()) {
-            if (pair.getValue().deleted && !base.require(pair.getKey()).deleted) {
+            Entry original = base.entries.get(pair.getKey());
+            if (pair.getValue().deleted && original != null && !original.deleted) {
                 script.append("ResearchEditor.remove(")
                     .append(quote(pair.getKey()))
                     .append(");\n");

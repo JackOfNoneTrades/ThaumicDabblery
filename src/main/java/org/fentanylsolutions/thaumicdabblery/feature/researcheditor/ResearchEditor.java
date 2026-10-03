@@ -21,7 +21,8 @@ import stanhebben.zenscript.annotations.ZenMethod;
 public final class ResearchEditor {
 
     public static final String FILE_NAME = "thaumicdabblery_research_editor.zs";
-    private static final List<Consumer<ResearchLayout>> PATCHES = new ArrayList<>();
+    private static final List<Consumer<ResearchLayout>> SCRIPT_PATCHES = new ArrayList<>(),
+        EDITOR_PATCHES = new ArrayList<>();
     private static final Deque<Change> UNDO = new ArrayDeque<>(), REDO = new ArrayDeque<>();
     private static ResearchLayout baseline, current;
     private static EditorFile file;
@@ -37,7 +38,8 @@ public final class ResearchEditor {
     }
 
     private static synchronized void prepareReload() {
-        PATCHES.clear();
+        SCRIPT_PATCHES.clear();
+        EDITOR_PATCHES.clear();
         baseline = current = null;
         UNDO.clear();
         REDO.clear();
@@ -54,23 +56,46 @@ public final class ResearchEditor {
     }
 
     private static synchronized void finishReload() {
-        baseline = ResearchLayout.capture();
+        ResearchLayout original = ResearchLayout.capture();
+        baseline = original.copy();
+        try {
+            for (Consumer<ResearchLayout> patch : SCRIPT_PATCHES) patch.accept(baseline);
+            baseline.validate(original);
+        } catch (IllegalArgumentException exception) {
+            problem = exception.getMessage();
+            MineTweakerAPI.logError("Research editor script baseline rejected: " + problem);
+            baseline = original.copy();
+            current = baseline.copy();
+            MineTweakerAPI.apply(new Overlay(original, current));
+            return;
+        }
         current = baseline.copy();
         try {
-            for (Consumer<ResearchLayout> patch : PATCHES) patch.accept(current);
+            for (Consumer<ResearchLayout> patch : EDITOR_PATCHES) patch.accept(current);
             current.validate(baseline);
         } catch (IllegalArgumentException exception) {
             problem = exception.getMessage();
             MineTweakerAPI.logError("Research editor overlay rejected: " + problem);
             current = baseline.copy();
         }
-        // The last action rolls the entire overlay back BEFORE ordinary script actions are undone.
-        MineTweakerAPI.apply(new Overlay(baseline, current));
+        // Restore both layers BEFORE ordinary script actions are undone on the next reload.
+        MineTweakerAPI.apply(new Overlay(original, current));
+    }
+
+    private static List<Consumer<ResearchLayout>> patches() {
+        // ZenModule records the script group's original filename on __ZenMain__.run, including in production.
+        // Use the executing group, not a helper function's source file or an import/variable name.
+        for (StackTraceElement frame : Thread.currentThread()
+            .getStackTrace()) {
+            if ("__ZenMain__".equals(frame.getClassName()) && "run".equals(frame.getMethodName()))
+                return FILE_NAME.equals(frame.getFileName()) ? EDITOR_PATCHES : SCRIPT_PATCHES;
+        }
+        return SCRIPT_PATCHES;
     }
 
     @ZenMethod
     public static synchronized void move(String key, String tab, int x, int y) {
-        PATCHES.add(layout -> {
+        patches().add(layout -> {
             ResearchLayout.Entry entry = layout.require(key);
             entry.tab = tab;
             entry.x = x;
@@ -80,7 +105,7 @@ public final class ResearchEditor {
 
     @ZenMethod
     public static synchronized void flag(String key, String flag, boolean value) {
-        PATCHES.add(layout -> {
+        patches().add(layout -> {
             ResearchLayout.Entry entry = layout.require(key);
             for (int i = 0; i < ResearchLayout.FLAGS.length; i++) {
                 if (ResearchLayout.FLAGS[i].equalsIgnoreCase(flag)) {
@@ -94,14 +119,14 @@ public final class ResearchEditor {
 
     @ZenMethod
     public static synchronized void warp(String key, int amount) {
-        PATCHES.add(layout -> layout.setWarp(key, amount));
+        patches().add(layout -> layout.setWarp(key, amount));
     }
 
     @ZenMethod
     public static synchronized void parents(String key, String[] visible, String[] hidden) {
         final String[] normalCopy = visible == null ? null : visible.clone();
         final String[] hiddenCopy = hidden == null ? null : hidden.clone();
-        PATCHES.add(layout -> {
+        patches().add(layout -> {
             ResearchLayout.Entry entry = layout.require(key);
             entry.parents = normalCopy == null ? null : normalCopy.clone();
             entry.hidden = hiddenCopy == null ? null : hiddenCopy.clone();
@@ -110,7 +135,7 @@ public final class ResearchEditor {
 
     @ZenMethod
     public static synchronized void remove(String key) {
-        PATCHES.add(layout -> layout.delete(key));
+        patches().add(layout -> layout.delete(key));
     }
 
     public static synchronized int generation() {

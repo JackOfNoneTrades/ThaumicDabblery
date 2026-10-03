@@ -35,6 +35,7 @@ public final class ResearchEditorChecks {
   check(Boolean.FALSE.equals(Launch.blackboard.get("fml.deobfuscatedEnvironment")),"production runtime");
   setup();
   collectedScripts();
+  exportedBatches();
   overriddenFlags();
   warp();
   check(ResearchEditor.problem()==null,"ready after reload");
@@ -234,6 +235,56 @@ public final class ResearchEditorChecks {
    public boolean next(){boolean result=first;first=false;return result;}
    public java.io.InputStream open(){return input;}
   }).iterator();
+ }
+
+ private void exportedBatches()throws Exception {
+  Path regular=Paths.get("scripts/zzzz-exported-editor.zs"),second=Paths.get("scripts/aaa-exported-editor.zs");
+  try {
+   ResearchEditor.edit("first batch",l->{l.swap("TD_A","TD_B");l.toggleFlag("TD_A",1);l.setWarp("TD_A",7);l.parent("TD_A",null,"TD_D",true);l.delete("TD_V");});
+   String exported=saved();Files.write(regular,exported.getBytes(StandardCharsets.UTF_8));script("");
+   check(ResearchEditor.problem()==null&&items.get("TD_A").displayColumn==2&&items.get("TD_B").displayColumn==0,"exported occupied swap applies as a batch");
+   check(items.get("TD_A").isHidden()&&thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==7&&Arrays.equals(items.get("TD_A").parentsHidden,new String[]{"TD_D"})&&ResearchCategories.getResearch("TD_V")==null,"export retains flags, warp, parents and deletion");
+   ResearchEditor.edit("next batch",l->l.setWarp("TD_C",3));
+   check(saved().contains("ResearchEditor.warp(\"TD_C\", 3)")&&!saved().contains("\"TD_A\"")&&!saved().contains("\"TD_B\"")&&!saved().contains("\"TD_V\""),"exported declarations do not reappear on next save");
+   check(new String(Files.readAllBytes(regular),StandardCharsets.UTF_8).equals(exported),"editor leaves regular script untouched");
+   ResearchEditor.undo();check(!saved().contains("ResearchEditor.")&&thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==7&&ResearchCategories.getResearch("TD_V")==null,"undo removes only new batch");
+   ResearchEditor.redo();check(thaumcraft.api.ThaumcraftApi.getWarp("TD_C")==3&&!saved().contains("\"TD_A\""),"redo excludes exported baseline");
+   ResearchEditor.edit("override exported value",l->l.setWarp("TD_A",9));
+   check(saved().contains("ResearchEditor.warp(\"TD_A\", 9)")&&!saved().contains("ResearchEditor.move"),"new edits override exported values without duplicating other properties");
+   MineTweakerImplementationAPI.reload();check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==9,"managed overrides apply after later-named regular scripts");
+   ResearchEditor.edit("return to exported value",l->l.setWarp("TD_A",7));check(!saved().contains("\"TD_A\""),"returning to exported baseline removes override");
+   Files.write(second,saved().getBytes(StandardCharsets.UTF_8));script("");
+   ResearchEditor.edit("third batch",l->l.setWarp("TD_C",4));
+   check(saved().contains("ResearchEditor.warp(\"TD_C\", 4)")&&!saved().contains("\"TD_A\""),"multiple exported batches establish new baseline");
+   ResearchEditor.undo();check(!saved().contains("ResearchEditor.")&&thaumcraft.api.ThaumcraftApi.getWarp("TD_C")==3,"undo returns to second exported batch");
+   Files.delete(second);script("");check(thaumcraft.api.ThaumcraftApi.getWarp("TD_C")==0&&thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==7,"removing one exported script restores only its changes");
+   Files.delete(regular);script("");
+   check(items.get("TD_A").displayColumn==0&&items.get("TD_B").displayColumn==2&&!items.get("TD_A").isHidden()&&items.get("TD_A").parentsHidden==null&&thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==0&&ResearchCategories.getResearch("TD_V")==items.get("TD_V"),"removing exports restores original layout and deleted entries");
+   String helper="import mods.thaumicdabblery.ResearchEditor as E;\nfunction applyBatch() as void { E.warp(\"TD_A\", 5); }\napplyBatch();\n";
+   Files.write(regular,helper.getBytes(StandardCharsets.UTF_8));script(helper.replace(", 5)",", 9)"));
+   ResearchEditor.edit("helper batch",l->l.setWarp("TD_C",2));
+   check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==9&&saved().contains("ResearchEditor.warp(\"TD_A\", 9)"),"helper functions and aliases retain managed-file ownership");
+   script("");ResearchEditor.edit("helper baseline",l->l.setWarp("TD_C",2));check(!saved().contains("\"TD_A\""),"regular helper calls belong to baseline");
+   Files.delete(regular);script("");
+   // A module can contain a source file named like the managed file without being the managed root script.
+   java.lang.reflect.Field providerField=minetweaker.runtime.MTTweaker.class.getDeclaredField("scriptProvider");providerField.setAccessible(true);
+   final minetweaker.runtime.IScriptProvider provider=(minetweaker.runtime.IScriptProvider)providerField.get(minetweaker.MineTweakerAPI.tweaker);
+   minetweaker.MineTweakerAPI.tweaker.setScriptProvider(()->{
+    List<minetweaker.runtime.IScriptIterator> groups=new ArrayList<>();provider.getScripts().forEachRemaining(groups::add);
+    groups.add(new minetweaker.runtime.IScriptIterator(){boolean first=true;
+     public String getGroupName(){return "td-editor-export";}public String getName(){return ResearchEditor.FILE_NAME;}
+     public boolean next(){boolean result=first;first=false;return result;}
+     public java.io.InputStream open(){return new java.io.ByteArrayInputStream(helper.getBytes(StandardCharsets.UTF_8));}
+    });return groups.iterator();
+   });
+   try {script("");ResearchEditor.edit("module baseline",l->l.setWarp("TD_C",2));
+    check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5&&!saved().contains("\"TD_A\""),"same-named source in another module is regular baseline");
+   } finally {minetweaker.MineTweakerAPI.tweaker.setScriptProvider(provider);script("");}
+   Files.write(regular,"mods.thaumicdabblery.ResearchEditor.move(\"TD_A\", \"TD_EDITOR\", 2, 0);\n".getBytes(StandardCharsets.UTF_8));script("");
+   check(ResearchEditor.problem()!=null&&items.get("TD_A").displayColumn==0,"invalid regular editor batch is atomic");
+   Files.write(regular,"mods.thaumicdabblery.ResearchEditor.warp(\"TD_A\", 5);\n".getBytes(StandardCharsets.UTF_8));script("mods.thaumicdabblery.ResearchEditor.warp(\"TD_A\", -1);\n");
+   check(ResearchEditor.problem()!=null&&thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5,"invalid managed batch preserves valid regular baseline");
+  } finally {Files.deleteIfExists(regular);Files.deleteIfExists(second);script("");}
  }
 
 }
