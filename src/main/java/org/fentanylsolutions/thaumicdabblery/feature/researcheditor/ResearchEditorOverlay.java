@@ -464,6 +464,12 @@ public final class ResearchEditorOverlay extends GuiScreen {
                     edit("Swapped " + name(first) + " and " + name(target), next -> next.swap(first, target));
                 }
                 if (!saveFailed) cancel();
+            } else if (button == 0 && pick != Pick.TAB && onMap(x, y)) {
+                // Picking a research still allows empty-space dragging without changing the pending selection.
+                lastMouseX = x;
+                lastMouseY = y;
+                panning = true;
+                dragging = moved = false;
             }
             return;
         }

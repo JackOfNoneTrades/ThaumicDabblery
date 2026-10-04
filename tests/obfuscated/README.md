@@ -479,13 +479,16 @@ from saved research, and is granted (including warp) again on load. Disabling th
 intact but prevents that grant when loading a save made while AutoUnlock was enabled. Use disposable player files.
 
 `ResearchEditorClientProbe` runs in real production clients with the same four dependency combinations.
-Require `TD_EDITOR_CLIENT_PASS` (59 checks without addons, 63 with addons). Mouse and keyboard events are supplied through
+Require `TD_EDITOR_CLIENT_PASS` (70 checks without addons, 74 with addons). Mouse and keyboard events are supplied through
 LWJGL's event fields and the actual stock screen's input methods, exercising the input mixin before native
 and Salis Arcana handlers. The screen must remain exactly `GuiResearchBrowser`, including when toggled
 with the same book instance open. Checks include drag/pan separation, native rendering, menu properties,
-parent picking, moving into an occupied destination tab, cross-tab swaps, deletion, undo/redo buttons and shortcuts, point/knowledge preservation,
-key and mouse bindings, recipe-page entry, Salis saved-page preservation, tab pagination, script reload and
+parent picking, moving into an occupied destination tab, cross-tab swaps, deletion, undo/redo buttons and shortcuts,
+point/knowledge preservation, key and mouse bindings, recipe-page entry, Salis saved-page preservation, tab pagination, script reload and
 minimum-size geometry, tab clicks beside the toolbar, and forbidden-knowledge input validation and cancellation.
+Parent/swap selection checks drag empty space after switching tabs, including navigating to an off-screen parent.
+Panning must retain the pending selection, stop on release, leave scripts/history untouched and allow the target
+to be picked afterward. The old build fails this test because target selection blocks empty-space dragging.
 The UI also exports its saved batch to a regular script, reloads, edits an exported value and undoes it; only
 the new override may be written, and the exported script must remain unchanged. A simulated filesystem failure must show a concise notice without temporary-file paths; `logs/fml-client-latest.log` must contain
 `TD_TEST_SHARING_VIOLATION`, both paths and the full exception. Cursor checks ensure frame/input preparation never advances the blink counter

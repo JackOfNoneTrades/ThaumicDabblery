@@ -44,6 +44,33 @@ public final class ResearchEditorClientProbe {
  private void release(int x,int y)throws Exception{mouse(x,y,0,false);}
  private int sx(int x)throws Exception{return (Integer)call(overlay(),"screenX","screenX",new Class[]{int.class},x);}
  private int sy(int y)throws Exception{return (Integer)call(overlay(),"screenY","screenY",new Class[]{int.class},y);}
+ private void panToTarget(String key,String mode)throws Exception {
+  Object g=overlay();ResearchLayout.Entry target=ResearchEditor.layout().require(key);
+  String before=checks.saved(),undo=ResearchEditor.undoName(),redo=ResearchEditor.redoName();
+  Object source=field(g,"source"),selected=field(g,"selected");
+  ResearchBrowserAccess geometry=(ResearchBrowserAccess)Minecraft.func_71410_x().field_71462_r;
+  int left=(Integer)field(g,"left"),right=(Integer)field(g,"right"),top=(Integer)field(g,"top"),bottom=(Integer)field(g,"bottom");
+  // First drag in both axes, then navigate back to the target using only empty-space gestures.
+  for(int step=0;step<80;step++){
+   int dx=step==0?48:Math.max(-48,Math.min(48,(left+right)/2-sx(target.x)));
+   int dy=step==0?32:Math.max(-32,Math.min(32,(top+bottom)/2-sy(target.y)));
+   if(step>0&&Math.abs(dx)<=1&&Math.abs(dy)<=1)break;
+   int x=-1,y=-1;
+   outer:for(int py=top+50;py<bottom-40;py+=24)for(int px=left+60;px<right-60;px+=24){
+    if(call(g,"hit","hit",new Class[]{int.class,int.class},px,py)==null){x=px;y=py;break outer;}
+   }
+   if(x<0)throw new AssertionError("no empty canvas for pan test");
+   double oldX=geometry.thaumicdabblery$mapX(),oldY=geometry.thaumicdabblery$mapY();
+   click(x,y,0);mouse(x+dx,y+dy,-1,false);release(x+dx,y+dy);
+   if(Math.abs(geometry.thaumicdabblery$mapX()-oldX+dx)>1||Math.abs(geometry.thaumicdabblery$mapY()-oldY+dy)>1)throw new AssertionError(mode+" picker blocks empty-space panning");
+  }
+  checks.check(mode.equals(field(g,"pick").toString())&&Objects.equals(source,field(g,"source"))&&Objects.equals(selected,field(g,"selected")),mode+" pan preserves pending target selection");
+  checks.check(!((Boolean)field(g,"panning"))&&!((Boolean)field(g,"dragging")),mode+" pan stops on mouse release");
+  double endX=geometry.thaumicdabblery$mapX(),endY=geometry.thaumicdabblery$mapY();mouse(left+70,top+60,-1,false);
+  checks.check(endX==geometry.thaumicdabblery$mapX()&&endY==geometry.thaumicdabblery$mapY(),mode+" unheld mouse movement does not pan");
+  checks.check(before.equals(checks.saved())&&Objects.equals(undo,ResearchEditor.undoName())&&Objects.equals(redo,ResearchEditor.redoName()),mode+" pan leaves scripts and history untouched");
+  checks.check(key.equals(call(g,"hit","hit",new Class[]{int.class,int.class},sx(target.x),sy(target.y))),mode+" target is reachable after panning");
+ }
  private void menu(int row)throws Exception{Object g=overlay();click((Integer)field(g,"menuX")+12,(Integer)field(g,"menuY")+34+row*16,0);}
  private void toolbar(String button)throws Exception{Object g=overlay();int x=button.equals("Done")?(Integer)field(g,"right")-45:button.equals("Undo")?(Integer)field(g,"left")+40:(Integer)field(g,"left")+90;int y=(Integer)field(g,"toolbarY")+6;click(x,y,0);if(ResearchEditorClient.enabled())release(x,y);}
  private void type(int key)throws Exception{type(key,' ');}
@@ -149,12 +176,14 @@ public final class ResearchEditorClientProbe {
     shot("editor-select-tab");tab(ResearchEditorChecks.OTHER);checks.check(checks.items.get("TD_A").category.equals(ResearchEditorChecks.OTHER),"tab click moves selected entry into occupied destination tab");
     checks.check(checks.items.get("TD_A").displayColumn==0&&checks.items.get("TD_A").displayRow==0,"occupied destination relocates to first free cell");
     checks.check(field(overlay(),"tab").equals(ResearchEditorChecks.OTHER),"move focuses destination tab");
-    click(sx(0),sy(0),1);menu(2);tab(ResearchEditorChecks.TAB);click(sx(2),sy(0),0);
+    click(sx(0),sy(0),1);menu(2);tab(ResearchEditorChecks.TAB);panToTarget("TD_B","SWAP");click(sx(2),sy(0),0);
     checks.check(checks.items.get("TD_A").category.equals(ResearchEditorChecks.TAB)&&checks.items.get("TD_B").category.equals(ResearchEditorChecks.OTHER),"cross-tab swap target selection");
     toolbar("Undo");checks.check(checks.items.get("TD_B").category.equals(ResearchEditorChecks.TAB),"swap is single undo action");
+    ResearchEditor.edit("distant parent",l->l.move("TD_D",ResearchEditorChecks.OTHER,30,18));call(overlay(),"refresh","refresh",new Class[]{});
     click(sx(2),sy(0),1);menu(0);menu(0);tab(ResearchEditorChecks.OTHER);
    }else if(stage==6){
-    shot("editor-select-parent");click(sx(1),sy(1),0);checks.check(Arrays.equals(checks.items.get("TD_B").parents,new String[]{"TD_D"}),"parent picker works across tabs");
+    checks.check(call(overlay(),"hit","hit",new Class[]{int.class,int.class},sx(30),sy(18))==null,"cross-tab parent starts outside viewport");
+    panToTarget("TD_D","PARENT");shot("editor-select-parent");click(sx(30),sy(18),0);checks.check(Arrays.equals(checks.items.get("TD_B").parents,new String[]{"TD_D"}),"parent picker works across tabs");
     tab(ResearchEditorChecks.TAB);click(sx(2),sy(0),1);menu(0);menu(1);menu(2);type(1);
     checks.check(Arrays.equals(checks.items.get("TD_B").parentsHidden,new String[]{"TD_D"}),"parent context hidden-link control");
     click(sx(2),sy(0),1);menu(4);checks.check(ResearchCategories.getResearch("TD_B")==null&&checks.items.get("TD_C").parentsHidden.length==0,"delete UI detaches hidden links");
