@@ -451,11 +451,11 @@ All tests use temporary scripts and research categories in disposable instances.
 
 Compile `ResearchEditorChecks` and `ResearchEditorServerProbe` into a small probe mod for a disposable
 production server. Run CurseForge ModTweaker 0.9.6 and GTNH ModTweaker 0.14.0, each with and without
-TC4Tweaks 1.5.47 and Salis Arcana 1.1.71. Require `TD_EDITOR_SERVER_PASS` (139 checks per combination).
+TC4Tweaks 1.5.47 and Salis Arcana 1.1.71. Require `TD_EDITOR_SERVER_PASS` (153 checks per combination).
 The fixtures exercise compact script output, swaps within and between tabs, nearest-free placement,
-all six true/false flags, hidden prerequisites, cycle/duplicate/self rejection, exact deletion undo,
+all seven true/false flags, hidden prerequisites, cycle/duplicate/self rejection, exact deletion undo,
 TC4Tweaks lookup caches, ordinary-script ordering, multiple reloads, external-file conflicts and atomic
-file replacement. A research subclass whose five flag getters throw verifies that capture, script replay and
+file replacement. A research subclass whose six flag getters throw verifies that capture, script replay and
 rollback use stored flags without invoking player-dependent addon code. Dedicated servers must refuse editor
 activation while applying generated scripts normally.
 Export checks move generated batches into regular scripts, clear the managed file and reload. New saves must
@@ -472,8 +472,14 @@ clearing an original virtual flag, automatic relocation when clearing Virtual, c
 reload, undo and redo. Forbidden knowledge checks cover setting and clearing warp, compact output,
 ordinary-script ordering, deletion, negative-value rejection and exact rollback. Occupied destinations at both coordinate boundaries must find valid free positions.
 
+AutoUnlock tests cover enabling and clearing both default states, compact output, undo/redo, script reload,
+exported baselines, and unchanged player completion/warp while editing. A fake player runs through Thaumcraft's
+actual load/save handlers: automatic completion bypasses unmet prerequisites, applies attached warp, is omitted
+from saved research, and is granted (including warp) again on load. Disabling the flag leaves current knowledge
+intact but prevents that grant when loading a save made while AutoUnlock was enabled. Use disposable player files.
+
 `ResearchEditorClientProbe` runs in real production clients with the same four dependency combinations.
-Require `TD_EDITOR_CLIENT_PASS` (56 checks without addons, 60 with addons). Mouse and keyboard events are supplied through
+Require `TD_EDITOR_CLIENT_PASS` (59 checks without addons, 63 with addons). Mouse and keyboard events are supplied through
 LWJGL's event fields and the actual stock screen's input methods, exercising the input mixin before native
 and Salis Arcana handlers. The screen must remain exactly `GuiResearchBrowser`, including when toggled
 with the same book instance open. Checks include drag/pan separation, native rendering, menu properties,

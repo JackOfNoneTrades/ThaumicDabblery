@@ -635,6 +635,8 @@ public final class ResearchEditorOverlay extends GuiScreen {
             warpInput.setSelectionPos(0);
         }));
         menu.add(new MenuItem("< Back", () -> rootMenu(key, menuX, menuY)));
+        // Keep all properties and Back visible when the screen has room for the complete menu.
+        menuY = Math.max(30, Math.min(menuY, height - 38 - menu.size() * ROW));
     }
 
     private void drawWarp() {

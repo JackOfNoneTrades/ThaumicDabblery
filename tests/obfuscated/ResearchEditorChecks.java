@@ -26,7 +26,7 @@ public final class ResearchEditorChecks {
   ResearchCategories.registerCategory("TD_EDITOR_EMPTY",icon,back);
   make("TD_A",TAB,0,0);make("TD_B",TAB,2,0);make("TD_C",TAB,0,2);make("TD_D",OTHER,0,0);
   items.get("TD_C").setParents("TD_A","TD_A").setParentsHidden("TD_B").setSiblings("TD_A","TD_A","TD_B");
-  items.get("TD_D").setLost().setHidden().setRound().setSpecial().setSecondary();
+  items.get("TD_D").setLost().setHidden().setRound().setSpecial().setSecondary().setAutoUnlock();
   make("TD_V",OTHER,4,4);items.get("TD_V").setVirtual();
   script("");
  }
@@ -36,6 +36,7 @@ public final class ResearchEditorChecks {
   setup();
   collectedScripts();
   exportedBatches();
+  autoUnlock();
   overriddenFlags();
   warp();
   check(ResearchEditor.problem()==null,"ready after reload");
@@ -184,6 +185,52 @@ public final class ResearchEditorChecks {
   check(ResearchEditor.problem()!=null&&thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==0,"negative scripted warp rejected atomically");
   script("");
  }
+ private void autoUnlock()throws Exception {
+  net.minecraft.server.MinecraftServer server=net.minecraft.server.MinecraftServer.func_71276_C();
+  net.minecraft.entity.player.EntityPlayerMP player=net.minecraftforge.common.util.FakePlayerFactory.get(server.func_71218_a(0),new com.mojang.authlib.GameProfile(UUID.randomUUID(),"TD_AutoUnlock"));
+  player.field_71135_a=new net.minecraft.network.NetHandlerPlayServer(server,new net.minecraft.network.NetworkManager(false){private final io.netty.channel.Channel sink=new io.netty.channel.embedded.EmbeddedChannel(new io.netty.channel.ChannelInboundHandlerAdapter());public io.netty.channel.Channel channel(){return sink;}},player){@Override public void func_147359_a(net.minecraft.network.Packet packet){}};
+  String name=player.func_70005_c_();
+  thaumcraft.common.lib.research.PlayerKnowledge knowledge=thaumcraft.common.Thaumcraft.proxy.getPlayerKnowledge();
+  thaumcraft.common.lib.events.EventHandlerEntity events=new thaumcraft.common.lib.events.EventHandlerEntity();
+  Path directory=Files.createTempDirectory("td-autounlock-");String uuid=player.func_110124_au().toString();
+  net.minecraftforge.event.entity.player.PlayerEvent.LoadFromFile load=new net.minecraftforge.event.entity.player.PlayerEvent.LoadFromFile(player,directory.toFile(),uuid);
+  net.minecraftforge.event.entity.player.PlayerEvent.SaveToFile save=new net.minecraftforge.event.entity.player.PlayerEvent.SaveToFile(player,directory.toFile(),uuid);
+  boolean wuss=thaumcraft.common.config.Config.wuss;
+  try {
+   thaumcraft.common.config.Config.wuss=false;
+   events.playerLoad(load);int initialWarp=knowledge.getWarpTotal(name);
+   ResearchEditor.edit("auto unlock",l->{l.toggleFlag("TD_A",6);l.parent("TD_A",null,"TD_B",false);l.setWarp("TD_A",4);});
+   check(items.get("TD_A").isAutoUnlock()&&saved().contains("\"AutoUnlock\", true"),"AutoUnlock checkbox saves native flag");
+   check(!thaumcraft.common.lib.research.ResearchManager.isResearchComplete(name,"TD_A")&&knowledge.getWarpTotal(name)==initialWarp,"enabling AutoUnlock does not complete research or award warp");
+   ResearchEditor.undo();check(!items.get("TD_A").isAutoUnlock()&&!saved().contains("AutoUnlock"),"AutoUnlock undo compacts flag");
+   ResearchEditor.redo();check(items.get("TD_A").isAutoUnlock(),"AutoUnlock redo restores flag");
+   MineTweakerImplementationAPI.reload();
+   check(items.get("TD_A").isAutoUnlock()&&!thaumcraft.common.lib.research.ResearchManager.isResearchComplete(name,"TD_A")&&knowledge.getWarpTotal(name)==initialWarp,"AutoUnlock script reload changes definition only");
+   events.playerLoad(load);
+   check(thaumcraft.common.lib.research.ResearchManager.isResearchComplete(name,"TD_A")&&!thaumcraft.common.lib.research.ResearchManager.isResearchComplete(name,"TD_B"),"native player load grants AutoUnlock despite incomplete prerequisite");
+   check(knowledge.getWarpTotal(name)==initialWarp+4,"native AutoUnlock completion awards attached warp");
+   net.minecraft.nbt.NBTTagCompound nbt=new net.minecraft.nbt.NBTTagCompound();
+   thaumcraft.common.lib.research.ResearchManager.saveResearchNBT(nbt,player);
+   check(!nbt.toString().contains("TD_A"),"native saves omit automatically unlocked research");
+   events.playerSave(save);events.playerLoad(load);
+   check(knowledge.getWarpTotal(name)==initialWarp+8,"native reload grants automatic research warp again");
+   events.playerSave(save);
+   ResearchEditor.edit("disable auto unlock",l->l.toggleFlag("TD_A",6));
+   check(!items.get("TD_A").isAutoUnlock()&&thaumcraft.common.lib.research.ResearchManager.isResearchComplete(name,"TD_A")&&knowledge.getWarpTotal(name)==initialWarp+8,"disabling AutoUnlock leaves current completion and warp intact");
+   events.playerLoad(load);
+   check(!thaumcraft.common.lib.research.ResearchManager.isResearchComplete(name,"TD_A")&&knowledge.getWarpTotal(name)==initialWarp+8,"disabled automatic research is not restored from prior automatic-only save");
+   script("");
+   ResearchEditor.edit("clear original AutoUnlock",l->l.toggleFlag("TD_D",6));
+   check(!items.get("TD_D").isAutoUnlock()&&saved().contains("\"AutoUnlock\", false"),"original AutoUnlock can be cleared in script");
+   MineTweakerImplementationAPI.reload();check(!items.get("TD_D").isAutoUnlock(),"false AutoUnlock script survives reload");
+   ResearchEditor.edit("restore original AutoUnlock",l->l.toggleFlag("TD_D",6));
+   check(items.get("TD_D").isAutoUnlock()&&!saved().contains("AutoUnlock"),"returning to original AutoUnlock compacts override");
+  } finally {
+   script("");
+   thaumcraft.common.config.Config.wuss=wuss;knowledge.wipePlayerKnowledge(name);
+   try(java.util.stream.Stream<Path> paths=Files.walk(directory)){for(Path path:(Iterable<Path>)paths.sorted(Comparator.reverseOrder())::iterator)Files.delete(path);}
+  }
+ }
  private void overriddenFlags()throws Exception {
   // Gadomancy's isHidden() reads the client player, which does not exist during world startup.
   ResearchItem dynamic=new ResearchItem("TD_DYNAMIC",TAB,new AspectList(),20,20,1,new ResourceLocation("thaumcraft","textures/aspects/ordo.png")){
@@ -192,16 +239,17 @@ public final class ResearchEditorChecks {
    @Override public boolean isSecondary(){throw new AssertionError("dynamic isSecondary called");}
    @Override public boolean isRound(){throw new AssertionError("dynamic isRound called");}
    @Override public boolean isSpecial(){throw new AssertionError("dynamic isSpecial called");}
+   @Override public boolean isAutoUnlock(){throw new AssertionError("dynamic isAutoUnlock called");}
   };
-  dynamic.setHidden().setRound().registerResearchItem();
+  dynamic.setHidden().setRound().setAutoUnlock().registerResearchItem();
   script("");
-  check(ResearchEditor.layout().require("TD_DYNAMIC").flags==10,"capture stored flags without invoking addon getters");
+  check(ResearchEditor.layout().require("TD_DYNAMIC").flags==74,"capture stored flags without invoking addon getters");
   ResearchEditor.edit("dynamic flags",l->l.require("TD_DYNAMIC").flags=21);
   check(ResearchLayout.capture().require("TD_DYNAMIC").flags==21,"apply stored flags without invoking addon getters");
   MineTweakerImplementationAPI.reload();
   check(ResearchEditor.layout().require("TD_DYNAMIC").flags==21,"dynamic research flag script replays");
   script("");
-  check(ResearchLayout.capture().require("TD_DYNAMIC").flags==10,"rollback restores stored flags without invoking addon getters");
+  check(ResearchLayout.capture().require("TD_DYNAMIC").flags==74,"rollback restores stored flags without invoking addon getters");
  }
  public interface Checked{void run()throws Exception;}
  private void expectInvalid(String label,Checked action)throws Exception{String before=saved();try{action.run();throw new AssertionError("accepted "+label);}catch(IllegalArgumentException expected){checks++;}check(saved().equals(before),"invalid "+label+" leaves file unchanged");}
@@ -240,10 +288,10 @@ public final class ResearchEditorChecks {
  private void exportedBatches()throws Exception {
   Path regular=Paths.get("scripts/zzzz-exported-editor.zs"),second=Paths.get("scripts/aaa-exported-editor.zs");
   try {
-   ResearchEditor.edit("first batch",l->{l.swap("TD_A","TD_B");l.toggleFlag("TD_A",1);l.setWarp("TD_A",7);l.parent("TD_A",null,"TD_D",true);l.delete("TD_V");});
+   ResearchEditor.edit("first batch",l->{l.swap("TD_A","TD_B");l.toggleFlag("TD_A",1);l.toggleFlag("TD_A",6);l.setWarp("TD_A",7);l.parent("TD_A",null,"TD_D",true);l.delete("TD_V");});
    String exported=saved();Files.write(regular,exported.getBytes(StandardCharsets.UTF_8));script("");
    check(ResearchEditor.problem()==null&&items.get("TD_A").displayColumn==2&&items.get("TD_B").displayColumn==0,"exported occupied swap applies as a batch");
-   check(items.get("TD_A").isHidden()&&thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==7&&Arrays.equals(items.get("TD_A").parentsHidden,new String[]{"TD_D"})&&ResearchCategories.getResearch("TD_V")==null,"export retains flags, warp, parents and deletion");
+   check(items.get("TD_A").isHidden()&&items.get("TD_A").isAutoUnlock()&&thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==7&&Arrays.equals(items.get("TD_A").parentsHidden,new String[]{"TD_D"})&&ResearchCategories.getResearch("TD_V")==null,"export retains flags, warp, parents and deletion");
    ResearchEditor.edit("next batch",l->l.setWarp("TD_C",3));
    check(saved().contains("ResearchEditor.warp(\"TD_C\", 3)")&&!saved().contains("\"TD_A\"")&&!saved().contains("\"TD_B\"")&&!saved().contains("\"TD_V\""),"exported declarations do not reappear on next save");
    check(new String(Files.readAllBytes(regular),StandardCharsets.UTF_8).equals(exported),"editor leaves regular script untouched");
@@ -259,7 +307,7 @@ public final class ResearchEditorChecks {
    ResearchEditor.undo();check(!saved().contains("ResearchEditor.")&&thaumcraft.api.ThaumcraftApi.getWarp("TD_C")==3,"undo returns to second exported batch");
    Files.delete(second);script("");check(thaumcraft.api.ThaumcraftApi.getWarp("TD_C")==0&&thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==7,"removing one exported script restores only its changes");
    Files.delete(regular);script("");
-   check(items.get("TD_A").displayColumn==0&&items.get("TD_B").displayColumn==2&&!items.get("TD_A").isHidden()&&items.get("TD_A").parentsHidden==null&&thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==0&&ResearchCategories.getResearch("TD_V")==items.get("TD_V"),"removing exports restores original layout and deleted entries");
+   check(items.get("TD_A").displayColumn==0&&items.get("TD_B").displayColumn==2&&!items.get("TD_A").isHidden()&&!items.get("TD_A").isAutoUnlock()&&items.get("TD_A").parentsHidden==null&&thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==0&&ResearchCategories.getResearch("TD_V")==items.get("TD_V"),"removing exports restores original layout and deleted entries");
    String helper="import mods.thaumicdabblery.ResearchEditor as E;\nfunction applyBatch() as void { E.warp(\"TD_A\", 5); }\napplyBatch();\n";
    Files.write(regular,helper.getBytes(StandardCharsets.UTF_8));script(helper.replace(", 5)",", 9)"));
    ResearchEditor.edit("helper batch",l->l.setWarp("TD_C",2));

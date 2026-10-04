@@ -24,8 +24,9 @@ import thaumcraft.api.research.ResearchItem;
 /** A complete editable projection. Pages, recipe requirements and player knowledge are never changed. */
 public final class ResearchLayout {
 
-    public static final String[] FLAGS = { "Lost", "Hidden", "Secondary", "Round", "Spiky", "Virtual" };
-    private static final String[] FIELDS = { "isLost", "isHidden", "isSecondary", "isRound", "isSpecial", "isVirtual" };
+    public static final String[] FLAGS = { "Lost", "Hidden", "Secondary", "Round", "Spiky", "Virtual", "AutoUnlock" };
+    private static final String[] FIELDS = { "isLost", "isHidden", "isSecondary", "isRound", "isSpecial", "isVirtual",
+        "isAutoUnlock" };
     public final Map<String, Entry> entries = new LinkedHashMap<>();
 
     public static final class Entry {
