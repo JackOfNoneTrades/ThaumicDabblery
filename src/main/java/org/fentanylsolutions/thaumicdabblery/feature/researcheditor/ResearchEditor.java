@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import org.fentanylsolutions.thaumicdabblery.ThaumicDabblery;
@@ -28,6 +30,8 @@ public final class ResearchEditor {
     private static EditorFile file;
     private static String problem;
     private static int generation;
+    private static boolean collecting;
+    private static final Set<String> REMOVED_RESEARCH = new HashSet<>(), REMOVED_TABS = new HashSet<>();
 
     private ResearchEditor() {}
 
@@ -38,6 +42,9 @@ public final class ResearchEditor {
     }
 
     private static synchronized void prepareReload() {
+        collecting = true;
+        REMOVED_RESEARCH.clear();
+        REMOVED_TABS.clear();
         SCRIPT_PATCHES.clear();
         EDITOR_PATCHES.clear();
         baseline = current = null;
@@ -56,11 +63,13 @@ public final class ResearchEditor {
     }
 
     private static synchronized void finishReload() {
+        collecting = false;
         ResearchLayout original = ResearchLayout.capture();
         baseline = original.copy();
         try {
             for (Consumer<ResearchLayout> patch : SCRIPT_PATCHES) patch.accept(baseline);
-            baseline.validate(original);
+            baseline.finishTabRemovals()
+                .validate(original);
         } catch (IllegalArgumentException exception) {
             problem = exception.getMessage();
             MineTweakerAPI.logError("Research editor script baseline rejected: " + problem);
@@ -72,11 +81,12 @@ public final class ResearchEditor {
         current = baseline.copy();
         try {
             for (Consumer<ResearchLayout> patch : EDITOR_PATCHES) patch.accept(current);
-            current.validate(baseline);
+            current = current.finishTabRemovals();
+            current.validate(original);
         } catch (IllegalArgumentException exception) {
             problem = exception.getMessage();
             MineTweakerAPI.logError("Research editor overlay rejected: " + problem);
-            current = baseline.copy();
+            current = baseline.finishTabRemovals();
         }
         // Restore both layers BEFORE ordinary script actions are undone on the next reload.
         MineTweakerAPI.apply(new Overlay(original, current));
@@ -95,7 +105,7 @@ public final class ResearchEditor {
 
     @ZenMethod
     public static synchronized void move(String key, String tab, int x, int y) {
-        patches().add(layout -> {
+        researchPatch(key, layout -> {
             ResearchLayout.Entry entry = layout.require(key);
             entry.tab = tab;
             entry.x = x;
@@ -105,7 +115,7 @@ public final class ResearchEditor {
 
     @ZenMethod
     public static synchronized void flag(String key, String flag, boolean value) {
-        patches().add(layout -> {
+        researchPatch(key, layout -> {
             ResearchLayout.Entry entry = layout.require(key);
             for (int i = 0; i < ResearchLayout.FLAGS.length; i++) {
                 if (ResearchLayout.FLAGS[i].equalsIgnoreCase(flag)) {
@@ -119,23 +129,71 @@ public final class ResearchEditor {
 
     @ZenMethod
     public static synchronized void warp(String key, int amount) {
-        patches().add(layout -> layout.setWarp(key, amount));
+        researchPatch(key, layout -> layout.setWarp(key, amount));
     }
 
     @ZenMethod
     public static synchronized void parents(String key, String[] visible, String[] hidden) {
         final String[] normalCopy = visible == null ? null : visible.clone();
         final String[] hiddenCopy = hidden == null ? null : hidden.clone();
-        patches().add(layout -> {
+        researchPatch(key, layout -> {
             ResearchLayout.Entry entry = layout.require(key);
-            entry.parents = normalCopy == null ? null : normalCopy.clone();
-            entry.hidden = hiddenCopy == null ? null : hiddenCopy.clone();
+            entry.parents = survivingParents(layout, normalCopy);
+            entry.hidden = survivingParents(layout, hiddenCopy);
         });
     }
 
     @ZenMethod
     public static synchronized void remove(String key) {
-        patches().add(layout -> layout.delete(key));
+        researchPatch(key, layout -> layout.delete(key));
+    }
+
+    @ZenMethod
+    public static synchronized void removeTab(String tab) {
+        patches().add(layout -> {
+            if (REMOVED_TABS.contains(tab)
+                && !thaumcraft.api.research.ResearchCategories.researchCategories.containsKey(tab)) {
+                MineTweakerAPI
+                    .logWarning("Skipping editor removal of tab " + tab + ": already removed by ordinary scripts.");
+                return;
+            }
+            layout.removeTab(tab);
+        });
+    }
+
+    /** Called only for existing entries actually removed by ordinary ModTweaker actions during this reload. */
+    public static synchronized void recordRemovedResearch(String key) {
+        if (collecting) REMOVED_RESEARCH.add(key);
+    }
+
+    public static synchronized void recordRemovedTab(String tab) {
+        if (collecting) REMOVED_TABS.add(tab);
+    }
+
+    private static void researchPatch(String key, Consumer<ResearchLayout> patch) {
+        patches().add(layout -> {
+            if (removedByScripts(layout, key)) {
+                MineTweakerAPI
+                    .logWarning("Skipping editor changes for research " + key + ": removed by ordinary scripts.");
+                return;
+            }
+            patch.accept(layout);
+        });
+    }
+
+    private static boolean removedByScripts(ResearchLayout layout, String key) {
+        return REMOVED_RESEARCH.contains(key) && !layout.entries.containsKey(key);
+    }
+
+    private static String[] survivingParents(ResearchLayout layout, String[] parents) {
+        if (parents == null) return null;
+        List<String> result = new ArrayList<>();
+        for (String parent : parents) {
+            if (removedByScripts(layout, parent))
+                MineTweakerAPI.logWarning("Skipping editor prerequisite " + parent + ": removed by ordinary scripts.");
+            else result.add(parent);
+        }
+        return result.toArray(new String[0]);
     }
 
     public static synchronized int generation() {

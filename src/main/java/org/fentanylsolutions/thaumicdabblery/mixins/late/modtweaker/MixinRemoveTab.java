@@ -3,6 +3,7 @@ package org.fentanylsolutions.thaumicdabblery.mixins.late.modtweaker;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.fentanylsolutions.thaumicdabblery.feature.researcheditor.ResearchEditor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -32,7 +33,9 @@ public abstract class MixinRemoveTab {
             return;
         }
 
+        ResearchEditor.recordRemovedTab(tab);
         for (String researchKey : new ArrayList<>(category.research.keySet())) {
+            ResearchEditor.recordRemovedResearch(researchKey);
             OrphanResearch action = new OrphanResearch(researchKey);
             action.apply();
             thaumicdabblery$orphanActions.add(action);

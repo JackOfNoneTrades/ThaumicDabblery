@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,6 +29,8 @@ public final class ResearchLayout {
     private static final String[] FIELDS = { "isLost", "isHidden", "isSecondary", "isRound", "isSpecial", "isVirtual",
         "isAutoUnlock" };
     public final Map<String, Entry> entries = new LinkedHashMap<>();
+    private final Map<String, ResearchCategoryList> tabs = new LinkedHashMap<>();
+    private final Set<String> removedTabs = new LinkedHashSet<>();
 
     public static final class Entry {
 
@@ -37,6 +40,7 @@ public final class ResearchLayout {
         public Integer warp;
         public String[] parents, hidden, siblings;
         public boolean deleted;
+        private boolean removedWithTab;
 
         private Entry(ResearchItem item) {
             research = item;
@@ -64,6 +68,7 @@ public final class ResearchLayout {
             hidden = copy(source.hidden);
             siblings = copy(source.siblings);
             deleted = source.deleted;
+            removedWithTab = source.removedWithTab;
         }
 
         public boolean hasFlag(int index) {
@@ -81,6 +86,7 @@ public final class ResearchLayout {
 
     public static ResearchLayout capture() {
         ResearchLayout layout = new ResearchLayout();
+        layout.tabs.putAll(ResearchCategories.researchCategories);
         for (ResearchCategoryList category : ResearchCategories.researchCategories.values()) {
             for (ResearchItem research : category.research.values())
                 layout.entries.put(research.key, new Entry(research));
@@ -90,6 +96,8 @@ public final class ResearchLayout {
 
     public ResearchLayout copy() {
         ResearchLayout result = new ResearchLayout();
+        result.tabs.putAll(tabs);
+        result.removedTabs.addAll(removedTabs);
         for (Map.Entry<String, Entry> entry : entries.entrySet())
             result.entries.put(entry.getKey(), new Entry(entry.getValue()));
         return result;
@@ -123,6 +131,7 @@ public final class ResearchLayout {
             throw new IllegalArgumentException("Position must be within -10000 to 10000");
         if (occupied(key, tab, x, y))
             throw new IllegalArgumentException("Position occupied. Use Swap positions instead.");
+        tabs.putIfAbsent(tab, ResearchCategories.getResearchList(tab));
         Entry entry = require(key);
         entry.tab = tab;
         entry.x = x;
@@ -225,13 +234,31 @@ public final class ResearchLayout {
         return count;
     }
 
+    public void removeTab(String tab) {
+        if (!tabs.containsKey(tab)) throw new IllegalArgumentException("Missing tab: " + tab);
+        removedTabs.add(tab);
+    }
+
+    /** Run on a copy after both script layers, so entries can move out before their old tab disappears. */
+    public ResearchLayout finishTabRemovals() {
+        ResearchLayout result = copy();
+        for (Map.Entry<String, Entry> pair : result.entries.entrySet()) {
+            Entry entry = pair.getValue();
+            if (!entry.deleted && removedTabs.contains(entry.tab)) {
+                result.delete(pair.getKey());
+                entry.removedWithTab = true;
+            }
+        }
+        return result;
+    }
+
     /** Validate changed constraints only; mod packs may already contain overlaps or dependency cycles. */
     public void validate(ResearchLayout before) {
         for (Map.Entry<String, Entry> pair : entries.entrySet()) {
             String key = pair.getKey();
             Entry entry = pair.getValue(), original = before.entries.get(key);
             if (entry.deleted) continue;
-            if (!ResearchCategories.researchCategories.containsKey(entry.tab))
+            if (removedTabs.contains(entry.tab) || !tabs.containsKey(entry.tab))
                 throw new IllegalArgumentException("Missing tab: " + entry.tab);
             if (original == null || !entry.tab.equals(original.tab)
                 || entry.x != original.x
@@ -255,9 +282,16 @@ public final class ResearchLayout {
     /** All placements happen together so swapping occupied positions needs no temporary research coordinates. */
     public void apply() {
         Map<Object, Integer> warp = warpMap();
-        for (ResearchCategoryList category : ResearchCategories.researchCategories.values()) {
+        // Restore category identity and ordering on undo, preserving tabs registered outside this snapshot.
+        Map<String, ResearchCategoryList> categories = new LinkedHashMap<>(tabs);
+        for (Map.Entry<String, ResearchCategoryList> category : ResearchCategories.researchCategories.entrySet())
+            categories.putIfAbsent(category.getKey(), category.getValue());
+        for (ResearchCategoryList category : categories.values()) {
             for (String key : entries.keySet()) category.research.remove(key);
         }
+        for (String tab : removedTabs) categories.remove(tab);
+        ResearchCategories.researchCategories.clear();
+        ResearchCategories.researchCategories.putAll(categories);
         for (Map.Entry<String, Entry> pair : entries.entrySet()) {
             Entry entry = pair.getValue();
             ResearchItem research = entry.research;
@@ -296,9 +330,10 @@ public final class ResearchLayout {
         for (Map.Entry<String, Entry> pair : new TreeMap<>(entries).entrySet()) {
             Entry original = base.entries.get(pair.getKey());
             if (pair.getValue().deleted && original != null && !original.deleted) {
-                script.append("ResearchEditor.remove(")
-                    .append(quote(pair.getKey()))
-                    .append(");\n");
+                if (!pair.getValue().removedWithTab || !removedTabs.contains(original.tab))
+                    script.append("ResearchEditor.remove(")
+                        .append(quote(pair.getKey()))
+                        .append(");\n");
                 base.delete(pair.getKey());
             }
         }
@@ -338,6 +373,10 @@ public final class ResearchLayout {
                     .append(array(entry.hidden))
                     .append(");\n");
         }
+        for (String tab : removedTabs)
+            if (!baseline.removedTabs.contains(tab)) script.append("ResearchEditor.removeTab(")
+                .append(quote(tab))
+                .append(");\n");
         return script.toString();
     }
 

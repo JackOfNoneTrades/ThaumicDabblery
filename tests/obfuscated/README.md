@@ -451,7 +451,7 @@ All tests use temporary scripts and research categories in disposable instances.
 
 Compile `ResearchEditorChecks` and `ResearchEditorServerProbe` into a small probe mod for a disposable
 production server. Run CurseForge ModTweaker 0.9.6 and GTNH ModTweaker 0.14.0, each with and without
-TC4Tweaks 1.5.47 and Salis Arcana 1.1.71. Require `TD_EDITOR_SERVER_PASS` (153 checks per combination).
+TC4Tweaks 1.5.47 and Salis Arcana 1.1.71. Require `TD_EDITOR_SERVER_PASS` (200 checks per combination).
 The fixtures exercise compact script output, swaps within and between tabs, nearest-free placement,
 all seven true/false flags, hidden prerequisites, cycle/duplicate/self rejection, exact deletion undo,
 TC4Tweaks lookup caches, ordinary-script ordering, multiple reloads, external-file conflicts and atomic
@@ -462,7 +462,12 @@ Export checks move generated batches into regular scripts, clear the managed fil
 exclude the exported moves, flags, warp, parents and deletions. Cover atomic swaps, repeated batches, overrides,
 returning to baseline, undo/redo, unchanged regular files, removing exports, helper functions/import aliases,
 a same-named source in a different script module, and independent rejection of invalid baseline/managed batches.
-The same fixture also runs in a development server with SRG calls remapped to MCP names.
+Deferred tab-removal checks cover regular and managed declarations, moves out of and into removed tabs,
+compact saves, exported batches, multiple/empty tabs, duplicate link cleanup, category identity/order restoration,
+undo/redo, invalid batches and repeated reloads. Ordinary ModTweaker deletions skip obsolete editor declarations
+and parent references without discarding unrelated edits; unknown keys still fail, recreated keys receive their
+edits, and deletion tracking resets on each reload.
+The fixture can also run in a development server with SRG calls remapped to MCP names.
 Script-sync checks retain the input streams and verify immediate closure for normal, empty and failed reads,
 including an actual file stream that cannot be garbage-collected during the assertion. Repeated reloads followed
 by the first prerequisite edit must save successfully. These checks reproduce the handle leak on non-Windows
@@ -479,7 +484,7 @@ from saved research, and is granted (including warp) again on load. Disabling th
 intact but prevents that grant when loading a save made while AutoUnlock was enabled. Use disposable player files.
 
 `ResearchEditorClientProbe` runs in real production clients with the same four dependency combinations.
-Require `TD_EDITOR_CLIENT_PASS` (70 checks without addons, 74 with addons). Mouse and keyboard events are supplied through
+Require `TD_EDITOR_CLIENT_PASS` (77 checks without addons, 81 with addons). Mouse and keyboard events are supplied through
 LWJGL's event fields and the actual stock screen's input methods, exercising the input mixin before native
 and Salis Arcana handlers. The screen must remain exactly `GuiResearchBrowser`, including when toggled
 with the same book instance open. Checks include drag/pan separation, native rendering, menu properties,
@@ -489,6 +494,9 @@ minimum-size geometry, tab clicks beside the toolbar, and forbidden-knowledge in
 Parent/swap selection checks drag empty space after switching tabs, including navigating to an off-screen parent.
 Panning must retain the pending selection, stop on release, leave scripts/history untouched and allow the target
 to be picked afterward. The old build fails this test because target selection blocks empty-space dragging.
+Client tab-removal checks reload with the removed tab selected, preserve a managed move out of that tab,
+then edit, save, undo, redo and reload the rescued research. Removing the deletion script restores the tab
+and its entries without changing player knowledge or warp.
 The UI also exports its saved batch to a regular script, reloads, edits an exported value and undoes it; only
 the new override may be written, and the exported script must remain unchanged. A simulated filesystem failure must show a concise notice without temporary-file paths; `logs/fml-client-latest.log` must contain
 `TD_TEST_SHARING_VIOLATION`, both paths and the full exception. Cursor checks ensure frame/input preparation never advances the blink counter

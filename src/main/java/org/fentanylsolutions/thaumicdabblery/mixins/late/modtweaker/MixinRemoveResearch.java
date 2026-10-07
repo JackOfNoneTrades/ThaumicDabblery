@@ -1,5 +1,6 @@
 package org.fentanylsolutions.thaumicdabblery.mixins.late.modtweaker;
 
+import org.fentanylsolutions.thaumicdabblery.feature.researcheditor.ResearchEditor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -26,6 +27,7 @@ public abstract class MixinRemoveResearch {
             return;
         }
 
+        ResearchEditor.recordRemovedResearch(key);
         thaumicdabblery$orphanAction = new OrphanResearch(key);
         thaumicdabblery$orphanAction.apply();
     }

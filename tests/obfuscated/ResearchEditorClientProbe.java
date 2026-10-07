@@ -236,6 +236,21 @@ public final class ResearchEditorClientProbe {
     checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==8&&checks.saved().contains("ResearchEditor.warp(\"TD_A\", 8)")&&!checks.saved().contains("ResearchEditor.move")&&!checks.saved().contains("ResearchEditor.flag")&&!checks.saved().contains("ResearchEditor.parents"),"next UI save emits only new overrides after export");
     toolbar("Undo");checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5&&!checks.saved().contains("ResearchEditor."),"UI undo preserves exported baseline");
     checks.check(new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("scripts/zzzz-exported-editor.zs")),java.nio.charset.StandardCharsets.UTF_8).equals(exported),"UI saves leave exported script unchanged");
+    tab(ResearchEditorChecks.TAB);
+    java.nio.file.Path removal=java.nio.file.Paths.get("scripts/zzz-tab-removal.zs");
+    java.nio.file.Files.write(removal,("mods.thaumicdabblery.ResearchEditor.removeTab(\""+ResearchEditorChecks.TAB+"\");\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    checks.script("mods.thaumicdabblery.ResearchEditor.move(\"TD_B\", \""+ResearchEditorChecks.OTHER+"\", 8, 8);\n");overlay();
+    checks.check(ResearchEditorClient.enabled()&&ResearchCategories.getResearchList(ResearchEditorChecks.TAB)==null&&!ResearchEditorClient.selectedTab().equals(ResearchEditorChecks.TAB),"removing selected tab on reload keeps editor open on an existing tab");
+    checks.check(ResearchCategories.getResearch("TD_B")==checks.items.get("TD_B")&&ResearchCategories.getResearch("TD_C")==null,"managed move rescues research from regular deferred tab removal in client");
+    tab(ResearchEditorChecks.OTHER);call(overlay(),"focus","focus",new Class[]{String.class},"TD_B");
+    click(sx(8),sy(8),1);menu(3);menu(7);type(6,'5');type(28);
+    checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_B")==5&&checks.saved().contains("ResearchEditor.move(\"TD_B\"")&&!checks.saved().contains("removeTab"),"UI save preserves managed rescue without copying baseline tab removal");
+    toolbar("Undo");checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_B")==0&&ResearchCategories.getResearchList(ResearchEditorChecks.TAB)==null,"UI undo retains tab removal and rescued entry");
+    toolbar("Redo");MineTweakerImplementationAPI.reload();overlay();
+    checks.check(ResearchEditor.problem()==null&&thaumcraft.api.ThaumcraftApi.getWarp("TD_B")==5&&ResearchCategories.getResearch("TD_B")!=null,"UI redo and reload preserve rescued research");
+    java.nio.file.Files.delete(removal);checks.script("");overlay();
+    checks.check(ResearchCategories.getResearchList(ResearchEditorChecks.TAB)!=null&&ResearchCategories.getResearch("TD_C")==checks.items.get("TD_C")&&checks.items.get("TD_B").category.equals(ResearchEditorChecks.TAB),"removing deletion script restores tab, research and original placement in client");
+    checks.check(knowledge.equals(knowledge()),"tab deletion and reload do not change player knowledge or warp");
     System.out.println("TD_EDITOR_CLIENT_PASS checks="+checks.checks);done=true;mc.func_71400_g();
    }
    stage++;
