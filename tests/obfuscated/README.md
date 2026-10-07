@@ -49,7 +49,7 @@ Raw logs and screenshots from this run are in `/tmp/td-creature-test/` on the de
 
 ## Custom creature transformations
 
-Compile `CreatureInfusionChecks.java` and `CustomCreatureChecks.java` with either
+Compile `CreatureInfusionChecks.java`, `CustomCreatureChecks.java` and `CreatureBreachChecks.java` with either
 `CustomCreatureServerProbe.java` or `CustomCreatureClientProbe.java`. Use the same production classpath,
 Horizons jar and four ModTweaker/addon combinations described above. These probes include the native
 recipe-editing regression checks. Their optional `after:tc4tweak` dependency ensures TC4Tweaks has initialized
@@ -91,6 +91,45 @@ Verified on 2026-09-30 with the same Forge/Thaumcraft/Horizons versions listed a
 
 The separate restart without scripting mods and all three optional-dependency startup combinations also passed.
 Raw logs, saved vat NBT and screenshots are in `/tmp/td-custom-creature-test/` on the development machine.
+
+## Creature NBT, breaches and blacklists
+
+The custom-creature probes above also run `CreatureBreachChecks.java`. They verify input NBT subset matching,
+nested tags, output compound/list/byte data, fresh UUID/species defaults, matching fallback, immutable captured
+outputs, and preservation of NBT/breach settings through recipe edits and removal/redefinition. Invalid tags
+and explosion strengths intentionally log script errors without replacing the existing recipe.
+
+Blacklist checks cover duplicate declarations, exact species versus subclasses, native upgrades (including
+Loyalty), native/custom transformations, next-match selection, recipe replacement/restoration, and reload undo.
+A rejected recipe must leave its pedestal ingredient untouched.
+
+Breach checks assemble the actual multiblock through Horizons' construction code and complete native crafting
+cycles. Forge explosion and entity-spawn events assert that the controller/slaves and both water blocks are gone
+before one explosion, and that one fresh, undamaged result spawns afterward at the lower water position.
+They also check Giant output, no contained duplicate or failure-generated flux, disabled breaches, and retaining
+the assembled vat/source when a saved output cannot be created. The test saves `pending-breach-vat.dat` before
+completion and finishes after its recipe has been removed by a script reload.
+
+The client additionally completes a breach beside its real player and verifies normal network delivery of the
+released entity's name/baby state and removal of the controller and water. This is an integrated-server connection.
+
+Compile `CreatureBreachRestartProbe.java` alone into another probe jar for a separate production JVM without
+MineTweaker or ModTweaker. Copy `pending-breach-vat.dat` from a server run into that disposable instance.
+Require `TD_BREACH_RESTART_PASS scriptingMods=false`: saved output NBT, cost and explosion order must survive.
+Do not install it together with other probes. Fixtures created with both ModTweaker forks passed this restart test.
+
+Verified on 2026-10-07 with Forge 1614, Java 8, Thaumcraft 4.2.3.5, Thaumic Horizons 1.8.24,
+CraftTweaker 3.4.8 and GTNHLib 0.11.52, with TC4Tweaks 1.5.47 / Salis Arcana 1.1.71 in addon runs:
+
+| Runtime | ModTweaker | TC4Tweaks + Salis | Assertions |
+| --- | --- | --- | --- |
+| Production server | 0.14.0 / 0.9.6 | absent | 14,122 each |
+| Production server | 0.14.0 / 0.9.6 | present | 14,318 each |
+| Production client | 0.14.0 / 0.9.6 | absent | 14,134 each |
+| Production client | 0.14.0 / 0.9.6 | present | 14,330 each |
+
+These totals include the original creature-recipe regression suite. Logs and saved NBT are in
+`/tmp/td-vat-breach/` on the development machine. All tests require disposable worlds and scripts.
 
 ## Champion mobs
 

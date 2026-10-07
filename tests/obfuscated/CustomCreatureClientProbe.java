@@ -20,15 +20,21 @@ import thaumcraft.client.gui.GuiResearchRecipe;
 @Mod(modid="tdcustomcreatureclientprobe",name="Custom creature client probe",version="1",dependencies="required-after:thaumicdabblery;required-after:modtweaker2;required-after:ThaumicHorizons;after:tc4tweak;after:salisarcana")
 public final class CustomCreatureClientProbe {
  private final CustomCreatureChecks checks=new CustomCreatureChecks();
- private int ticks,frames,stage;private boolean launched,done;private volatile boolean serverDone,requestVat,vatDone;private volatile Throwable failure;private int x,y,z;
+ private int ticks,frames,stage;private boolean launched,done;private volatile boolean serverDone,requestVat,vatDone;private volatile Throwable failure;private int x,y,z;private volatile boolean requestBreach,breachDone;private volatile int breachId;
  @Mod.EventHandler public void ready(FMLLoadCompleteEvent e){FMLCommonHandler.instance().bus().register(this);}
  @Mod.EventHandler public void started(FMLServerStartedEvent e){try{checks.run(FMLCommonHandler.instance().getMinecraftServerInstance().func_71218_a(0));}catch(Throwable t){failure=t;}finally{serverDone=true;}}
  private void open(Minecraft mc,int page){mc.func_147108_a(new GuiResearchRecipe(ResearchCategories.getResearch(CustomCreatureChecks.RESEARCH),page,0,0));frames=0;}
  @SubscribeEvent public void serverTick(TickEvent.ServerTickEvent e){
-  if(e.phase!=TickEvent.Phase.END||!requestVat||vatDone)return;
+  if(e.phase!=TickEvent.Phase.END||(!requestVat||vatDone)&&(!requestBreach||breachDone))return;
   try{
    MinecraftServer server=MinecraftServer.func_71276_C();if(server.func_71203_ab().field_72404_b.isEmpty())return;
    EntityPlayerMP player=(EntityPlayerMP)server.func_71203_ab().field_72404_b.get(0);WorldServer world=(WorldServer)player.field_70170_p;
+   if(requestBreach&&!breachDone){
+    CreatureBreachChecks breach=new CreatureBreachChecks(checks,world);breach.x=(int)Math.floor(player.field_70165_t)+12;breach.y=(int)player.field_70163_u+3;breach.z=(int)Math.floor(player.field_70161_v)+3;
+    x=breach.x;y=breach.y;z=breach.z;TileVat vat=breach.assembled(breach.subject());breach.start(vat);checks.check(vat.mode==2,"network breach vat starts");breach.finish(vat);
+    for(Object o:world.field_72996_f)if(o instanceof EntityPigZombie&&"BreachOutput".equals(((EntityPigZombie)o).func_94057_bL())){EntityPigZombie mob=(EntityPigZombie)o;if(Math.abs(mob.field_70165_t-x)<2)breachId=mob.func_145782_y();}
+    checks.check(breachId!=0,"server spawned breach mob");breachDone=true;return;
+   }
    x=(int)Math.floor(player.field_70165_t)+2;y=(int)player.field_70163_u+3;z=(int)Math.floor(player.field_70161_v)+2;
    world.func_147465_d(x,y,z,ThaumicHorizons.blockVat,7,3);TileVat vat=(TileVat)world.func_147438_o(x,y,z);
    world.func_147465_d(x+2,y-1,z,ConfigBlocks.blockStoneDevice,1,3);((TilePedestal)world.func_147438_o(x+2,y-1,z)).func_70299_a(0,CustomCreatureChecks.stack("rotten_flesh"));
@@ -47,10 +53,16 @@ public final class CustomCreatureClientProbe {
     checks.check(((TileVat)te).getEntityContained().func_110138_aP()==20,"new mob and species health synchronized to real client");
     checks.check("Bacon".equals(((EntityPigZombie)((TileVat)te).getEntityContained()).func_94057_bL()),"custom name synchronized to client");
    }
+   if(stage==4){
+    if(!breachDone)return;net.minecraft.entity.Entity mob=mc.field_71441_e.func_73045_a(breachId);if(!(mob instanceof EntityPigZombie))return;
+    checks.check(((EntityPigZombie)mob).func_70631_g_()&&"BreachOutput".equals(((EntityPigZombie)mob).func_94057_bL()),"breach output name and baby state reach client");
+    checks.check(!(mc.field_71441_e.func_147438_o(x,y,z) instanceof TileVat)&&mc.field_71441_e.func_147437_c(x,y-1,z)&&mc.field_71441_e.func_147437_c(x,y-2,z),"dismantled vat and cleared water reach client");
+    checks.base.script("");System.out.println("TD_CUSTOM_CREATURE_CLIENT_PASS checks="+checks.checks);done=true;mc.func_71400_g();return;
+   }
    checks.check(mc.field_71462_r instanceof GuiResearchRecipe,"native custom recipe page renders");net.minecraft.util.ScreenShotHelper.func_148259_a(new java.io.File("."),"custom-creature-"+stage+".png",mc.field_71443_c,mc.field_71440_d,mc.func_147110_a());
    if(stage==1){checks.base.script(CustomCreatureChecks.demo()+CreatureInfusionChecks.set("custom:pigman",CustomCreatureChecks.RESEARCH,1,"exanimis 3","<minecraft:cookie>"));open(mc,1);stage++;}
    else if(stage==2){checks.base.script(CustomCreatureChecks.demo()+CreatureInfusionChecks.remove("custom:pigman"));open(mc,0);stage++;}
-   else{checks.base.script("");System.out.println("TD_CUSTOM_CREATURE_CLIENT_PASS checks="+checks.checks);done=true;mc.func_71400_g();}
+   else{checks.base.script(CreatureBreachChecks.recipe()+CreatureBreachChecks.nbt()+CreatureBreachChecks.breach(2));mc.func_147108_a(null);requestBreach=true;stage=4;frames=0;}
   }catch(Throwable t){done=true;System.out.println("TD_CUSTOM_CREATURE_CLIENT_FAILED checks="+checks.checks);t.printStackTrace();mc.func_71400_g();}
  }
  @SubscribeEvent public void render(TickEvent.RenderTickEvent e){if(e.phase==TickEvent.Phase.END)frames++;}

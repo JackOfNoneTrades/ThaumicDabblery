@@ -2,10 +2,13 @@ package org.fentanylsolutions.thaumicdabblery.compat.modtweaker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
@@ -26,7 +29,9 @@ import cpw.mods.fml.relauncher.ReflectionHelper;
 import minetweaker.IUndoableAction;
 import minetweaker.MineTweakerAPI;
 import minetweaker.MineTweakerImplementationAPI;
+import minetweaker.api.data.IData;
 import minetweaker.api.item.IItemStack;
+import minetweaker.mc1710.data.NBTConverter;
 import modtweaker2.helpers.InputHelper;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
@@ -137,13 +142,8 @@ public final class CreatureInfusionZen {
         ItemStack[] stacks = requireComponents(components);
         CreatureInfusionRecipe original = entry.original;
         CreatureInfusionRecipe replacement = original instanceof CustomCreatureRecipe
-            ? new CustomCreatureRecipe(
-                research,
-                original.getRecipeInput(),
-                ((CustomCreatureRecipe) original).getOutputEntity(),
-                instability,
-                parseAspects(aspects),
-                stacks)
+            ? ((CustomCreatureRecipe) entry.lastDefinition)
+                .withRecipe(research, instability, parseAspects(aspects), stacks)
             : new CreatureInfusionRecipe(
                 research,
                 copyOutput(original.getRecipeOutput()),
@@ -172,6 +172,75 @@ public final class CreatureInfusionZen {
             parseAspects(aspects),
             requireComponents(components));
         MineTweakerAPI.apply(new Register(new Entry(key, outputEntity, recipe)));
+    }
+
+    @ZenMethod
+    public static void setEntityNBT(String key, IData input, IData output) {
+        Entry entry = requireCustom(key);
+        MineTweakerAPI.apply(
+            new Change(entry, ((CustomCreatureRecipe) entry.current).withNBT(compound(input), compound(output))));
+    }
+
+    private static NBTTagCompound compound(IData data) {
+        if (data == null) return new NBTTagCompound();
+        NBTBase tag = NBTConverter.from(data);
+        if (!(tag instanceof NBTTagCompound)) throw new IllegalArgumentException("Entity NBT must be a compound");
+        return (NBTTagCompound) tag.copy();
+    }
+
+    @ZenMethod
+    public static void setBreach(String key, float strength) {
+        Entry entry = requireCustom(key);
+        MineTweakerAPI.apply(new Change(entry, ((CustomCreatureRecipe) entry.current).withBreach(strength)));
+    }
+
+    private static Entry requireCustom(String key) {
+        Entry entry = requireEntry(key);
+        if (!(entry.current instanceof CustomCreatureRecipe))
+            throw new IllegalArgumentException("Expected an active custom creature recipe: " + key);
+        return entry;
+    }
+
+    @ZenMethod
+    public static void blacklistInfusion(String mob, String key) {
+        Entry entry = requireEntry(key);
+        Class<?> type = CustomCreatureRecipe.requireMob(mob, false);
+        MineTweakerAPI.apply(new IUndoableAction() {
+
+            private boolean added;
+
+            @Override
+            public void apply() {
+                added = entry.blacklist.add(type);
+                CustomCreatureRecipe.setBlacklist(entry.current, entry.blacklist);
+            }
+
+            @Override
+            public void undo() {
+                if (added) entry.blacklist.remove(type);
+                CustomCreatureRecipe.setBlacklist(entry.current, entry.blacklist);
+            }
+
+            @Override
+            public boolean canUndo() {
+                return true;
+            }
+
+            @Override
+            public String describe() {
+                return "Blacklisting creature infusion " + key + " for " + mob;
+            }
+
+            @Override
+            public String describeUndo() {
+                return "Restoring creature infusion eligibility " + key + " for " + mob;
+            }
+
+            @Override
+            public Object getOverrideKey() {
+                return null;
+            }
+        });
     }
 
     @ZenMethod
@@ -334,7 +403,8 @@ public final class CreatureInfusionZen {
         private final String key;
         private final String output;
         private final CreatureInfusionRecipe original;
-        private CreatureInfusionRecipe current;
+        private CreatureInfusionRecipe current, lastDefinition;
+        private final Set<Class<?>> blacklist = new HashSet<>();
         private boolean ambiguous;
 
         private Entry(String key, String output, CreatureInfusionRecipe recipe) {
@@ -342,6 +412,7 @@ public final class CreatureInfusionZen {
             this.output = output;
             original = recipe;
             current = recipe;
+            lastDefinition = recipe;
         }
 
         private int insertionIndex() {
@@ -496,7 +567,7 @@ public final class CreatureInfusionZen {
         private final Entry entry;
         private final CreatureInfusionRecipe replacement;
         private final List<Runnable> pageUndo = new ArrayList<>();
-        private CreatureInfusionRecipe previous;
+        private CreatureInfusionRecipe previous, previousDefinition;
         private int index;
         private boolean applied;
 
@@ -508,12 +579,16 @@ public final class CreatureInfusionZen {
         @Override
         public void apply() {
             previous = entry.current;
+            previousDefinition = entry.lastDefinition;
             index = previous == null ? entry.insertionIndex() : ThaumicHorizons.critterRecipes.indexOf(previous);
             if (index < 0)
                 throw new IllegalStateException("Creature recipe changed outside this integration: " + entry.key);
             if (previous != null) ThaumicHorizons.critterRecipes.remove(index);
             if (replacement != null) ThaumicHorizons.critterRecipes.add(index, replacement);
+            CustomCreatureRecipe.setBlacklist(previous, Collections.emptySet());
+            CustomCreatureRecipe.setBlacklist(replacement, entry.blacklist);
             entry.current = replacement;
+            if (replacement != null) entry.lastDefinition = replacement;
             applied = true;
             try {
                 for (Slot slot : SLOTS) if (Arrays.asList(slot.entries)
@@ -536,7 +611,10 @@ public final class CreatureInfusionZen {
             if (replacement != null) ThaumicHorizons.critterRecipes.remove(replacement);
             if (previous != null)
                 ThaumicHorizons.critterRecipes.add(Math.min(index, ThaumicHorizons.critterRecipes.size()), previous);
+            CustomCreatureRecipe.setBlacklist(replacement, Collections.emptySet());
+            CustomCreatureRecipe.setBlacklist(previous, entry.blacklist);
             entry.current = previous;
+            entry.lastDefinition = previousDefinition;
             for (int i = pageUndo.size() - 1; i >= 0; i--) pageUndo.get(i)
                 .run();
             pageUndo.clear();

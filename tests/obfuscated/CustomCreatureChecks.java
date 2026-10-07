@@ -89,6 +89,7 @@ public final class CustomCreatureChecks {
    for(String op:new String[]{"mods.thaumcraft.Research.clearPages(\""+RESEARCH+"\");\n","mods.thaumcraft.Research.removeResearch(\""+RESEARCH+"\");\n"}){base.script(demo()+op);base.script("");check(ResearchCategories.getResearch(RESEARCH).getPages()==before,"page/research edits undo together");}
    base.script(demo()+CreatureInfusionChecks.remove("custom:pigman")+"mods.thaumcraft.Research.clearPages(\""+RESEARCH+"\");\n"+CreatureInfusionChecks.set("custom:pigman","",0,"","<minecraft:cookie>"));check(ResearchCategories.getResearch(RESEARCH).getPages().length==0,"custom redefinition respects cleared pages");
    base.script(add("custom:failure","","Pig","PigZombie","cookie"));TileVat failure=vat(world,new EntityPig(world),"cookie");start(failure,world,player);EntityLivingBase retained=failure.getEntityContained();((NBTTagCompound)get(failure,"recipeOutput")).func_74778_a("entity","MissingAfterSave");complete(failure,world);check(failure.getEntityContained()==retained,"unavailable saved output preserves source without crashing");
+   new CreatureBreachChecks(this,world).run();
    base.script("");check(base.entries().size()==30&&ThaumicHorizons.critterRecipes.size()==natives&&((List<?>)get(CreatureInfusionZen.class,"SLOTS")).size()==slots,"reload leaves no custom registry or page slots");check(((Map<?,?>)get(CreatureInfusionZen.class,"MANAGED_PAGES")).isEmpty(),"reload releases page snapshots");
   }finally{base.script("");world.func_147468_f(2,99,0);checks+=base.checks;}
  }

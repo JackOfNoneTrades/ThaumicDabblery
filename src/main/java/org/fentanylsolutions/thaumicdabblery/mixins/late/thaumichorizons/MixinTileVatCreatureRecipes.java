@@ -10,6 +10,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.fentanylsolutions.thaumicdabblery.compat.thaumichorizons.CustomCreatureRecipe;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -25,7 +26,27 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import thaumcraft.api.aspects.AspectList;
 
 @Mixin(value = TileVat.class, remap = false)
-public abstract class MixinTileVatCreatureRecipes {
+public abstract class MixinTileVatCreatureRecipes implements CustomCreatureRecipe.BreachVat {
+
+    @Unique
+    private boolean thaumicdabblery$breaching, thaumicdabblery$dismantling;
+
+    @Override
+    public void thaumicdabblery$dismantleForBreach() {
+        thaumicdabblery$breaching = true;
+        try {
+            ((TileVat) (Object) this).killMe();
+        } finally {
+            thaumicdabblery$breaching = thaumicdabblery$dismantling = false;
+        }
+    }
+
+    @Inject(method = "killMe", at = @At("HEAD"), cancellable = true, require = 1)
+    private void thaumicdabblery$disassembleOnce(CallbackInfo ci) {
+        if (!thaumicdabblery$breaching) return;
+        if (thaumicdabblery$dismantling) ci.cancel();
+        else thaumicdabblery$dismantling = true;
+    }
 
     @Shadow
     public int recipeType;
@@ -64,8 +85,12 @@ public abstract class MixinTileVatCreatureRecipes {
         if (recipeType != 0 || !CustomCreatureRecipe.OUTPUT_LABEL.equals(label) || !(output instanceof NBTTagCompound))
             return;
         TileVat vat = (TileVat) (Object) this;
-        CustomCreatureRecipe.finish(vat, (NBTTagCompound) output, myEssentia);
+        boolean breached = CustomCreatureRecipe.finish(vat, (NBTTagCompound) output, myEssentia);
         mode = 0;
+        if (breached) {
+            ci.cancel();
+            return;
+        }
         PacketHandler.INSTANCE.sendToAllAround(
             new PacketFXInfusionDone(vat.xCoord, vat.yCoord - 1, vat.zCoord),
             new NetworkRegistry.TargetPoint(
