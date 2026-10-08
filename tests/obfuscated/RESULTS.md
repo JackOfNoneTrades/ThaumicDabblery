@@ -579,3 +579,41 @@ feature-test instances did not contain these duplicates and therefore did not ca
 The duplicate jars were moved intact to `run/client/disabled-mods-2026-09-30/`; the standalone IC2 API jar stayed
 in `mods`. Relaunching the actual Java 25 development task completed loading and rendering without that crash.
 Evidence: `/tmp/td-furnace-test/dev-client-before-fix.log` and `dev-client-relaunch.log`.
+
+
+# Corpse Effigy skins verification, 2026-10-08
+
+Production artifact SHA-256: `c4ebcb78e13c60b04d3e534370dfeedbcd3c41d3740528d891b7e67e9efc4446`. `spotlessApply build` passed.
+All runtime checks used obfuscated Forge 1.7.10-10.13.4.1614, Java 8, Thaumcraft 4.2.3.5,
+Thaumic Horizons 1.8.24, CraftTweaker 3.4.8 and UniMixins 0.3.1.
+
+| ModTweaker | TC4Tweaks 1.5.47 + Salis Arcana 1.1.71 | Dedicated server | Integrated client |
+| --- | --- | --- | --- |
+| GTNH 0.14.0 | absent | 28 passed | 17 passed |
+| CurseForge 0.9.6 | absent | 28 passed | 17 passed |
+| GTNH 0.14.0 | present | 28 passed | 17 passed |
+| CurseForge 0.9.6 | present | 28 passed | 17 passed |
+
+The same 28 server and 17 client checks passed with both scripting mods absent. With Horizons
+also absent, the existing optional-dependency client probe passed startup, integrated world loading
+and stock Thaumonomicon rendering.
+
+Server checks cover native beacon activation, shared-viewer selection, last-binder appearance,
+rebinding elsewhere, dimensions, binding packet round trips, beacon/vat disk and description NBT,
+signed texture property preservation, malformed identities, self-infusion, consumed/destroyed bodies,
+and a beacon bound before construction of the vat.
+
+Clients receive real binding and tile updates, render the transformed native vat TESR, clear the body,
+disconnect, then rejoin the saved world. Pixel assertions and inspected framebuffer images cover
+legacy, modern classic/slim, clothing proportions, growing/ready/self-infusion modes and native fallback.
+A loopback HTTP fixture passes a texture through the native asynchronous skin loader and renders the
+result. Its hostname is temporarily allowed in the disposable probe process and restored afterward;
+production code preserves the native skin-domain policy. Mojang service availability and arbitrary
+third-party skin replacement mods were not tested.
+
+The existing creature infusion/breach dedicated-server suite also passed all four combinations:
+14,130 assertions per base run and 14,326 per addon run.
+
+Evidence: `/tmp/td-effigy/`, with `result.log` under each named instance, `effigy-*.png` under each
+client instance, `build.log`, and `regression.log`. Regression instances are `/tmp/td-vat-breach/`.
+The fixtures are `EffigySkinChecks`, `EffigySkinServerProbe` and `EffigySkinClientProbe`.

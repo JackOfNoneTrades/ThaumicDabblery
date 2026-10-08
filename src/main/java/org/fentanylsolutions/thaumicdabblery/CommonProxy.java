@@ -1,11 +1,14 @@
 package org.fentanylsolutions.thaumicdabblery;
 
+import net.minecraft.network.INetHandler;
+
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.CreatureInfusionZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.FurnacePagesZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ResearchPrerequisitesZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ResearchTabsZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ThaumicHorizonsSelfInfusionZen;
 import org.fentanylsolutions.thaumicdabblery.feature.FeatureManager;
+import org.fentanylsolutions.thaumicdabblery.feature.effigyskins.EffigySkinNetwork;
 import org.fentanylsolutions.thaumicdabblery.feature.researcheditor.ResearchEditor;
 import org.fentanylsolutions.thaumicdabblery.feature.scanall.ScanAllCommand;
 
@@ -30,6 +33,7 @@ public class CommonProxy {
 
     public void init(FMLInitializationEvent event) {
         FeatureManager.init(event);
+        if (Loader.isModLoaded("ThaumicHorizons")) EffigySkinNetwork.initialize();
         if (Loader.isModLoaded("MineTweaker3") && Loader.isModLoaded("modtweaker2")) {
             ResearchTabsZen.register();
             FurnacePagesZen.register();
@@ -57,6 +61,8 @@ public class CommonProxy {
         if (Loader.isModLoaded("MineTweaker3") && Loader.isModLoaded("modtweaker2")
             && Loader.isModLoaded("ThaumicHorizons")) CreatureInfusionZen.registerCommand();
     }
+
+    public void receiveEffigyBinding(EffigySkinNetwork.Binding binding, INetHandler source) {}
 
     public boolean toggleResearchEditor() {
         throw new IllegalArgumentException("Thaumonomicon editing is only available in single-player.");

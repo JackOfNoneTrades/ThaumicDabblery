@@ -18,6 +18,7 @@
     * Reload-safe Thaumonomicon tab ordering, including compatibility with TC4Tweaks
     * Focal Manipulator upgrade path customization
     * Thaumic Horizons player and creature vat recipe modification, custom mob transformations and configurable Thaumonomicon display items
+* Thaumic Horizons Corpse Effigies display bound player skins, with personal appearances for shared Soul Beacons
 * Single-player Thaumonomicon editor with drag placement, parent editing, cross-tab moves and swaps, properties, deletion, undo/redo and compact script saving through `/td edit`
 * Operator command `/td scanall [player]` to complete item/entity scans, discover aspects and reveal scan-dependent research without awarding research points
 * Configurable minimum Vis cost for casting and crafting, including Thaumic Bases bracelets

@@ -556,3 +556,22 @@ dereferences that player, so snapshots must never invoke it. Continue through th
 ModTweaker absent, command refusal, and normal stock book rendering. Require
 `TD_EDITOR_OPTIONAL_CLIENT_PASS`. All instances must be disposable: the fixtures create research tabs,
 change scripts, and generate temporary worlds. Never run them in a user's pack or existing save.
+
+## Corpse Effigy skins
+
+Compile `EffigySkinChecks` and `EffigySkinServerProbe` as a disposable probe mod against SRG Minecraft,
+the production Dabblery jar, Forge and Thaumic Horizons 1.8.24. Require `TD_EFFIGY_SERVER_PASS`.
+Run both ModTweaker forks, each with and without TC4Tweaks/Salis Arcana. Checks exercise the actual beacon
+activation and transformed vat: shared viewers, last binder, rebinding, dimension isolation, packet round trips,
+vat/beacon disk and description NBT, malformed profiles, retained signed texture properties, self-infusion,
+body consumption/destruction and binding before vat construction.
+
+`EffigySkinClientProbe` creates a disposable integrated world and sends binding and tile updates through
+real connections. It renders the actual vat TESR into a framebuffer using deterministic legacy and modern
+textures. Pixel checks cover both effigy modes, self-infusion, clothing proportions, classic/slim models,
+and native fallback. A loopback HTTP fixture exercises asynchronous texture downloads and model metadata
+through the native skin loader; its domain is temporarily allowed only inside the disposable probe process.
+It also closes and reopens the world to check saved identities and login synchronization.
+Require `TD_EFFIGY_CLIENT_PASS`; inspect `effigy-*.png` in the instance directory. These fixtures test
+rendering independently of Mojang availability; live skin-service availability is not part of their assertions.
+Also run without MineTweaker/ModTweaker, and check ordinary startup without Horizons. Never use an existing save.
