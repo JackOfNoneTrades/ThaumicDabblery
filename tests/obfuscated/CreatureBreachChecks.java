@@ -30,7 +30,8 @@ public final class CreatureBreachChecks {
  private final EntityPlayerMP player;
  public int x=40,y=100,z=0;
  public boolean watching;
- public int explosions,spawns;
+ public int explosions,spawns,matrixDrops;
+ public final List<String> sounds=new ArrayList<>();
  public EntityLiving released;
  public CreatureBreachChecks(CustomCreatureChecks checks,WorldServer world){c=checks;this.world=world;player=FakePlayerFactory.get(world,new GameProfile(UUID.randomUUID(),"BreachProbe"));}
  public static final String API="mods.thaumichorizons.CreatureInfusion.";
@@ -48,7 +49,7 @@ public final class CreatureBreachChecks {
    world.func_147465_d(x+dx,y-dy,z+dz,cap?(center?ConfigBlocks.blockMetalDevice:ConfigBlocks.blockWoodenDevice):(center?Blocks.field_150355_j:Blocks.field_150359_w),cap?(center?9:6):0,3);
   }
   Class<?> cls=Class.forName("com.kentington.thaumichorizons.common.items.WandManagerTH");java.lang.reflect.Method replace=cls.getDeclaredMethod("replaceVat",net.minecraft.world.World.class,int.class,int.class,int.class);replace.setAccessible(true);replace.invoke(cls.newInstance(),world,x-1,y-3,z-1);
-  TileVat vat=(TileVat)world.func_147438_o(x,y,z);vat.setEntityContained(mob);pedestal();return vat;
+  TileVat vat=(TileVat)world.func_147438_o(x,y,z);vat.setEntityContained(mob);pedestal();world.func_147465_d(x,y+1,z,ThaumicHorizons.blockModifiedMatrix,0,3);return vat;
  }
  public void start(TileVat vat){c.start(vat,world,player);}
  public void finish(TileVat vat)throws Exception{
@@ -58,11 +59,17 @@ public final class CreatureBreachChecks {
  @SubscribeEvent public void explosion(ExplosionEvent.Start event){
   if(!watching||event.world!=world)return;explosions++;
   c.check(released==null&&spawns==0,"output not spawned before explosion");
+  c.check(world.func_147437_c(x,y+1,z)&&matrixDrops==0,"matrix removed before blast but item not spawned yet");
+  c.check(sounds.equals(Arrays.asList("dig.glass","liquid.water")),"glass and water sounds broadcast once before explosion");
   c.check(world.func_147438_o(x,y,z)==null,"controller dismantled before explosion");
   c.check(world.func_147437_c(x,y-1,z)&&world.func_147437_c(x,y-2,z),"both water blocks cleared before explosion");
   for(int dy=0;dy<4;dy++)for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++)c.check(!(world.func_147438_o(x+dx,y-dy,z+dz) instanceof TileVatSlave),"slave dismantled before explosion");
  }
  @SubscribeEvent public void spawn(EntityJoinWorldEvent event){
+  if(watching&&event.world==world&&event.entity instanceof net.minecraft.entity.item.EntityItem){
+   net.minecraft.item.ItemStack stack=((net.minecraft.entity.item.EntityItem)event.entity).func_92059_d();
+   if(stack.func_77973_b()==net.minecraft.item.Item.func_150898_a(ThaumicHorizons.blockModifiedMatrix)){matrixDrops+=stack.field_77994_a;c.check(explosions==1,"matrix drop occurs after explosion");}
+  }
   if(!watching||event.world!=world||!(event.entity instanceof EntityLiving)||!"BreachOutput".equals(((EntityLiving)event.entity).func_94057_bL()))return;
   spawns++;released=(EntityLiving)event.entity;
   c.check(explosions==1,"one explosion before output spawn");
@@ -71,6 +78,12 @@ public final class CreatureBreachChecks {
  }
  public void run()throws Exception{
   MinecraftForge.EVENT_BUS.register(this);
+  net.minecraft.world.IWorldAccess audio=(net.minecraft.world.IWorldAccess)java.lang.reflect.Proxy.newProxyInstance(getClass().getClassLoader(),new Class[]{net.minecraft.world.IWorldAccess.class},(proxy,method,args)->{
+   if(method.getName().equals("equals"))return proxy==args[0];
+   if(method.getName().equals("hashCode"))return System.identityHashCode(proxy);
+   if(watching&&args!=null&&args.length==6&&("dig.glass".equals(args[0])||"liquid.water".equals(args[0])))sounds.add((String)args[0]);return null;
+  });
+  world.func_72954_a(audio);
   try{
    c.base.script(recipe()+nbt());TileVat vat=loose(new EntityPig(world));start(vat);c.check(vat.mode==0,"input name/NBT mismatch refuses start");
    EntityPig pig=subject();data(pig).func_74768_a("experiment",3);vat.setEntityContained(pig);start(vat);c.check(vat.mode==0,"nested input mismatch refuses start");
@@ -103,6 +116,7 @@ public final class CreatureBreachChecks {
    NBTTagCompound saved=new NBTTagCompound();vat.func_145841_b(saved);CompressedStreamTools.func_74795_b(saved,Paths.get("pending-breach-vat.dat").toFile());
    c.base.script("");vat.func_145839_a(saved); // in-flight result no longer depends on registered recipe
    watching=true;finish(vat);watching=false;
+   c.check(matrixDrops==1,"exactly one matrix item survives breach");
    c.check(explosions==1&&spawns==1&&released!=null&&vat.getEntityContained()==null,"one explosion and one released output, no contained duplicate");
    c.check(data(released).func_74762_e("result")==7&&c.props(released).getInfusionCosts().getAmount(Aspect.UNDEAD)==8,"saved result NBT and cost survive script removal");
    for(int dx=-4;dx<=4;dx++)for(int dy=-4;dy<=1;dy++)for(int dz=-4;dz<=4;dz++)c.check(world.func_147439_a(x+dx,y+dy,z+dz)!=ConfigBlocks.blockFluxGoo&&world.func_147439_a(x+dx,y+dy,z+dz)!=ConfigBlocks.blockFluxGas,"breach does not killSubject or create flux");
@@ -110,9 +124,10 @@ public final class CreatureBreachChecks {
    x+=24;c.base.script(recipe()+breach(2));vat=assembled(subject());start(vat);((NBTTagCompound)CustomCreatureChecks.get(vat,"recipeOutput")).func_74778_a("entity","MissingOutput");EntityLivingBase original=vat.getEntityContained();finish(vat);c.check(world.func_147438_o(x,y,z)==vat&&vat.getEntityContained()==original,"unavailable output preserves assembled vat and input");
    vat.setEntityContained(null);((CustomCreatureRecipe.BreachVat)vat).thaumicdabblery$dismantleForBreach();
    x+=24;c.base.script(recipe().replace("PigZombie","Giant")+API+"setEntityNBT(\"custom:breach\", {}, {CustomName:\"BreachOutput\"});\n"+breach(4));vat=assembled(subject());start(vat);
-   explosions=spawns=0;released=null;watching=true;finish(vat);watching=false;
+   explosions=spawns=matrixDrops=0;sounds.clear();released=null;watching=true;finish(vat);watching=false;
+   c.check(matrixDrops==1,"matrix survives larger breach explosion too");
    c.check(released instanceof EntityGiantZombie&&released.field_70131_O>2&&spawns==1&&vat.getEntityContained()==null,"oversized mob released outside vat with no containment");
    c.base.script("");c.check(((Map<?,?>)CustomCreatureChecks.get(CustomCreatureRecipe.class,"BLACKLIST")).isEmpty(),"reload releases all blacklist recipe references");
-  }finally{watching=false;MinecraftForge.EVENT_BUS.unregister(this);c.base.script("");}
+  }finally{watching=false;world.func_72848_b(audio);MinecraftForge.EVENT_BUS.unregister(this);c.base.script("");}
  }
 }

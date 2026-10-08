@@ -243,10 +243,18 @@ public final class CustomCreatureRecipe extends CreatureInfusionRecipe {
         // Detach first: native disassembly must not kill the subject and release flux.
         vat.setEntityContained(null);
         vat.mode = 0;
+        // Remove the matrix while its controller still exists; its break callback expects a TileVat below it.
+        boolean dropMatrix = world.getBlock(x, y + 1, z) == ThaumicHorizons.blockModifiedMatrix;
+        int matrixMetadata = world.getBlockMetadata(x, y + 1, z);
+        if (dropMatrix) world.func_147480_a(x, y + 1, z, false);
         ((BreachVat) vat).thaumicdabblery$dismantleForBreach();
+        world.playSoundEffect(x + 0.5, y - 1.5, z + 0.5, "dig.glass", 1.0F, 1.0F);
         world.setBlockToAir(x, y - 1, z);
         world.setBlockToAir(x, y - 2, z);
+        world.playSoundEffect(x + 0.5, y - 1.5, z + 0.5, "liquid.water", 1.0F, 1.0F);
         world.createExplosion(null, x + 0.5, y - 1.5, z + 0.5, power, true);
+        // Normal block drops, delayed until after the blast so the matrix item survives.
+        if (dropMatrix) ThaumicHorizons.blockModifiedMatrix.dropBlockAsItem(world, x, y + 1, z, matrixMetadata, 0);
         result.setLocationAndAngles(x + 0.5, y - 2, z + 0.5, 0, 0);
         if (!world.spawnEntityInWorld(result))
             ThaumicDabblery.LOG.error("Creature breach output {} could not spawn after vat disassembly", id);

@@ -20,9 +20,13 @@ import thaumcraft.client.gui.GuiResearchRecipe;
 @Mod(modid="tdcustomcreatureclientprobe",name="Custom creature client probe",version="1",dependencies="required-after:thaumicdabblery;required-after:modtweaker2;required-after:ThaumicHorizons;after:tc4tweak;after:salisarcana")
 public final class CustomCreatureClientProbe {
  private final CustomCreatureChecks checks=new CustomCreatureChecks();
- private int ticks,frames,stage;private boolean launched,done;private volatile boolean serverDone,requestVat,vatDone;private volatile Throwable failure;private int x,y,z;private volatile boolean requestBreach,breachDone;private volatile int breachId;
- @Mod.EventHandler public void ready(FMLLoadCompleteEvent e){FMLCommonHandler.instance().bus().register(this);}
+ private int ticks,frames,stage;private boolean launched,done;private volatile boolean serverDone,requestVat,vatDone;private volatile Throwable failure;private int x,y,z;private volatile boolean requestBreach,breachDone;private volatile int breachId;private boolean glassSound,waterSound;
+ @Mod.EventHandler public void ready(FMLLoadCompleteEvent e){FMLCommonHandler.instance().bus().register(this);net.minecraftforge.common.MinecraftForge.EVENT_BUS.register(this);}
  @Mod.EventHandler public void started(FMLServerStartedEvent e){try{checks.run(FMLCommonHandler.instance().getMinecraftServerInstance().func_71218_a(0));}catch(Throwable t){failure=t;}finally{serverDone=true;}}
+ @SubscribeEvent public void sound(net.minecraftforge.client.event.sound.PlaySoundEvent17 event){
+  if(requestBreach){if(event.name.endsWith("dig.glass"))glassSound=true;if(event.name.endsWith("liquid.water"))waterSound=true;}
+  event.result=null; // Observe real received sound events without playing audio during automation.
+ }
  private void open(Minecraft mc,int page){mc.func_147108_a(new GuiResearchRecipe(ResearchCategories.getResearch(CustomCreatureChecks.RESEARCH),page,0,0));frames=0;}
  @SubscribeEvent public void serverTick(TickEvent.ServerTickEvent e){
   if(e.phase!=TickEvent.Phase.END||(!requestVat||vatDone)&&(!requestBreach||breachDone))return;
@@ -55,6 +59,10 @@ public final class CustomCreatureClientProbe {
    }
    if(stage==4){
     if(!breachDone)return;net.minecraft.entity.Entity mob=mc.field_71441_e.func_73045_a(breachId);if(!(mob instanceof EntityPigZombie))return;
+    int drops=0;for(Object o:mc.field_71441_e.field_72996_f)if(o instanceof net.minecraft.entity.item.EntityItem){net.minecraft.entity.item.EntityItem item=(net.minecraft.entity.item.EntityItem)o;if(Math.abs(item.field_70165_t-x)<3&&Math.abs(item.field_70161_v-z)<3&&item.func_92059_d().func_77973_b()==net.minecraft.item.Item.func_150898_a(ThaumicHorizons.blockModifiedMatrix))drops+=item.func_92059_d().field_77994_a;}
+    if(!glassSound||!waterSound||drops==0)return;
+    checks.check(glassSound&&waterSound,"glass and water sounds arrive through real client sound events");
+    checks.check(drops==1&&mc.field_71441_e.func_147437_c(x,y+1,z),"matrix removal and single surviving item arrive at client");
     checks.check(((EntityPigZombie)mob).func_70631_g_()&&"BreachOutput".equals(((EntityPigZombie)mob).func_94057_bL()),"breach output name and baby state reach client");
     checks.check(!(mc.field_71441_e.func_147438_o(x,y,z) instanceof TileVat)&&mc.field_71441_e.func_147437_c(x,y-1,z)&&mc.field_71441_e.func_147437_c(x,y-2,z),"dismantled vat and cleared water reach client");
     checks.base.script("");System.out.println("TD_CUSTOM_CREATURE_CLIENT_PASS checks="+checks.checks);done=true;mc.func_71400_g();return;
@@ -62,7 +70,7 @@ public final class CustomCreatureClientProbe {
    checks.check(mc.field_71462_r instanceof GuiResearchRecipe,"native custom recipe page renders");net.minecraft.util.ScreenShotHelper.func_148259_a(new java.io.File("."),"custom-creature-"+stage+".png",mc.field_71443_c,mc.field_71440_d,mc.func_147110_a());
    if(stage==1){checks.base.script(CustomCreatureChecks.demo()+CreatureInfusionChecks.set("custom:pigman",CustomCreatureChecks.RESEARCH,1,"exanimis 3","<minecraft:cookie>"));open(mc,1);stage++;}
    else if(stage==2){checks.base.script(CustomCreatureChecks.demo()+CreatureInfusionChecks.remove("custom:pigman"));open(mc,0);stage++;}
-   else{checks.base.script(CreatureBreachChecks.recipe()+CreatureBreachChecks.nbt()+CreatureBreachChecks.breach(2));mc.func_147108_a(null);requestBreach=true;stage=4;frames=0;}
+   else{checks.base.script(CreatureBreachChecks.recipe()+CreatureBreachChecks.nbt()+CreatureBreachChecks.breach(2));mc.func_147108_a(null);mc.field_71474_y.func_151439_a(net.minecraft.client.audio.SoundCategory.MASTER,1.0F);requestBreach=true;stage=4;frames=0;}
   }catch(Throwable t){done=true;System.out.println("TD_CUSTOM_CREATURE_CLIENT_FAILED checks="+checks.checks);t.printStackTrace();mc.func_71400_g();}
  }
  @SubscribeEvent public void render(TickEvent.RenderTickEvent e){if(e.phase==TickEvent.Phase.END)frames++;}

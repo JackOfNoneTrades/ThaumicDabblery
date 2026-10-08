@@ -106,27 +106,31 @@ A rejected recipe must leave its pedestal ingredient untouched.
 Breach checks assemble the actual multiblock through Horizons' construction code and complete native crafting
 cycles. Forge explosion and entity-spawn events assert that the controller/slaves and both water blocks are gone
 before one explosion, and that one fresh, undamaged result spawns afterward at the lower water position.
-They also check Giant output, no contained duplicate or failure-generated flux, disabled breaches, and retaining
+World sound observers check one glass and one water sound before the blast; the matrix must be removed
+before the explosion and drop exactly one item afterward. They also check Giant output, no contained duplicate
+or failure-generated flux, disabled breaches, and retaining
 the assembled vat/source when a saved output cannot be created. The test saves `pending-breach-vat.dat` before
 completion and finishes after its recipe has been removed by a script reload.
 
 The client additionally completes a breach beside its real player and verifies normal network delivery of the
-released entity's name/baby state and removal of the controller and water. This is an integrated-server connection.
+released entity's name/baby state and removal of the controller, matrix and water. Client sound events must
+receive both glass and water sounds, and one matrix item must arrive after the breach. The automation observes
+then suppresses audio playback. This is an integrated-server connection.
 
 Compile `CreatureBreachRestartProbe.java` alone into another probe jar for a separate production JVM without
 MineTweaker or ModTweaker. Copy `pending-breach-vat.dat` from a server run into that disposable instance.
 Require `TD_BREACH_RESTART_PASS scriptingMods=false`: saved output NBT, cost and explosion order must survive.
 Do not install it together with other probes. Fixtures created with both ModTweaker forks passed this restart test.
 
-Verified on 2026-10-07 with Forge 1614, Java 8, Thaumcraft 4.2.3.5, Thaumic Horizons 1.8.24,
+Verified on 2026-10-08 with Forge 1614, Java 8, Thaumcraft 4.2.3.5, Thaumic Horizons 1.8.24,
 CraftTweaker 3.4.8 and GTNHLib 0.11.52, with TC4Tweaks 1.5.47 / Salis Arcana 1.1.71 in addon runs:
 
 | Runtime | ModTweaker | TC4Tweaks + Salis | Assertions |
 | --- | --- | --- | --- |
-| Production server | 0.14.0 / 0.9.6 | absent | 14,122 each |
-| Production server | 0.14.0 / 0.9.6 | present | 14,318 each |
-| Production client | 0.14.0 / 0.9.6 | absent | 14,134 each |
-| Production client | 0.14.0 / 0.9.6 | present | 14,330 each |
+| Production server | 0.14.0 / 0.9.6 | absent | 14,130 each |
+| Production server | 0.14.0 / 0.9.6 | present | 14,326 each |
+| Production client | 0.14.0 / 0.9.6 | absent | 14,144 each |
+| Production client | 0.14.0 / 0.9.6 | present | 14,340 each |
 
 These totals include the original creature-recipe regression suite. Logs and saved NBT are in
 `/tmp/td-vat-breach/` on the development machine. All tests require disposable worlds and scripts.
