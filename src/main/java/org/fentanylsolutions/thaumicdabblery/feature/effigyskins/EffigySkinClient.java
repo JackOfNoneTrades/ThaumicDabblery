@@ -143,6 +143,10 @@ public final class EffigySkinClient {
     }
 
     public static boolean render(TileEntity interior, float scale) {
+        return render(interior, scale, 0, 0);
+    }
+
+    public static boolean render(TileEntity interior, float scale, float yaw, float pitch) {
         TileEntity above = interior.getWorldObj()
             .getTileEntity(interior.xCoord, interior.yCoord + 1, interior.zCoord);
         if (!(above instanceof TileVat)) return false;
@@ -154,7 +158,7 @@ public final class EffigySkinClient {
         int width = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
         int height = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
         ModelBiped model = width > 0 && height == width ? (skin.slim ? SLIM : CLASSIC) : LEGACY;
-        model.render(null, 0, 0, 0, 0, 0, scale);
+        model.render(null, 0, 0, 0, yaw, pitch, scale);
         return true;
     }
 

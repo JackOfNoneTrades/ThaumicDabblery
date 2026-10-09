@@ -617,3 +617,42 @@ The existing creature infusion/breach dedicated-server suite also passed all fou
 Evidence: `/tmp/td-effigy/`, with `result.log` under each named instance, `effigy-*.png` under each
 client instance, `build.log`, and `regression.log`. Regression instances are `/tmp/td-vat-breach/`.
 The fixtures are `EffigySkinChecks`, `EffigySkinServerProbe` and `EffigySkinClientProbe`.
+
+
+# Vat tracking and frame controls verification, 2026-10-09
+
+Production artifact SHA-256: `8edff9d15e77a469e5619266030afcfcd3286e343fef1087d4fe6ec1128acffb`.
+`spotlessApply build` passed. Runtime checks used obfuscated Forge 1.7.10-10.13.4.1614,
+Java 8, Thaumcraft 4.2.3.5, Thaumic Horizons 1.8.24, CraftTweaker 3.4.8 and UniMixins 0.3.1.
+
+| ModTweaker | TC4Tweaks 1.5.47 + Salis Arcana 1.1.71 | Dedicated server | Separate connected client |
+| --- | --- | --- | --- |
+| GTNH 0.14.0 | absent | 391 passed | 12 passed |
+| CurseForge 0.9.6 | absent | 391 passed | 12 passed |
+| GTNH 0.14.0 | present | 391 passed | 12 passed |
+| CurseForge 0.9.6 | present | 391 passed | 12 passed |
+
+Server checks cover script compilation, reload undo, validation, four frame orientations,
+frame precedence and saved selection, removal/fallback, frame override of body tracking,
+head tracking around a framed direction, nearest-player selection, range, yaw/pitch bounds,
+turn speed and angle wrapping. The contained entity's orientation remains unchanged.
+The existing Corpse Effigy server suite also passed 28 checks with scripting mods present
+and 28 with MineTweaker/ModTweaker absent.
+
+Remote clients connect through Forge's native startup connection path. Actual entity-interaction
+packets rotate the diamond frame through all four positions. Checks verify replicated and animated
+poses, head limits, body tracking, effigy binding to Developer, and render-time restoration of entity
+angles. These caught and corrected a client update injection that missed the native method's early
+return. Framebuffer screenshots show the three assembled vats and were inspected for the base GTNH run.
+Initial test connections that bypassed Forge's normal startup/status setup failed before login;
+the final fixture uses the native connection path and all four runs pass.
+
+Limits: arbitrary third-party creature renderers and live authenticated skin-service availability
+were not tested. The offline Developer profile uses the normal skin fallback. This feature changes
+vat rendering, not creature AI or the released entity's rotation.
+
+Evidence: `/tmp/td-vat-facing/`, with `result.log` in `{gtnh,curse,gtnh-addons,curse-addons}`
+for server checks and `remote-*` / `network-*` for separate client/server runs. Remote screenshots
+are `remote-*/screenshots/vat-facing-demo.png`; effigy regression results are in `regression.log`.
+The retained fixtures are `VatFacingChecks`, `VatFacingServerProbe`, `VatFacingDemo` and
+`VatFacingRemoteProbe`. The user's separate play instances are under ignored `run/vat-facing-*`.

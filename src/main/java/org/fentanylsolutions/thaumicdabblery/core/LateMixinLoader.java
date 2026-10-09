@@ -165,8 +165,12 @@ public class LateMixinLoader implements ILateMixinLoader {
             mixins.add("thaumichorizons.MixinTileVatCreatureRecipes");
             mixins.add("thaumichorizons.MixinTileSoulBeaconSkin");
             mixins.add("thaumichorizons.MixinTileVatEffigySkin");
+            mixins.add("thaumichorizons.MixinTileVatFacing");
             if (FMLLaunchHandler.side()
-                .isClient()) mixins.add("thaumichorizons.MixinTileVatEffigyRender");
+                .isClient()) {
+                mixins.add("thaumichorizons.MixinTileVatEffigyRender");
+                mixins.add("thaumichorizons.MixinTileVatFacingRender");
+            }
         }
         if (loadedMods.contains("ThaumicHorizons") && loadedMods.contains("witchery")) {
             mixins.add("thaumichorizons.MixinItemInfusionSelfCheat");

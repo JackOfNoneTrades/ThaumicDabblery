@@ -33,7 +33,10 @@ public class CommonProxy {
 
     public void init(FMLInitializationEvent event) {
         FeatureManager.init(event);
-        if (Loader.isModLoaded("ThaumicHorizons")) EffigySkinNetwork.initialize();
+        if (Loader.isModLoaded("ThaumicHorizons")) {
+            EffigySkinNetwork.initialize();
+            org.fentanylsolutions.thaumicdabblery.feature.vatfacing.VatFacingNetwork.initialize();
+        }
         if (Loader.isModLoaded("MineTweaker3") && Loader.isModLoaded("modtweaker2")) {
             ResearchTabsZen.register();
             FurnacePagesZen.register();
@@ -42,6 +45,7 @@ public class CommonProxy {
             if (Loader.isModLoaded("ThaumicHorizons")) {
                 ThaumicHorizonsSelfInfusionZen.register();
                 CreatureInfusionZen.register();
+                org.fentanylsolutions.thaumicdabblery.compat.modtweaker.VatZen.register();
             }
         }
     }
@@ -63,6 +67,9 @@ public class CommonProxy {
     }
 
     public void receiveEffigyBinding(EffigySkinNetwork.Binding binding, INetHandler source) {}
+
+    public void receiveVatFacing(org.fentanylsolutions.thaumicdabblery.feature.vatfacing.VatFacingNetwork.Pose pose,
+        INetHandler source) {}
 
     public boolean toggleResearchEditor() {
         throw new IllegalArgumentException("Thaumonomicon editing is only available in single-player.");

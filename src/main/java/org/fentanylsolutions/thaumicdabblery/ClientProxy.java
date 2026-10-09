@@ -23,6 +23,12 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
+    public void receiveVatFacing(org.fentanylsolutions.thaumicdabblery.feature.vatfacing.VatFacingNetwork.Pose pose,
+        INetHandler source) {
+        org.fentanylsolutions.thaumicdabblery.feature.vatfacing.VatFacingClient.receive(pose, source);
+    }
+
+    @Override
     public boolean toggleResearchEditor() {
         if (!Loader.isModLoaded("MineTweaker3") || !Loader.isModLoaded("modtweaker2"))
             throw new IllegalArgumentException("Thaumonomicon editing requires MineTweaker and ModTweaker.");

@@ -5,6 +5,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 
 import org.fentanylsolutions.thaumicdabblery.feature.effigyskins.EffigySkinClient;
+import org.fentanylsolutions.thaumicdabblery.feature.vatfacing.VatFacing;
+import org.fentanylsolutions.thaumicdabblery.feature.vatfacing.VatFacingClient;
+import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -23,6 +26,18 @@ public abstract class MixinTileVatEffigyRender {
         require = 2)
     private void thaumicdabblery$renderSkin(ModelBiped model, Entity entity, float limb, float amount, float age,
         float yaw, float pitch, float scale, TileEntity tile, double x, double y, double z, float partialTicks) {
-        if (!EffigySkinClient.render(tile, scale)) model.render(entity, limb, amount, age, yaw, pitch, scale);
+        VatFacing.State state = VatFacingClient.state(tile);
+        GL11.glPushMatrix();
+        try {
+            if (state != null && state.active) {
+                GL11.glRotatef(VatFacing.interpolate(state.prevBody, state.body, partialTicks) - 180, 0, 1, 0);
+                yaw = VatFacing.interpolate(state.prevHead, state.head, partialTicks);
+                pitch = VatFacing.interpolate(state.prevPitch, state.pitch, partialTicks);
+            }
+            if (!EffigySkinClient.render(tile, scale, yaw, pitch))
+                model.render(entity, limb, amount, age, yaw, pitch, scale);
+        } finally {
+            GL11.glPopMatrix();
+        }
     }
 }

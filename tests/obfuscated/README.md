@@ -575,3 +575,20 @@ It also closes and reopens the world to check saved identities and login synchro
 Require `TD_EFFIGY_CLIENT_PASS`; inspect `effigy-*.png` in the instance directory. These fixtures test
 rendering independently of Mojang availability; live skin-service availability is not part of their assertions.
 Also run without MineTweaker/ModTweaker, and check ordinary startup without Horizons. Never use an existing save.
+
+## Vat tracking and frame controls
+
+`VatFacingChecks` / `VatFacingServerProbe` run against a production dedicated server with Horizons 1.8.24.
+Require `TD_VAT_FACING_SERVER_PASS`: scripts and reload undo, validation, all four frame rotations,
+latest-frame selection and saved identity, removal, body override/head coexistence, nearest-player tracking,
+head limits through a full circle, pitch, speed, range and unchanged contained-entity orientation.
+Run CurseForge 0.9.6 and GTNH 0.14.0, both with and without TC4Tweaks 1.5.47 / Salis Arcana 1.1.71.
+
+`VatFacingDemo` is a disposable server-only fixture which constructs three vats, binds the middle effigy
+on login, and supplies diamonds/item frames in creative mode. It grants operator permissions and replaces
+terrain near the origin, so use only a fresh disposable server. `VatFacingRemoteProbe` connects a separate
+production client through Forge's normal connection entry point, sends actual entity-interaction packets
+to rotate the diamond frame, teleports the player to check tracking, checks render-time restoration,
+and records `screenshots/vat-facing-demo.png`. Require `TD_VAT_FACING_REMOTE_PASS`. The client closes
+and stops the test server when complete. This specifically catches missing client update hooks when the
+native vat method returns early: the frame's goal changes but the rendered pose otherwise never advances.
