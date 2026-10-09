@@ -1,12 +1,14 @@
 package org.fentanylsolutions.thaumicdabblery.compat.modtweaker;
 
 import java.util.Locale;
+import java.util.Map;
 
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
+import org.fentanylsolutions.thaumicdabblery.feature.vatfacing.VatAppearance;
 import org.fentanylsolutions.thaumicdabblery.feature.vatfacing.VatFacing;
 
 import minetweaker.IUndoableAction;
@@ -31,10 +33,7 @@ public final class VatZen {
     @ZenMethod
     public static void setTracking(String entity, String mode, double range, double maxYaw, double maxPitch,
         double speed) {
-        Class<?> type = (Class<?>) EntityList.stringToClassMapping.get(entity);
-        if (!"effigy".equals(entity) && (type == null || !EntityLivingBase.class.isAssignableFrom(type)
-            || EntityPlayer.class.isAssignableFrom(type)))
-            throw new IllegalArgumentException("Unknown vat creature: " + entity);
+        requireEntity(entity);
         String normalized = mode == null ? "" : mode.toLowerCase(Locale.ROOT);
         if (!normalized.equals("none") && !normalized.equals("head") && !normalized.equals("body"))
             throw new IllegalArgumentException("Vat tracking mode must be head, body or none");
@@ -53,6 +52,74 @@ public final class VatZen {
             public void undo() {
                 if (previous == null) VatFacing.RULES.remove(entity);
                 else VatFacing.RULES.put(entity, previous);
+            }
+        });
+    }
+
+    private static void requireEntity(String entity) {
+        Class<?> type = (Class<?>) EntityList.stringToClassMapping.get(entity);
+        if (!"effigy".equals(entity) && (type == null || !EntityLivingBase.class.isAssignableFrom(type)
+            || EntityPlayer.class.isAssignableFrom(type)))
+            throw new IllegalArgumentException("Unknown vat creature: " + entity);
+    }
+
+    /** Global default; entity-specific overrides win regardless of definition order. */
+    @ZenMethod
+    public static void setBobbing(double amplitude, int periodTicks) {
+        VatAppearance.Bobbing setting = bobbing(amplitude, periodTicks);
+        MineTweakerAPI.apply(new Change("global vat bobbing") {
+
+            VatAppearance.Bobbing previous;
+
+            public void apply() {
+                previous = VatAppearance.globalBobbing;
+                VatAppearance.globalBobbing = setting;
+            }
+
+            public void undo() {
+                VatAppearance.globalBobbing = previous;
+            }
+        });
+    }
+
+    @ZenMethod
+    public static void setBobbing(String entity, double amplitude, int periodTicks) {
+        requireEntity(entity);
+        setAppearance(VatAppearance.BOBBING, entity, bobbing(amplitude, periodTicks), "bobbing");
+    }
+
+    @ZenMethod
+    public static void setYOffset(String entity, double offset) {
+        requireEntity(entity);
+        if (!valid(offset, -4, 4)) throw new IllegalArgumentException("Vat Y offset must be -4..4 blocks");
+        setAppearance(VatAppearance.Y_OFFSETS, entity, (float) offset, "Y offset");
+    }
+
+    @ZenMethod
+    public static void setScale(String entity, double scale) {
+        requireEntity(entity);
+        if (!valid(scale, 0.05, 8)) throw new IllegalArgumentException("Vat scale must be 0.05..8");
+        setAppearance(VatAppearance.SCALES, entity, (float) scale, "scale");
+    }
+
+    private static VatAppearance.Bobbing bobbing(double amplitude, int periodTicks) {
+        if (!valid(amplitude, 0, 2) || periodTicks < 2 || periodTicks > 72000)
+            throw new IllegalArgumentException("Vat bobbing requires amplitude 0..2 blocks and period 2..72000 ticks");
+        return new VatAppearance.Bobbing((float) amplitude, periodTicks);
+    }
+
+    private static <T> void setAppearance(Map<String, T> settings, String entity, T value, String description) {
+        MineTweakerAPI.apply(new Change("vat " + description + " for " + entity) {
+
+            T previous;
+
+            public void apply() {
+                previous = settings.put(entity, value);
+            }
+
+            public void undo() {
+                if (previous == null) settings.remove(entity);
+                else settings.put(entity, previous);
             }
         });
     }

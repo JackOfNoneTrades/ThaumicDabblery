@@ -61,6 +61,10 @@ public final class VatFacing {
     public static final class State {
 
         public boolean active;
+        public boolean customBobbing;
+        public float bobAmplitude, yOffset;
+        public int bobPeriod = 360;
+        public float scale = 1;
         public float body, head, pitch, prevBody, prevHead, prevPitch, goalBody, goalHead, goalPitch;
         public float speed = 6, yawLimit = 60, pitchLimit = 30;
         public UUID frame;
@@ -82,6 +86,11 @@ public final class VatFacing {
         public void write(NBTTagCompound root) {
             NBTTagCompound tag = new NBTTagCompound();
             tag.setBoolean("active", active);
+            tag.setBoolean("customBobbing", customBobbing);
+            tag.setFloat("bobAmplitude", bobAmplitude);
+            tag.setInteger("bobPeriod", bobPeriod);
+            tag.setFloat("yOffset", yOffset);
+            tag.setFloat("scale", scale);
             tag.setFloat("body", body);
             tag.setFloat("head", head);
             tag.setFloat("pitch", pitch);
@@ -98,6 +107,11 @@ public final class VatFacing {
         public void read(NBTTagCompound root) {
             NBTTagCompound tag = root.getCompoundTag(TAG);
             active = tag.getBoolean("active");
+            customBobbing = tag.getBoolean("customBobbing");
+            bobAmplitude = MathHelper.clamp_float(finite(tag.getFloat("bobAmplitude"), 0), 0, 2);
+            bobPeriod = tag.hasKey("bobPeriod") ? MathHelper.clamp_int(tag.getInteger("bobPeriod"), 2, 72000) : 360;
+            yOffset = MathHelper.clamp_float(finite(tag.getFloat("yOffset"), 0), -4, 4);
+            scale = tag.hasKey("scale") ? MathHelper.clamp_float(finite(tag.getFloat("scale"), 1), 0.05F, 8) : 1;
             goalBody = finite(tag.getFloat("goalBody"), 0);
             goalHead = finite(tag.getFloat("goalHead"), 0);
             goalPitch = finite(tag.getFloat("goalPitch"), 0);
@@ -201,6 +215,8 @@ public final class VatFacing {
         EntityLivingBase mob = vat.getEntityContained();
         boolean effigy = mob == null && (vat.mode == 3 || vat.mode == 4 || vat.mode == 2 && vat.recipeType == 1);
         String key = effigy ? "effigy" : mob == null ? null : EntityList.getEntityString(mob);
+        boolean appearanceChanged = VatAppearance
+            .apply(s, key, effigy || mob != null && !(mob instanceof EntityPlayer));
         Rule rule = RULES.get(key);
         EntityItemFrame frame = control(vat, s);
         boolean active = (effigy || mob != null && !(mob instanceof EntityPlayer))
@@ -258,7 +274,9 @@ public final class VatFacing {
             || oldSpeed != s.speed
             || oldYaw != s.yawLimit
             || oldLimit != s.pitchLimit;
-        if (changed || active && vat.getWorldObj()
-            .getTotalWorldTime() % 20 == 0) VatFacingNetwork.send(vat);
+        if (appearanceChanged || changed
+            || (active || s.customBobbing || s.yOffset != 0 || s.scale != 1) && vat.getWorldObj()
+                .getTotalWorldTime() % 20 == 0)
+            VatFacingNetwork.send(vat);
     }
 }

@@ -29,6 +29,10 @@ public abstract class MixinTileVatEffigyRender {
         VatFacing.State state = VatFacingClient.state(tile);
         GL11.glPushMatrix();
         try {
+            if (state != null) {
+                GL11.glTranslatef(0, -state.yOffset, 0);
+                GL11.glScalef(state.scale, state.scale, state.scale);
+            }
             if (state != null && state.active) {
                 GL11.glRotatef(VatFacing.interpolate(state.prevBody, state.body, partialTicks) - 180, 0, 1, 0);
                 yaw = VatFacing.interpolate(state.prevHead, state.head, partialTicks);

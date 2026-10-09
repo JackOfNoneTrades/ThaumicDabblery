@@ -656,3 +656,31 @@ for server checks and `remote-*` / `network-*` for separate client/server runs. 
 are `remote-*/screenshots/vat-facing-demo.png`; effigy regression results are in `regression.log`.
 The retained fixtures are `VatFacingChecks`, `VatFacingServerProbe`, `VatFacingDemo` and
 `VatFacingRemoteProbe`. The user's separate play instances are under ignored `run/vat-facing-*`.
+
+# Vat appearance controls verification, 2026-10-09
+
+An isolated build based on `f330bce` plus the vat appearance changes passed `spotlessApply build`.
+This deliberately excluded the concurrent Planar Vortex work. Production jar SHA-256:
+`e7db41cce13833f09c91e82e4960920fb76e65d1f48f8fd581a5dade55fe833d`.
+All runtime checks used obfuscated Forge 1.7.10-10.13.4.1614, Java 8, Horizons 1.8.24,
+Thaumcraft 4.2.3.5, CraftTweaker 3.4.8 and UniMixins 0.3.1.
+
+| ModTweaker | TC4Tweaks 1.5.47 + Salis Arcana 1.1.71 | Dedicated server | Separate connected client |
+| --- | --- | --- | --- |
+| GTNH 0.14.0 | absent | 39 passed | 32 passed |
+| CurseForge 0.9.6 | absent | 39 passed | 32 passed |
+| GTNH 0.14.0 | present | 39 passed | 32 passed |
+| CurseForge 0.9.6 | present | 39 passed | 32 passed |
+
+Server coverage includes global/per-entity script overloads, precedence independent of definition order,
+zero amplitude, species changes, empty vats, wave extrema/partial ticks/long world clocks, NBT round trips,
+legacy defaults, validation and repeated reload/removal. Clients verify actual server synchronization,
+replacement of the native wave, scale matrices and pivot/Y offset calculations, matrix restoration after
+normal and exceptional rendering, and unchanged physical position/hitbox. The existing remote frame and
+head/body tracking assertions also pass. The GTNH base screenshot was inspected: the enlarged raised pig,
+smaller raised effigy, and unchanged zombie remain in their respective vats.
+
+Evidence: `/tmp/td-vat-appearance/`, with `build.log`, `servers.log`, `remote.log`, per-instance `result.log`,
+and `remote-*/screenshots/vat-appearance-demo.png`. Tests use `VatAppearanceChecks`,
+`VatAppearanceServerProbe`, and `VatAppearanceRemoteProbe` with the existing vat demo.
+Arbitrary third-party entity renderers were not tested. The native dissolution bobbing behavior is unchanged.

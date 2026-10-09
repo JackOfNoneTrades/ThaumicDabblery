@@ -592,3 +592,12 @@ to rotate the diamond frame, teleports the player to check tracking, checks rend
 and records `screenshots/vat-facing-demo.png`. Require `TD_VAT_FACING_REMOTE_PASS`. The client closes
 and stops the test server when complete. This specifically catches missing client update hooks when the
 native vat method returns early: the frame's goal changes but the rendered pose otherwise never advances.
+
+`VatAppearanceChecks` / `VatAppearanceServerProbe` extend vat coverage to global/per-species bobbing,
+Y offsets and scale. Compile with `VatFacingChecks`; require `TD_VAT_APPEARANCE_SERVER_PASS`.
+Checks cover script overloads, priority independent of definition order, species changes, zero amplitude,
+sinusoid extrema/partial ticks/long world clocks, saved and packet NBT, legacy defaults, validation and reload undo.
+`VatAppearanceRemoteProbe` uses the same three-vat demo and additional `VatAppearanceChecks.SCRIPT` settings.
+Require `TD_VAT_APPEARANCE_REMOTE_PASS`: server settings must reach a separate client, the native bob must
+be replaced, and OpenGL scaling/offset matrices must restore on both normal return and a thrown renderer error.
+Physical entity position and hitbox must remain unchanged. The usual facing/frame assertions also run.
