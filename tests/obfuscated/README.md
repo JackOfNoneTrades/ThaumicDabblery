@@ -593,6 +593,25 @@ and records `screenshots/vat-facing-demo.png`. Require `TD_VAT_FACING_REMOTE_PAS
 and stops the test server when complete. This specifically catches missing client update hooks when the
 native vat method returns early: the frame's goal changes but the rendered pose otherwise never advances.
 
+
+## Planar Vortex recipes
+
+Compile `PlanarVortexChecks` and `PlanarVortexServerProbe` against the production jar and SRG Minecraft.
+Require `TD_PLANAR_SERVER_PASS` on GTNH 0.14.0 and CurseForge 0.9.6, each with and without
+TC4Tweaks 1.5.47 / Salis Arcana 1.1.71. The fixture exercises the transformed native crafting method,
+real dropped items through tile ticks, partial stacks, item/entity NBT, wildcard metadata, overlapping
+recipes, rejected entity spawns, output stack limits, saved outputs and native wand extraction.
+It removes and restores all four original conversions, checks portal/stabilization restrictions,
+and repeatedly reloads the actual ZenScript overloads.
+
+`PlanarVortexDemo` builds a disposable creative vortex near the origin and equips the joining operator
+with empty and charged wands. The player uses survival mode with damage immunity so Salis Arcana's
+creative vis bypass does not invalidate payment assertions. `PlanarVortexRemoteProbe` connects a separate production client, creates dropped inputs
+through server commands, sends a native wand-use packet, and verifies replicated input remainders,
+retrieved item NBT and a single named creature. Require `TD_PLANAR_REMOTE_PASS`.
+These fixtures alter terrain and scripts, grant operator status, and stop their server when finished;
+use disposable instances only.
+
 `VatAppearanceChecks` / `VatAppearanceServerProbe` extend vat coverage to global/per-species bobbing,
 Y offsets and scale. Compile with `VatFacingChecks`; require `TD_VAT_APPEARANCE_SERVER_PASS`.
 Checks cover script overloads, priority independent of definition order, species changes, zero amplitude,
@@ -601,3 +620,32 @@ sinusoid extrema/partial ticks/long world clocks, saved and packet NBT, legacy d
 Require `TD_VAT_APPEARANCE_REMOTE_PASS`: server settings must reach a separate client, the native bob must
 be replaced, and OpenGL scaling/offset matrices must restore on both normal return and a thrown renderer error.
 Physical entity position and hitbox must remain unchanged. The usual facing/frame assertions also run.
+
+`PlanarVortexCompletionChecks` adds instant item release, protected output merging and save/load,
+free/paid wand batches for both output types, native crafting discounts, insufficient-vis atomicity,
+spawn cancellation refunds, queue save/reload snapshots, stabilization and completion validation.
+The early item-merge mixin must also load without Horizons. Remote tests additionally verify instant
+item synchronization, an empty wand being refused, and a charged wand releasing one pig with its
+vis debit synchronized back to the client. The feedback checks verify server-calculated costs with
+wand-cap modifiers, per-aspect affordability, no vis spent by previews, native queue priority,
+look-away/held-item guards, exact decimal formatting, missing-only pulsing, and overlay removal after
+completion. Remote clients capture `vortex-cost-missing.png` and `vortex-cost-ready.png`, check the
+native failure sound event, and reject routine failure chat. Keep the client master sound volume above
+zero for that event check.
+
+`VortexOptionalServerProbe` runs without Horizons or either scripting mod and verifies ordinary item merging with the early output-protection mixin installed. Require `TD_VORTEX_OPTIONAL_SERVER_PASS`.
+
+`PlanarVortexAnimationChecks` verifies the windup and release beat, repeated input/click suppression,
+exactly-once output and payment, disconnected/missing-wand cancellation, stabilization loss, and
+save/reload interruption without losing the queued recipe. It also checks that rays reach zero before
+expansion begins. Suction checks exercise real item physics, pickup/merge protection, neighboring
+vortex ownership, and cancellation restoring visibility and gravity. The remote client checks the
+same flight and absorption from synchronized input data. Compile it alongside the other Planar Vortex server fixtures. The updated remote
+probe captures `vortex-animation-contract.png`, `vortex-animation-rays.png`,
+`vortex-animation-clear.png`, and `vortex-animation-release.png` from actual server-driven animation
+packets. A delegating renderer verifies that the native renderer actually ran at each captured phase.
+The test camera pans gently off-axis to avoid the native renderer's fixed-axis visibility issue;
+the remote fixture uses a stationary baby zombie to keep the HUD raycast unobstructed.
+Run with `-Dtd.vortex.rays=false` and the matching client config to check the rays-disabled path.
+Use fresh disposable test
+worlds; an interrupted previous fixture can leave old queues at its fixed coordinates.

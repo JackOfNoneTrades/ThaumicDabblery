@@ -41,3 +41,5 @@ thaumicdabblery.scanall.target=Completed all item and entity scans for %s withou
 key.thaumicdabblery.researchEditor=Toggle Thaumonomicon Edit Mode (book only)
 
 thaumicdabblery.aspect.scanBeforeCombining=Scan an item containing this aspect before combining it. No research points were spent.
+thaumicdabblery.config.client=Client Visuals
+thaumicdabblery.config.client.showVortexCraftingRays=Show Vortex Crafting Rays

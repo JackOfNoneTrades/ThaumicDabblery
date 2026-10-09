@@ -12,10 +12,12 @@ public final class Config {
     private static Configuration configuration;
 
     public static boolean debugMode;
+    public static volatile boolean showVortexCraftingRays = true;
     public static volatile int minimumVisCostPercent = 10;
 
     public static final class Categories {
 
+        public static final String CLIENT = "client";
         public static final String DEBUG = "debug";
         public static final String VIS_COSTS = "viscosts";
 
@@ -49,6 +51,20 @@ public final class Config {
         minimumVisCostProperty.setLanguageKey(visCostsLanguageKey + ".minimumVisCostPercent");
         minimumVisCostPercent = Math.max(0, Math.min(100, minimumVisCostProperty.getInt(10)));
         minimumVisCostProperty.set(minimumVisCostPercent);
+
+        if (cpw.mods.fml.common.FMLCommonHandler.instance()
+            .getSide()
+            .isClient()) {
+            configuration.setCategoryLanguageKey(Categories.CLIENT, ThaumicDabblery.MODID + ".config.client");
+            Property rays = configuration.get(
+                Categories.CLIENT,
+                "showVortexCraftingRays",
+                true,
+                "Show rotating rays during Planar Vortex crafting. Client-side visual preference only. "
+                    + "Disabling this keeps the contraction, brightness changes and crafting timing.");
+            rays.setLanguageKey(ThaumicDabblery.MODID + ".config.client.showVortexCraftingRays");
+            showVortexCraftingRays = rays.getBoolean(true);
+        }
 
         FeatureManager.configure(configuration);
 

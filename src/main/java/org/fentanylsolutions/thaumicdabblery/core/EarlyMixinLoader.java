@@ -1,6 +1,6 @@
 package org.fentanylsolutions.thaumicdabblery.core;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +22,11 @@ public class EarlyMixinLoader implements IEarlyMixinLoader, IFMLLoadingPlugin {
 
     @Override
     public List<String> getMixins(Set<String> loadedCoreMods) {
-        return Collections.emptyList();
+        List<String> mixins = new ArrayList<>();
+        mixins.add("MixinEntityItemVortexOutput");
+        if (cpw.mods.fml.relauncher.FMLLaunchHandler.side()
+            .isClient()) mixins.add("MixinRenderItemVortexInput");
+        return mixins;
     }
 
     @Override

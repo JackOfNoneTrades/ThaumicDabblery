@@ -657,6 +657,44 @@ are `remote-*/screenshots/vat-facing-demo.png`; effigy regression results are in
 The retained fixtures are `VatFacingChecks`, `VatFacingServerProbe`, `VatFacingDemo` and
 `VatFacingRemoteProbe`. The user's separate play instances are under ignored `run/vat-facing-*`.
 
+
+# Planar Vortex recipes verification, 2026-10-09
+
+Production artifact SHA-256: `2e243074ac6408c8713241bda0d8654ec15e57119c023a30403d29f3dbdb4e51`.
+`spotlessApply build` passed. Runtime checks used obfuscated Forge 1.7.10-10.13.4.1614,
+Java 8, Thaumcraft 4.2.3.5, Thaumic Horizons 1.8.24, CraftTweaker 3.4.8 and UniMixins 0.3.1.
+
+| ModTweaker | TC4Tweaks 1.5.47 + Salis Arcana 1.1.71 | Dedicated server | Separate connected client |
+| --- | --- | --- | --- |
+| GTNH 0.14.0 | absent | 70 passed | 9 passed |
+| CurseForge 0.9.6 | absent | 70 passed | 9 passed |
+| GTNH 0.14.0 | present | 70 passed | 9 passed |
+| CurseForge 0.9.6 | present | 70 passed | 9 passed |
+
+Checks use real ZenScript loading and transformed native vortex methods. Coverage includes input
+remainders and complete batches through actual tile ticks, tagged item and entity outputs, distinct
+entity UUIDs, cancelled entity spawns preserving inputs, input NBT matching, metadata/wildcards,
+overlap priority, non-stackable output splitting, tile NBT persistence and native wand extraction.
+All four native recipes are removed and restored; checks confirm original putty quantities, all six
+primal charges in the disposable wand, one to four wisps, and the void golem's thrower ownership.
+Three reloads, custom removal undo, reserved pearl inputs, malformed quantities/IDs/NBT, and
+portal/stabilization restrictions are covered.
+
+Separate clients receive server scripts, create dropped input entities through server commands,
+send the native wand-use packet, and observe the remaining input, tagged retrieved item, and one
+named zombie. The nine checks run through actual client/server connections on all four combinations.
+No manual screenshot or UI-navigation claim is made; these tests verify crafting and networking.
+
+Limits: arbitrary modded boss spawn callbacks and the full pocket-plane creation sequence were not
+exercised. Primordial pearls are rejected as custom inputs, leaving the native portal branch intact.
+The fixture's creative vortex bypasses attenuators for remote tests; the server fixture separately
+checks that an ordinary vortex with five beams cannot craft. Integrated-server play and original
+MineTweaker3 releases were not tested for this feature.
+
+Evidence: `/tmp/td-planar/`, including `servers-final.log`, `remote.log`, each instance's `result.log`,
+and the production artifact. Build output is `/tmp/td-planar-build.log`. Fixtures are retained as
+`PlanarVortexChecks`, `PlanarVortexServerProbe`, `PlanarVortexDemo` and `PlanarVortexRemoteProbe`.
+
 # Vat appearance controls verification, 2026-10-09
 
 An isolated build based on `f330bce` plus the vat appearance changes passed `spotlessApply build`.
@@ -684,3 +722,115 @@ Evidence: `/tmp/td-vat-appearance/`, with `build.log`, `servers.log`, `remote.lo
 and `remote-*/screenshots/vat-appearance-demo.png`. Tests use `VatAppearanceChecks`,
 `VatAppearanceServerProbe`, and `VatAppearanceRemoteProbe` with the existing vat demo.
 Arbitrary third-party entity renderers were not tested. The native dissolution bobbing behavior is unchanged.
+
+
+## Planar Vortex completion modes and vis costs, 2026-10-09
+
+Updated production artifact SHA-256: `1db39d517a4626dad3ff94e016a8197455439df79ed194beaa554ea224ad63b8`.
+`spotlessApply build` passed. On the same obfuscated runtime and four ModTweaker/addon combinations
+listed above, all **101 dedicated-server checks and 15 separate-client checks passed per combination**.
+`VortexOptionalServerProbe` also passed startup and ordinary dropped-item merging with Horizons,
+MineTweaker and ModTweaker absent.
+
+Completion tests add instant item output and feedback protection, protected/unprotected stack merging
+in both directions, output-marker save/load, collection/rethrow semantics, free and paid wand modes,
+one batch per click, multi-stack output with one vis charge, all-aspect affordability, native crafting
+discounts, cancelled item/creature spawn refunds, queue persistence, recipe/cost snapshots surviving
+script removal, and validation. These checks caught TC4's empty AspectList.copy() behavior, which
+creates a null-aspect entry, and a chat notification problem with disconnected automation players.
+Both are handled in the final build.
+
+Actual client/server packets verify instant diamonds, delayed pigs, an empty wand being refused,
+and both creature creation and the charged wand's vis debit reaching the client. The remote fixture
+uses survival mode with damage immunity: Salis Arcana bypasses vis payment in creative mode, so a
+creative-mode empty-wand assertion is invalid with that setting. Production retains native crafting
+behavior, including other mods' creative bypasses. Native recipes and unconfigured custom recipes
+retain their previous free behavior.
+
+Evidence: `/tmp/td-planar/completion-servers.log`, `completion-remote-final.log`, `optional-final.log`,
+per-instance `result.log`, and `/tmp/td-planar-completion-build.log`. The remote fixture now covers
+completion modes; `PlanarVortexCompletionChecks` and `VortexOptionalServerProbe` are retained too.
+The user's ignored `run/planar-vortex-*` instances were redeployed with instant dirt-to-diamond and
+cookie-to-pig requiring a wand with a base cost of 5 Aer plus 2 Terra. The previous play world remains
+in `world`; this demo uses `completion-world`.
+
+## Planar Vortex cost HUD and quiet failures, 2026-10-09
+
+Production jar SHA-256: `cd571cedf08c4fa037927e8d8b1ca400d64deceef41d97f23f6d09f3f1ce0a4f`.
+`spotlessApply build` passed. On obfuscated Forge 1614 / Thaumcraft 4.2.3.5 / Horizons 1.8.24,
+GTNH ModTweaker 0.14.0 and CurseForge ModTweaker 0.9.6 each passed **107 dedicated-server checks
+and 27 separate-client checks**, both alone and with TC4Tweaks 1.5.47 / Salis Arcana 1.1.71.
+The no-Horizons/no-scripting-mod server probe also passed.
+
+New checks exercise server-generated previews, exact hundredths after wand-cap modifiers,
+per-aspect affordability without draining vis, native free-item queue priority, client packet delivery,
+wand switching, look-away and held-item guards, missing-only pulsing, and clearing completed previews.
+The remote client observes the native wand-failure sound and verifies that a refused payment adds no
+routine failure chat. Its sound volume is nonzero so Minecraft dispatches sound events. The fixture's
+zombie has zero movement speed so it cannot walk into the HUD test's line of sight.
+
+In-game screenshots were inspected for both unaffordable and affordable costs. This caught
+Thaumcraft's icon helper restoring lighting before the cost labels; the renderer now disables it again
+for bright, readable text. Missing aspect icons pulse while the numerical costs remain steady.
+Technical output/queue failures remain logged. These tests cover the native font/rendering path;
+arbitrary third-party HUD replacements were not tested.
+
+Evidence: `/tmp/td-planar/feedback-servers-verified.log`, `feedback-remote-verified.log`,
+`feedback-optional-verified.log`, each instance's `result.log`, and
+`remote-*/screenshots/vortex-cost-missing.png` / `vortex-cost-ready.png`.
+Build log: `/tmp/td-planar-feedback-build.log`. The existing ignored play server and client jars were
+updated; the server is available on `localhost:25569`. The already-closed play client was left closed.
+
+
+## Planar Vortex crafting animation, 2026-10-09
+
+Production jar SHA-256: `687c2f2e70b06bcd57015eb383b591e854f49aed349f72cdbb62c68b3f3a1af3`.
+`spotlessApply build` passed. On obfuscated Forge 1614 / Thaumcraft 4.2.3.5 / Horizons 1.8.24,
+GTNH ModTweaker 0.14.0 and CurseForge ModTweaker 0.9.6 each passed **128 dedicated-server checks
+and 29 separate-client checks**, both alone and with TC4Tweaks 1.5.47 / Salis Arcana 1.1.71.
+The no-Horizons/no-scripting-mod server probe also passed. A separate client with the rays disabled
+passed all 29 checks.
+
+New server checks cover delayed release, exactly-once output/payment, repeated clicks, missing inputs,
+removed wands, disconnected owners, stabilization loss, chunk unload and saved-queue reload safety.
+The rays reach zero at tick 20; expansion starts at tick 22. Client checks cover animation packets,
+configuration and phase captures alongside the existing cost HUD and payment synchronization checks.
+
+Additional GTNH visual runs with rays enabled and disabled passed all 29 checks, including native
+renderer callback assertions for captured phases. Screenshots confirm contraction, rays disappearing
+before expansion, and the contracted core remaining visible with rays disabled. The automated camera
+now pans gently off-axis: its original fixed-axis view could hide the native vortex. This changes only
+the test fixture. An intermediate disabled-rays run failed a HUD raycast assertion because its adult
+zombie blocked the view; the stationary baby zombie fixture fixes that obstruction.
+
+Evidence: `/tmp/td-planar/animation-servers-verified.log`, `animation-remote-verified.log`,
+`animation-optional-verified.log`, `animation-visual-final.log`, and
+`animation-rays-disabled-final.log`; phase screenshots are under `remote-*/screenshots/`.
+Build log: `/tmp/td-planar-animation-build.log`. The ignored play server and matching standalone
+client were updated with the same production jar for the dirt-to-diamond and cookie-to-pig demo.
+
+
+## Planar Vortex input suction and deeper contraction, 2026-10-09
+
+Production jar SHA-256: `221af7125097f7d86b879819e03afb04aab1c5b97e8d7e688704ef9b87c529ba`.
+`spotlessApply build` passed. On obfuscated Forge 1614 / Thaumcraft 4.2.3.5 / Horizons 1.8.24,
+GTNH ModTweaker 0.14.0 and CurseForge ModTweaker 0.9.6 each passed **137 dedicated-server checks**,
+both alone and with TC4Tweaks 1.5.47 / Salis Arcana 1.1.71. The no-Horizons/no-scripting-mod
+server probe passed with the expanded early EntityItem mixin.
+
+The contracted scale is now 0.04 instead of 0.28; the ray envelope and release timing are unchanged.
+New checks run actual item updates to verify lifting a falling input into the center, absorption
+without early consumption, pickup/merge protection, exclusive ownership against a neighboring vortex,
+and cancellation restoring visibility and gravity. Suction state is transient, and client prediction
+uses the server's start time and input coordinates. Client absorption persists through the release
+boundary until removal arrives, avoiding an input flash caused by network delay.
+
+Both ModTweaker variants passed **30 separate-client checks**, each alone and with the addons.
+A separate rays-disabled client also passed all 30 checks.
+The remote fixture summons an instant input below and in front of the vortex and observes it rising
+and becoming absorbed before output. In-game screenshots were inspected for the smaller core and
+visible input flight. The normal demo server and client jars match the tested artifact.
+
+Evidence: `/tmp/td-planar/suction-servers-final.log`, `suction-remote-final.log`,
+`suction-optional-final.log`, and `remote-*/screenshots/vortex-input-suction.png` plus the existing
+animation phase screenshots. Build log: `/tmp/td-planar-suction-build.log`.

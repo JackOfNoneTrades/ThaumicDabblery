@@ -29,6 +29,11 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
+    public void receiveVortexPreview(net.minecraft.nbt.NBTTagCompound data, INetHandler source) {
+        org.fentanylsolutions.thaumicdabblery.feature.planarvortex.VortexFeedbackClient.receive(data, source);
+    }
+
+    @Override
     public boolean toggleResearchEditor() {
         if (!Loader.isModLoaded("MineTweaker3") || !Loader.isModLoaded("modtweaker2"))
             throw new IllegalArgumentException("Thaumonomicon editing requires MineTweaker and ModTweaker.");
@@ -38,7 +43,10 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void init(FMLInitializationEvent event) {
         super.init(event);
-        if (Loader.isModLoaded("ThaumicHorizons")) EffigySkinClient.register();
+        if (Loader.isModLoaded("ThaumicHorizons")) {
+            EffigySkinClient.register();
+            org.fentanylsolutions.thaumicdabblery.feature.planarvortex.VortexFeedbackClient.register();
+        }
         ScanAllSources.register();
         VisDiscountTooltipHandler.register();
         WandComponentStatsTooltipHandler.register();
