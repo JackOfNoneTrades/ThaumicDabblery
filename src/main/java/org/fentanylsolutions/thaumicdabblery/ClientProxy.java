@@ -5,6 +5,7 @@ import net.minecraft.network.INetHandler;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ResearchTabOrderClientHandler;
 import org.fentanylsolutions.thaumicdabblery.feature.effigyskins.EffigySkinClient;
 import org.fentanylsolutions.thaumicdabblery.feature.effigyskins.EffigySkinNetwork;
+import org.fentanylsolutions.thaumicdabblery.feature.osmotic.OsmoticTooltips;
 import org.fentanylsolutions.thaumicdabblery.feature.researcheditor.ResearchEditorClient;
 import org.fentanylsolutions.thaumicdabblery.feature.scanall.ScanAllSources;
 import org.fentanylsolutions.thaumicdabblery.feature.visdiscount.VisDiscountTooltipHandler;
@@ -43,6 +44,7 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void init(FMLInitializationEvent event) {
         super.init(event);
+        if (Loader.isModLoaded("ThaumicTinkerer")) OsmoticTooltips.register();
         if (Loader.isModLoaded("ThaumicHorizons")) {
             EffigySkinClient.register();
             org.fentanylsolutions.thaumicdabblery.feature.planarvortex.VortexFeedbackClient.register();

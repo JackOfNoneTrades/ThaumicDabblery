@@ -161,6 +161,13 @@ public class LateMixinLoader implements ILateMixinLoader {
                 mixins.add("witchinggadgets.MixinMessageClientNotifierHandler");
             }
         }
+        if (loadedMods.contains("ThaumicTinkerer")) {
+            mixins.add("thaumictinkerer.MixinTileEnchanter");
+            mixins.add("thaumictinkerer.MixinPacketEnchanterAddEnchant");
+            mixins.add("thaumictinkerer.MixinPacketEnchanterStartWorking");
+            if (FMLLaunchHandler.side()
+                .isClient()) mixins.add("thaumictinkerer.MixinGuiEnchanting");
+        }
         if (loadedMods.contains("ThaumicHorizons")) {
             mixins.add("thaumichorizons.MixinTileVatCreatureRecipes");
             mixins.add("thaumichorizons.MixinTileSoulBeaconSkin");

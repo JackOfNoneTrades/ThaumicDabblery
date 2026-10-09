@@ -20,6 +20,7 @@
     * Thaumic Horizons player and creature vat recipe modification, custom mob transformations and configurable Thaumonomicon display items
 * Scripted head/body tracking for vat creatures and effigies, with configurable item-frame rotation controls
 * Scripted Planar Vortex item and creature recipes, with NBT support and native recipe removal
+* Scripted Osmotic Enchanter enchantments, vis costs, icons and research requirements, with paginated selection
 * Thaumic Horizons Corpse Effigies display bound player skins, with personal appearances for shared Soul Beacons
 * Single-player Thaumonomicon editor with drag placement, parent editing, cross-tab moves and swaps, properties, deletion, undo/redo and compact script saving through `/td edit`
 * Operator command `/td scanall [player]` to complete item/entity scans, discover aspects and reveal scan-dependent research without awarding research points

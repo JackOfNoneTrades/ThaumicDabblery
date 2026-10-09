@@ -834,3 +834,105 @@ visible input flight. The normal demo server and client jars match the tested ar
 Evidence: `/tmp/td-planar/suction-servers-final.log`, `suction-remote-final.log`,
 `suction-optional-final.log`, and `remote-*/screenshots/vortex-input-suction.png` plus the existing
 animation phase screenshots. Build log: `/tmp/td-planar-suction-build.log`.
+
+
+## Osmotic Enchanter scripting, 2026-10-09
+
+Production jar SHA-256: `7af13b93ad12b87e727053af261b526fea503a0963a454807219e2883d68d231`.
+`spotlessApply build` passed. On obfuscated Forge 1614 / Thaumcraft 4.2.3.5,
+each combination of original Thaumic Tinkerer 2.5-164 or GTNH Thaumic Tinkerer 2.12.33
+with CurseForge ModTweaker 0.9.6 or GTNH ModTweaker 0.14.0 passed **36 dedicated-server
+checks and 16 separate-client checks**. The server probe without Thaumic Tinkerer,
+Thaumic Horizons or scripting mods also passed.
+
+Checks cover real scripts, native cost scaling, exact level overrides, icons, research gates,
+removal and reload undo, invalid definitions and packets, native enchantment incompatibilities,
+late-registered enchantments, free recipes, idle selection refresh, and accepted running costs
+surviving recipe removal and tile NBT save/load. Native pillars and an actual wand complete jobs
+and pay vis. Remote checks exercise the stock GUI and packet handlers, live reload with the GUI
+open, pagination beyond 16 entries, and keeping page two selected after server item synchronization.
+
+In-game screenshots were inspected for icon rendering and pager placement beneath the wand slot.
+These tests cover the stock interface; arbitrary third-party GUI replacements were not tested.
+All test servers and clients were temporary fixtures, leaving the existing Planar Vortex play
+instance unchanged.
+
+Evidence: `/tmp/td-osmotic/servers-verified.log`, `remote-verified.log`,
+`optional-verified.log`, individual instance `result.log` files, and
+`remote-*/screenshots/osmotic-page-1.png`, `osmotic-page-2.png`, and `osmotic-selected.png`.
+Build log: `/tmp/td-osmotic/build-pages.log`.
+
+Pager appearance follow-up: SHA-256
+`99e3a803f5538fc0030e3a95d4bf052c4214807e52b257c036035494c36ebd48`.
+Centered pixel chevrons and an unboxed page count now align with the wand slot.
+`spotlessApply build` passed, followed by 16 remote checks each with GTNH Tinkerer / GTNH
+ModTweaker and original Tinkerer / CurseForge ModTweaker. The resulting in-game screenshot
+was inspected for alignment. Evidence: `/tmp/td-osmotic/build-pager-style.log` and
+`/tmp/td-osmotic/remote-pager-style.log`. The manual demo client was updated and restarted.
+
+The manual demo server subsequently crashed when first loading `WandComponentVisDiscountRegistry`:
+its installed jar had been overwritten while its JVM was still running during the pager deployment.
+The class is present in the artifact. A clean server restart using the same artifact successfully
+completed Sharpness III and verified payment of 4 Ordo plus 2 Aer, then reset the demo machine.
+Evidence: `run/osmotic-server/play-restarted.log`, marker `TD_OSMOTIC_PLAY_CRAFT_PASS`.
+Deployment instructions now require stopping the JVM before replacing its jars.
+
+Start-button layout follow-up: SHA-256
+`cfe24549b7d14f9346e7d478e85e9566eeb8a6d9c18725d1347143daed3b48f9`.
+The native start/progress button now sits beside the vis bars, above the enchantment grid.
+`spotlessApply build` passed. GTNH Tinkerer / GTNH ModTweaker and original Tinkerer /
+CurseForge ModTweaker each passed 20 remote checks, including a full 16-entry grid,
+nonoverlapping start-button hitboxes and actual completion/payment after activating the GUI button.
+Evidence: `/tmp/td-osmotic/build-start-layout.log` and `remote-start-layout.log`.
+A further GTNH run passed all 20 checks with a frame delay before the selected-page screenshot;
+`remote-start-visual.log` and `remote-gtnh-gtnh/screenshots/osmotic-selected.png` confirm that
+the start button is visible above two full rows. Both demo JVMs were stopped before jar replacement.
+
+Final start-control behavior: SHA-256
+`d4859367685961fc5ffbd82532856b31b2abdc233be1edd15b391e584ffe9060`.
+The original unframed symbol remains visible when disabled, explains selection on hover, and follows
+the vis bars down by 24 pixels on a one-row page. A temporary framed version was discarded.
+`spotlessApply build` and 23 remote checks passed with both GTNH Tinkerer / GTNH ModTweaker and
+original Tinkerer / CurseForge ModTweaker. Checks include the disabled tooltip, switching between
+two rows and one row, unobstructed start-button hitboxes, and actual crafting/payment.
+The remote fixture exposes 18 dummy enchantments so its second page fits one row.
+Evidence: `/tmp/td-osmotic/build-start-adaptive.log`, `remote-start-adaptive.log`, and the page screenshots.
+Both demo processes were stopped before updating their jars and the client reconnected successfully.
+
+Tooltip lighting and overlay follow-up: SHA-256
+`cc895144a23d8f7a73db0a44cdaee6cdee331ee6e1c49e4d97f86b5d85a7ad9d`.
+Thaumic Tinkerer's native tooltip helper disables lighting/depth testing and changes blending/color
+without restoring them. The enchanter now captures its tooltip for Forge's post-screen event,
+draws it after NEI's container overlays, and restores all OpenGL attributes in a finally block.
+Pending text is copied before the native GUI clears it and discarded before the next frame.
+
+`spotlessApply build` and 25 remote checks passed with GTNH Tinkerer / GTNH ModTweaker and
+original Tinkerer / CurseForge ModTweaker. The regression probe compares lighting, light sources,
+color material, rescale normals, depth testing, blending, alpha testing, texture state, shade model,
+current color and attribute-stack depth before and after rendering. Hovered/unhovered captures
+show the tooltip covering NEI entries; static NEI pixels outside the tooltip are identical.
+Evidence: `/tmp/td-osmotic/build-tooltip-overlay.log`, `remote-tooltip-overlay.log`, and
+`remote-*/screenshots/osmotic-nei-hovered.png` / `osmotic-nei-unhovered.png`.
+
+Full-payment and interruption follow-up: SHA-256
+`77cab931530f3813f8b30a603be51113ae1fd3e5f3b542ddcccd70b37cd6afbb`.
+`spotlessApply build` passed. All four original/GTNH Tinkerer and CurseForge/GTNH ModTweaker
+combinations passed 69 server checks. GTNH Tinkerer / GTNH ModTweaker and original Tinkerer /
+CurseForge ModTweaker each passed 28 separate-client checks.
+
+New checks cover the full discounted cost before starting, rejection without consumption,
+exact balances, and completion when the final discounted payment is less than one whole vis.
+Native inventory operations cover pickup and immediate reinsertion, shift-click, hotbar swap,
+dropping, direct extraction, clearing and replacement. Each cancellation clears progress without
+refunding payment, preserves valid retry selections for wand removal, and emits exactly one
+`thaumcraft:craftfail` sound, observed through the world's sound listener. Target removal/replacement
+also cancels with one sound and clears selections. Zero extraction, setting the same stack and
+closing the container leave the job running. Cancelled selections survive save/load and reinsertion;
+the existing in-progress save/load test still passes. Free jobs now require a compatible wand.
+
+Remote checks empty and refill the wand while the GUI remains open, verify Start is disabled with
+the exact missing-vis tooltip, send an unaffordable start packet to verify server rejection, then
+successfully craft after refilling. Evidence: `/tmp/td-osmotic/build-wand-guard.log`,
+`servers-wand-guard.log`, and `remote-wand-guard.log`.
+The stopped demo processes were updated; Sharpness V's demo cost is 40 of each standard primal,
+allowing about 12 seconds to test cancellation before completion.

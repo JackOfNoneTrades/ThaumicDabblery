@@ -43,3 +43,10 @@ key.thaumicdabblery.researchEditor=Toggle Thaumonomicon Edit Mode (book only)
 thaumicdabblery.aspect.scanBeforeCombining=Scan an item containing this aspect before combining it. No research points were spent.
 thaumicdabblery.config.client=Client Visuals
 thaumicdabblery.config.client.showVortexCraftingRays=Show Vortex Crafting Rays
+
+thaumicdabblery.osmotic.select=Select an enchantment to begin
+thaumicdabblery.osmotic.working=Enchanting...
+thaumicdabblery.osmotic.wand=Insert a compatible wand
+thaumicdabblery.osmotic.insufficient=Not enough vis to start
+thaumicdabblery.osmotic.missing=%s: missing %s vis
+thaumicdabblery.osmotic.invalidDiscount=Invalid wand vis modifier

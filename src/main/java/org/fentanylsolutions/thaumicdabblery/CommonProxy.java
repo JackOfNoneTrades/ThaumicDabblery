@@ -33,6 +33,8 @@ public class CommonProxy {
 
     public void init(FMLInitializationEvent event) {
         FeatureManager.init(event);
+        if (Loader.isModLoaded("ThaumicTinkerer"))
+            org.fentanylsolutions.thaumicdabblery.feature.osmotic.OsmoticPackets.initialize();
         if (Loader.isModLoaded("ThaumicHorizons")) {
             EffigySkinNetwork.initialize();
             org.fentanylsolutions.thaumicdabblery.feature.planarvortex.VortexFeedback.initialize();
@@ -43,6 +45,8 @@ public class CommonProxy {
             FurnacePagesZen.register();
             ResearchPrerequisitesZen.register();
             ResearchEditor.register();
+            if (Loader.isModLoaded("ThaumicTinkerer"))
+                org.fentanylsolutions.thaumicdabblery.compat.modtweaker.OsmoticEnchanterZen.register();
             if (Loader.isModLoaded("ThaumicHorizons")) {
                 ThaumicHorizonsSelfInfusionZen.register();
                 CreatureInfusionZen.register();

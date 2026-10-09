@@ -4,6 +4,10 @@ These are disposable Forge test mods, **not** ordinary deobfuscated JUnit tests.
 The probes assert that `fml.deobfuscatedEnvironment` is false. Do not install them in a player's instance:
 server probes alter scripts/config temporarily, and probes stop their instance when finished.
 
+Stop an instance and wait for its JVM to exit before replacing any installed jar, including during
+manual demos. Replacing a jar beneath a running classloader can cause delayed class-loading crashes
+when a feature first accesses a class. Restart every instance whose jars were changed.
+
 Include the production `fentlib-04136bd-snapshot.jar` and GTNHLib 0.11.37 in automated instances.
 Leave FentLib's `terminalDepLoaderProgress` enabled (the default) to send dependency-loader progress to
 the terminal instead of opening popups. Never install its `-dev` artifact in these obfuscated runtimes.
@@ -649,3 +653,27 @@ the remote fixture uses a stationary baby zombie to keep the HUD raycast unobstr
 Run with `-Dtd.vortex.rays=false` and the matching client config to check the rays-disabled path.
 Use fresh disposable test
 worlds; an interrupted previous fixture can leave old queues at its fixed coordinates.
+
+
+`OsmoticChecks` / `OsmoticServerProbe` verify actual MineTweaker scripts against original Thaumic
+Tinkerer 2.5-164 and GTNH 2.12.33, each with CurseForge ModTweaker 0.9.6 and GTNH 0.14.0.
+Compile the fixtures against the original Tinkerer jar and the obfuscated runtime classpath; register
+the synthetic enchantments/research in post-init before loading scripts. Require
+`TD_OSMOTIC_SERVER_PASS`. Coverage includes native level scaling, exact overrides, research checks,
+normal and late-registered incompatibilities, invalid definitions, removed/malformed selections,
+real pillar/vis crafting, running-job save/reload snapshots, free recipes, and registry undo.
+Wand checks exercise full discounted affordability, exact payment below one whole vis, normal
+pickup/reinsertion, shift-click, hotbar swaps, dropping and direct inventory removal/replacement.
+A world sound listener counts cancellation sounds. Checks also cover removal/replacement of the
+target item, no refund, preserved retry selections across save/load, and closing the GUI without
+cancelling a running job.
+
+`OsmoticDemo` hosts a separate server fixture; `OsmoticRemoteProbe` connects using
+`-Dtd.osmotic.port=<port>`. Require `TD_OSMOTIC_REMOTE_PASS`. It exercises the stock GUI's first
+and second pages, real selection/start packets, malformed and research-locked selections, recipe
+removal while the GUI remains open, native crafting completion and synchronized wand payment.
+It also empties/refills the inserted wand to check Start availability, the missing-vis tooltip,
+and rejection of a direct unaffordable start packet.
+Screenshots: `osmotic-page-1.png`, `osmotic-page-2.png`, and `osmotic-selected.png`.
+Use fresh disposable worlds. The remote fixture counts server player-tick events to open the GUI;
+matching an exact `ticksExisted` value can miss the event on these runtimes.
