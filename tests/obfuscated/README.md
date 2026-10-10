@@ -651,6 +651,11 @@ packets. A delegating renderer verifies that the native renderer actually ran at
 The test camera pans gently off-axis to avoid the native renderer's fixed-axis visibility issue;
 the remote fixture uses a stationary baby zombie to keep the HUD raycast unobstructed.
 Run with `-Dtd.vortex.rays=false` and the matching client config to check the rays-disabled path.
+A world sound listener checks opening at the start, closing once at tick 22, cancellation before
+expansion, and removal of the old crafting sounds for custom recipes, native item retrieval and
+native golem conversion. The remote probe verifies both sound registrations and received playback
+events. The mono Vorbis opening clip lasts 1.1 seconds, with a baked fade from 0.7 to 1.1 seconds;
+the closing clip plays in full (1.74125 seconds).
 Use fresh disposable test
 worlds; an interrupted previous fixture can leave old queues at its fixed coordinates.
 

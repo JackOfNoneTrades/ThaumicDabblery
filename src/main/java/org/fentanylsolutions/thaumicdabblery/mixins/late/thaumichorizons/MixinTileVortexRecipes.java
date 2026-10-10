@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -24,6 +25,32 @@ import com.kentington.thaumichorizons.common.tiles.TileVortex;
 
 @Mixin(value = TileVortex.class, remap = false)
 public abstract class MixinTileVortexRecipes implements VortexRecipes.Holder, VortexCrafting.Holder {
+
+    @Redirect(
+        method = "handleVoidCrafting",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;playSoundEffect(DDDLjava/lang/String;FF)V",
+            remap = true),
+        require = 1)
+    private void thaumicdabblery$replaceEntityCraftSound(World world, double x, double y, double z, String sound,
+        float volume, float pitch) {
+        if (!thaumicdabblery$crafting.executing || !"thaumcraft:wand".equals(sound))
+            world.playSoundEffect(x, y, z, sound, volume, pitch);
+    }
+
+    @Redirect(
+        method = "onWandRightClick(Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/EntityPlayer;IIIII)I",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;playSound(DDDLjava/lang/String;FFZ)V",
+            remap = true),
+        require = 1)
+    private void thaumicdabblery$replaceItemCraftSound(World world, double x, double y, double z, String sound,
+        float volume, float pitch, boolean delayed) {
+        if (!thaumicdabblery$crafting.executing || !"thaumcraft:wand".equals(sound))
+            world.playSound(x, y, z, sound, volume, pitch, delayed);
+    }
 
     @Unique
     private final VortexCrafting.State thaumicdabblery$crafting = new VortexCrafting.State();

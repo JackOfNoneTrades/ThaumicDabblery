@@ -936,3 +936,24 @@ successfully craft after refilling. Evidence: `/tmp/td-osmotic/build-wand-guard.
 `servers-wand-guard.log`, and `remote-wand-guard.log`.
 The stopped demo processes were updated; Sharpness V's demo cost is 40 of each standard primal,
 allowing about 12 seconds to test cancellation before completion.
+
+## Planar Vortex crafting sounds (2026-10-09)
+
+Production artifact: `thaumicdabblery-dbcffde-snapshot-master.22+efb6722bff-dirty.jar`.
+SHA-256: `38307d310d28700f8b59faccb8084318dad70d39d3f1c308213e04a97ce52c23`.
+Build and formatting passed. All four obfuscated server configurations (CurseForge/GTNH
+ModTweaker, with and without TC4Tweaks/Salis Arcana) passed 146 checks each. Separate
+CurseForge and GTNH clients each passed 33 checks against dedicated servers.
+
+The sound listener verifies opening immediately, closing exactly once at expansion (tick 22),
+no closing after an earlier cancellation, and no previous crafting/completion sound during
+custom recipes, native item retrieval or native golem conversion. Remote clients verify resource
+registration, paired opening/closing playback and absence of the old sounds, alongside existing
+animation, suction, vis and failure-feedback checks. Neither client logged missing sounds or
+codec errors. The golem fixture includes a thrower, required by the native recipe.
+
+Both bundled assets are mono 32 kHz Vorbis. The opening is trimmed to 1.1 seconds with a
+0.7-to-1.1-second fade; decoded audio confirms the decreasing gain. The closing retains the
+supplied 1.74125-second duration. Both assets and sounds.json are present in the production jar.
+Evidence: `/tmp/td-planar/build-craft-sounds.log`, `sound-format.log`,
+`sound-server-matrix.log`, and `sound-remote-matrix.log`.

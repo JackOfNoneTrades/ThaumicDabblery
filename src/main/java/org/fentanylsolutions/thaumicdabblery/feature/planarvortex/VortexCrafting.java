@@ -12,6 +12,7 @@ public final class VortexCrafting {
 
     public static final int RELEASE = 28, DURATION = 36, EXPAND = 22;
     public static final float MIN_SCALE = .04F;
+    public static final String OPEN_SOUND = "thaumicdabblery:vortex.open", CLOSE_SOUND = "thaumicdabblery:vortex.close";
 
     public interface Holder {
 
@@ -23,7 +24,7 @@ public final class VortexCrafting {
     public static final class State {
 
         public long started = -1;
-        public boolean executing, released;
+        public boolean executing, released, expansionSoundPlayed;
         private EntityItem input;
         public int inputId = -1;
         public VortexSuction.Path suction;
@@ -80,6 +81,7 @@ public final class VortexCrafting {
         state.started = tile.getWorldObj()
             .getTotalWorldTime();
         state.released = false;
+        state.expansionSoundPlayed = false;
         if (state.input != null) {
             state.inputId = state.input.getEntityId();
             state.suction = new VortexSuction.Path(
@@ -96,7 +98,7 @@ public final class VortexCrafting {
             .markBlockForUpdate(tile.xCoord, tile.yCoord, tile.zCoord);
         VortexFeedback.animate(tile, state.started);
         tile.getWorldObj()
-            .playSoundEffect(tile.xCoord + .5, tile.yCoord + .5, tile.zCoord + .5, "thaumcraft:craftstart", .25F, .65F);
+            .playSoundEffect(tile.xCoord + .5, tile.yCoord + .5, tile.zCoord + .5, OPEN_SOUND, 1F, 1F);
     }
 
     public static void tick(TileVortex tile) {
@@ -118,6 +120,11 @@ public final class VortexCrafting {
         if (!ready(tile) || age < 0) {
             clear(tile);
             return;
+        }
+        if (!state.expansionSoundPlayed && age >= EXPAND) {
+            state.expansionSoundPlayed = true;
+            if (age < DURATION) tile.getWorldObj()
+                .playSoundEffect(tile.xCoord + .5, tile.yCoord + .5, tile.zCoord + .5, CLOSE_SOUND, 1F, 1F);
         }
         if (!state.released && age >= RELEASE) {
             state.released = true;

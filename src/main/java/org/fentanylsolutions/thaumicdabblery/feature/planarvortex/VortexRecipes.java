@@ -223,14 +223,6 @@ public final class VortexRecipes {
         } else {
             pending(vortex).remove(0);
             vortex.markDirty();
-            vortex.getWorldObj()
-                .playSoundEffect(
-                    vortex.xCoord + 0.5,
-                    vortex.yCoord + 0.5,
-                    vortex.zCoord + 0.5,
-                    "thaumcraft:wand",
-                    0.5F,
-                    1.0F);
             player.swingItem();
         }
         player.inventory.markDirty();

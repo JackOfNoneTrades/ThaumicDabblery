@@ -1,0 +1,10 @@
+{
+  "vortex.open": {
+    "category": "block",
+    "sounds": ["thaumicdabblery:vortex/open"]
+  },
+  "vortex.close": {
+    "category": "block",
+    "sounds": ["thaumicdabblery:vortex/close"]
+  }
+}
