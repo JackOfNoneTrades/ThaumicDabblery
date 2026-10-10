@@ -25,10 +25,9 @@ import thaumcraft.common.config.ConfigItems;
 public final class VortexPageRenderer {
 
     private static final RenderItem ITEMS = new RenderItem();
-    private static final ResourceLocation VORTEX = new ResourceLocation("thaumcraft", "textures/misc/nodes.png");
-    private static final ResourceLocation BOOK = new ResourceLocation(
-        "thaumcraft",
-        "textures/gui/gui_researchbook.png");
+    private static final ResourceLocation DIAGRAM = new ResourceLocation(
+        "thaumicdabblery",
+        "textures/gui/vortex_recipe.png");
     private static final int INK = 0x403047;
 
     public static void draw(GuiResearchRecipe gui, VortexPage page, int x, int y, int mx, int my) {
@@ -42,23 +41,17 @@ public final class VortexPageRenderer {
             flat();
             centered(font, tr("title"), x + 66, y, 132);
             mc.getTextureManager()
-                .bindTexture(BOOK);
-            // The stock book's forward arrow, in its native 256-unit texture coordinates.
-            quad(x + 28, y + 50, 18, 12, 12 / 256D, 184 / 256D, 24 / 256D, 192 / 256D);
-            quad(x + 86, y + 50, 18, 12, 12 / 256D, 184 / 256D, 24 / 256D, 192 / 256D);
+                .bindTexture(DIAGRAM);
+            // Like the stock smelting page: offering over the diagram, result beneath its arrow.
+            quad(x + 9, y - 4, 114, 137, 0, 0, 1, 1);
             if (!"instant".equals(recipe.completion)) {
-                item(mc, new ItemStack(ConfigItems.itemWandCasting), x + 58, y + 16);
-                if (hover(mx, my, x + 58, y + 16)) tooltip(gui, font, Arrays.asList(tr("wand")), mx, my);
+                item(mc, new ItemStack(ConfigItems.itemWandCasting), x + 18, y + 52);
+                if (hover(mx, my, x + 18, y + 52)) tooltip(gui, font, Arrays.asList(tr("wand")), mx, my);
             }
-            mc.getTextureManager()
-                .bindTexture(VORTEX);
-            // TileVortexRender uses row 2 of TC's 32-frame node sheet for a stabilized vortex.
-            int frame = (int) (System.nanoTime() / 40000000L % 32);
-            quad(x + 46, y + 36, 40, 40, frame / 32D, 2 / 32D, (frame + 1) / 32D, 3 / 32D);
             ItemStack input = recipe.input.copy();
             if (input.getItemDamage() == 32767) input.setItemDamage(0);
-            item(mc, input, x + 8, y + 48);
-            if (hover(mx, my, x + 8, y + 48)) {
+            item(mc, input, x + 58, y + 18);
+            if (hover(mx, my, x + 58, y + 18)) {
                 List<String> inputTip = new ArrayList<>(
                     input.getTooltip(mc.thePlayer, mc.gameSettings.advancedItemTooltips));
                 if (recipe.input.getItemDamage() == 32767) inputTip.add(tr("wildcard"));
@@ -74,18 +67,18 @@ public final class VortexPageRenderer {
             }
             ItemStack icon = page.outputIcon != null ? page.outputIcon : recipe.output;
             boolean model = icon == null;
-            if (model && !VortexEntityPreview.draw(gui, page, recipe, x + 116, y + 56)) {
+            if (model && !VortexEntityPreview.draw(gui, page, recipe, x + 66, y + 120)) {
                 icon = new ItemStack(Items.spawn_egg);
             }
             if (icon != null) {
                 icon = icon.copy();
                 if (recipe.output != null) icon.stackSize = recipe.output.stackSize;
-                item(mc, icon, x + 108, y + 48);
+                item(mc, icon, x + 58, y + 112);
             }
             String name = recipe.output != null ? recipe.output.getDisplayName() : entityName(recipe);
             if ("builtin:wisps".equals(page.key)) name = tr("wisps");
             if ("builtin:void_golem".equals(page.key)) name = tr("void_golem");
-            if (model ? mx >= x + 101 && mx < x + 132 && my >= y + 36 && my < y + 76 : hover(mx, my, x + 108, y + 48)) {
+            if (model ? mx >= x + 51 && mx < x + 82 && my >= y + 100 && my < y + 140 : hover(mx, my, x + 58, y + 112)) {
                 List<String> outputTip = recipe.output != null
                     ? new ArrayList<>(recipe.output.getTooltip(mc.thePlayer, mc.gameSettings.advancedItemTooltips))
                     : new ArrayList<>(Arrays.asList(name));
@@ -93,30 +86,24 @@ public final class VortexPageRenderer {
                     outputTip.add(tr("entity_nbt"));
                     outputTip.addAll(font.listFormattedStringToWidth(recipe.nbt.toString(), 220));
                 }
+                if ("builtin:void_golem".equals(page.key)) outputTip.add(tr("owner"));
                 tooltip(gui, font, outputTip, mx, my);
             }
             flat();
-            centered(font, name, x + 66, y + 85, 132);
-            if ("builtin:void_golem".equals(page.key)) centered(font, tr("owner"), x + 66, y + 117, 132);
             int count = recipe.vis.size();
             if (count > 0) {
                 Aspect[] aspects = recipe.vis.getAspects();
                 Arrays.sort(aspects, java.util.Comparator.comparing(Aspect::getTag));
                 int pages = (count + 5) / 6, current = mc.thePlayer.ticksExisted / 60 % pages;
-                centered(
-                    font,
-                    tr("vis") + (pages > 1 ? " (" + (current + 1) + "/" + pages + ")" : ""),
-                    x + 66,
-                    y + 107,
-                    132);
+                if (pages > 1) centered(font, (current + 1) + "/" + pages, x + 66, y + 142, 132);
                 int start = current * 6, shown = Math.min(6, count - start);
                 for (int i = 0; i < shown; i++) {
                     Aspect aspect = aspects[start + i];
                     int ax = x + 66 - shown * 22 / 2 + i * 22 + 3;
-                    UtilsFX.drawTag(ax, y + 122, aspect, 0, 0, 0, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, false);
+                    UtilsFX.drawTag(ax, y + 154, aspect, 0, 0, 0, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, false);
                     flat();
-                    centered(font, Integer.toString(recipe.vis.getAmount(aspect)), ax + 8, y + 142, 22);
-                    if (hover(mx, my, ax, y + 122))
+                    centered(font, Integer.toString(recipe.vis.getAmount(aspect)), ax + 8, y + 172, 22);
+                    if (hover(mx, my, ax, y + 154))
                         tooltip(gui, font, Arrays.asList(aspect.getName(), tr("discount")), mx, my);
                 }
             }

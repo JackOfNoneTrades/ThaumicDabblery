@@ -1013,3 +1013,22 @@ vanilla inventory lighting before and after pig, zombie, wisp and golem previews
 was visually reviewed. Evidence: `/tmp/td-planar/page-lighting-before.log`,
 `page-lighting-after.log`, `build-page-lighting.log`, `dirt-before.png`, and the refreshed
 `remote-*/screenshots/vortex-pages-2.png` captures.
+
+Vertical vortex diagram (2026-10-10): production artifact
+`thaumicdabblery-dbcffde-snapshot-master.24+d8e160a330-dirty.jar`, SHA-256
+`9e1b77a77aa251c4b10118780325e530ba5e92ec2736fac9bff4adf3daf56d0d`.
+`spotlessApply build` passed. The supplied 76x91 RGBA diagram is packaged byte-for-byte unchanged.
+The smelting-style layout places the offering inside its opening, the item or creature below
+its arrow, and costs underneath. The wand marker sits beside the opening. Names, entity NBT and
+native golem ownership are available on hover. GTNH and CurseForge obfuscated remote clients each
+passed 132 checks with updated input/output/wand hitboxes, including the block-lighting pixel
+regression. Screenshots of the new paid and automatic layouts were visually reviewed.
+Evidence: `/tmp/td-planar/build-page-diagram.log`, `page-diagram-remote.log`, and refreshed
+`remote-*/screenshots/vortex-pages-*.png` captures.
+
+Wand placement follow-up: SHA-256 `33b361b49c9c3f3c4e13701d2b1d664930b0ad797c6bcc5a1837075b43be504e`.
+Removed the vis-cost heading and moved the wand and its hover target to the vertical midpoint
+on the left of the diagram. `spotlessCheck build` passed; the obfuscated GTNH remote client
+passed 132 checks. The final paid/free spread was visually reviewed. Evidence:
+`/tmp/td-planar/build-page-wand-layout.log`, `page-wand-layout-remote.log`, and the refreshed
+`remote-gtnh/screenshots/vortex-pages-0.png`.
