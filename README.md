@@ -14,7 +14,7 @@
     * Wand core capacity, Vis regeneration, and innate Potency customization, including individual Thaumic Bases and Thaumic Concilium bracelets
     * Equipped item warp and runic shielding modification
     * Entity and item scanning based prerequisites for research
-    * Safe research movement and removal
+    * Safe research movement and removal; ordinary tab removal waits for editor moves and preserves entries moved out
     * Reload-safe Thaumonomicon tab name, icon, and background overrides
     * Reload-safe Thaumonomicon tab ordering, including compatibility with TC4Tweaks
     * Focal Manipulator upgrade path customization

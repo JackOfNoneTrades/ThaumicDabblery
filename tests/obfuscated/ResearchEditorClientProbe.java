@@ -238,7 +238,7 @@ public final class ResearchEditorClientProbe {
     checks.check(new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("scripts/zzzz-exported-editor.zs")),java.nio.charset.StandardCharsets.UTF_8).equals(exported),"UI saves leave exported script unchanged");
     tab(ResearchEditorChecks.TAB);
     java.nio.file.Path removal=java.nio.file.Paths.get("scripts/zzz-tab-removal.zs");
-    java.nio.file.Files.write(removal,("mods.thaumicdabblery.ResearchEditor.removeTab(\""+ResearchEditorChecks.TAB+"\");\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    java.nio.file.Files.write(removal,("mods.thaumcraft.Research.removeTab(\""+ResearchEditorChecks.TAB+"\");\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
     checks.script("mods.thaumicdabblery.ResearchEditor.move(\"TD_B\", \""+ResearchEditorChecks.OTHER+"\", 8, 8);\n");overlay();
     checks.check(ResearchEditorClient.enabled()&&ResearchCategories.getResearchList(ResearchEditorChecks.TAB)==null&&!ResearchEditorClient.selectedTab().equals(ResearchEditorChecks.TAB),"removing selected tab on reload keeps editor open on an existing tab");
     checks.check(ResearchCategories.getResearch("TD_B")==checks.items.get("TD_B")&&ResearchCategories.getResearch("TD_C")==null,"managed move rescues research from regular deferred tab removal in client");

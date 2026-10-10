@@ -190,12 +190,13 @@ public final class ResearchEditorChecks {
   ResourceLocation icon=new ResourceLocation("thaumcraft","textures/aspects/ordo.png");
   ResearchCategories.registerCategory("TD_TAB_SOURCE",icon,icon);ResearchCategories.registerCategory("TD_TAB_DEST",icon,icon);
   make("TD_RA","TD_TAB_SOURCE",0,0);make("TD_RB","TD_TAB_SOURCE",2,0);make("TD_RD","TD_TAB_DEST",0,0);make("TD_RL","TD_TAB_DEST",2,0);
+  items.get("TD_RB").setParents("TD_RA");
   items.get("TD_RL").setParents("TD_RA","TD_RA","TD_RB").setParentsHidden("TD_RB").setSiblings("TD_RA","TD_RB","TD_RB");
   script("");
   ResearchCategoryList originalTab=ResearchCategories.getResearchList("TD_TAB_SOURCE");
   List<String> tabOrder=new ArrayList<>(ResearchCategories.researchCategories.keySet());ResearchPage[] pages=items.get("TD_RA").getPages();
   String e="mods.thaumicdabblery.ResearchEditor.",m="mods.thaumcraft.Research.";
-  String remove=e+"removeTab(\"TD_TAB_SOURCE\");\n",move=e+"move(\"TD_RA\", \"TD_TAB_DEST\", 4, 4);\n";
+  String remove=m+"removeTab(\"TD_TAB_SOURCE\");\n",move=e+"move(\"TD_RA\", \"TD_TAB_DEST\", 4, 4);\n";
   String flag=e+"flag(\"TD_RA\", \"Hidden\", true);\n",other=e+"warp(\"TD_RD\", 3);\n";
   Path regular=Paths.get("scripts/zzz-tab-removal.zs");
   try {
@@ -207,7 +208,7 @@ public final class ResearchEditorChecks {
     check(ResearchCategories.getResearch("TD_RB")==null&&thaumcraft.api.ThaumcraftApi.getWarp("TD_RD")==3,"remaining research removed without discarding unrelated edits");
     check(Arrays.equals(items.get("TD_RL").parents,new String[]{"TD_RA","TD_RA"})&&items.get("TD_RL").parentsHidden.length==0&&Arrays.equals(items.get("TD_RL").siblings,new String[]{"TD_RA"}),"tab removal cuts all deleted links but retains links to moved-out research");
     ResearchEditor.edit("new edit after tab removal",l->l.setWarp("TD_RD",5));String compact=saved();
-    check(!compact.contains("ResearchEditor.remove(\"TD_RB\")")&&!compact.contains("ResearchEditor.parents")&&compact.contains("ResearchEditor.removeTab")==!exported,"saving retains only owned tab deletion and no incidental entry/link cleanup");
+    check(!compact.contains("ResearchEditor.remove(\"TD_RB\")")&&!compact.contains("ResearchEditor.parents")&&compact.contains(".removeTab")==!exported,"saving retains only owned tab deletion and no incidental entry/link cleanup");
     ResearchEditor.undo();check(thaumcraft.api.ThaumcraftApi.getWarp("TD_RD")==3&&ResearchCategories.getResearchList("TD_TAB_SOURCE")==null,"UI undo preserves removed tab");
     ResearchEditor.redo();MineTweakerImplementationAPI.reload();
     check(ResearchEditor.problem()==null&&ResearchCategories.getResearch("TD_RA")!=null&&ResearchCategories.getResearch("TD_RB")==null&&thaumcraft.api.ThaumcraftApi.getWarp("TD_RD")==5,"saved tab removal survives reload");
@@ -231,10 +232,10 @@ public final class ResearchEditorChecks {
    check(ResearchEditor.problem()==null&&ResearchCategories.getResearch("TD_RD")==null,"saving research moved into removed tab preserves its deletion");script("");
    script(remove+e+"removeTab(\"TD_TAB_DEST\");\n"+remove+e+"removeTab(\"TD_EDITOR_EMPTY\");\n");
    check(ResearchEditor.problem()==null&&ResearchCategories.getResearchList("TD_TAB_DEST")==null&&ResearchCategories.getResearchList("TD_EDITOR_EMPTY")==null,"multiple, duplicate and empty tab removals");script("");
-   script(other+e+"removeTab(\"TYPO_TAB\");\n");check(ResearchEditor.problem()!=null&&thaumcraft.api.ThaumcraftApi.getWarp("TD_RD")==0,"unknown deferred tab rejects batch atomically");script("");
+   script(other+e+"removeTab(\"TYPO_TAB\");\n");check(ResearchEditor.problem()==null&&thaumcraft.api.ThaumcraftApi.getWarp("TD_RD")==3,"removing a missing tab is harmless");script("");
    Files.write(regular,remove.getBytes(StandardCharsets.UTF_8));script(e+"flag(\"TYPO_KEY\", \"Hidden\", true);\n");
    check(ResearchEditor.problem()!=null&&ResearchCategories.getResearchList("TD_TAB_SOURCE")==null,"invalid managed batch preserves valid baseline removal");Files.delete(regular);script("");
-   for(String ordinary:new String[]{m+"removeTab(\"TD_TAB_SOURCE\");\n",m+"removeResearch(\"TD_RA\");\n"}){
+   for(String ordinary:new String[]{m+"removeResearch(\"TD_RA\");\n"}){
     for(boolean exported:new boolean[]{false,true}){
      String stale=flag+move+e+"warp(\"TD_RA\", 9);\n"+e+"parents(\"TD_RA\", [], []);\n"+e+"remove(\"TD_RA\");\n"+other;
      Files.write(regular,((exported?stale:"")+ordinary).getBytes(StandardCharsets.UTF_8));script(exported?"":stale);
@@ -259,6 +260,40 @@ public final class ResearchEditorChecks {
    check(ResearchEditor.problem()!=null,"removal tracking does not leak into later reloads");script("");
    Files.write(regular,(m+"removeTab(\"TD_TAB_SOURCE\");\n").getBytes(StandardCharsets.UTF_8));script(remove+other);
    check(ResearchEditor.problem()==null&&thaumcraft.api.ThaumcraftApi.getWarp("TD_RD")==3,"deferred removal of a tab already removed by ordinary scripts is harmless");
+   Files.delete(regular);script("");
+   script(e+"removeTab(\"TD_TAB_SOURCE\");\n"+move+flag);
+   check(ResearchEditor.problem()==null&&ResearchCategories.getResearch("TD_RA")==items.get("TD_RA")&&ResearchCategories.getResearchList("TD_TAB_SOURCE")==null,"legacy editor removal is an alias");
+   ResearchEditor.edit("save alias",l->l.setWarp("TD_RD",3));check(saved().contains("mods.thaumcraft.Research.removeTab")&&!saved().contains("ResearchEditor.removeTab"),"saved scripts use ordinary removal");script("");
+   String add=m+"addTab(\"TD_TAB_SOURCE\", \"minecraft\", \"textures/items/diamond.png\");\n";
+   String fresh=m+"addResearch(\"TD_FRESH\", \"TD_TAB_SOURCE\", \"\", 0, 0, 0, <minecraft:cookie>);\n";
+   Files.write(regular,(remove+add+fresh).getBytes(StandardCharsets.UTF_8));script(move+flag);
+   check(ResearchEditor.problem()==null,"replacement allows editor rescue and overlapping fresh positions");
+   ResearchCategoryList replacement=ResearchCategories.getResearchList("TD_TAB_SOURCE");
+   check(replacement!=null&&replacement!=originalTab&&replacement.icon.equals(new ResourceLocation("minecraft","textures/items/diamond.png")),"new tab identity and icon survive old removal");
+   check(ResearchCategories.getResearch("TD_RA")==items.get("TD_RA")&&items.get("TD_RA").category.equals("TD_TAB_DEST")&&ResearchCategories.getResearch("TD_RB")==null&&ResearchCategories.getResearch("TD_FRESH")!=null,"old entry rescued, old remainder removed, new entry retained");
+   check(Arrays.equals(items.get("TD_RL").parents,new String[]{"TD_RA","TD_RA"}),"replacement retains rescued links and cuts deleted links");
+   ResearchEditor.edit("save replacement",l->l.setWarp("TD_RD",2));check(saved().contains("move(\"TD_RA\"")&&!saved().contains("TD_RB")&&!saved().contains("addTab")&&!saved().contains("removeTab"),"saving retains rescue without copying replacement or incidental deletion");
+   for(int i=0;i<3;i++){MineTweakerImplementationAPI.reload();check(ResearchEditor.problem()==null&&ResearchCategories.getResearch("TD_RA")==items.get("TD_RA")&&ResearchCategories.getResearch("TD_RB")==null&&ResearchCategories.getResearch("TD_FRESH")!=null,"replacement reload remains stable");}
+   Files.delete(regular);script("");check(ResearchCategories.getResearchList("TD_TAB_SOURCE")==originalTab&&ResearchCategories.getResearch("TD_RA")==items.get("TD_RA")&&ResearchCategories.getResearch("TD_RB")==items.get("TD_RB")&&ResearchCategories.getResearch("TD_FRESH")==null&&new ArrayList<>(ResearchCategories.researchCategories.keySet()).equals(tabOrder),"replacement undo restores original category, entries and order");
+   Files.write(regular,(remove+add+fresh).getBytes(StandardCharsets.UTF_8));script(e+"move(\"TD_RB\", \"TD_TAB_SOURCE\", 2, 0);\n");
+   check(ResearchEditor.problem()==null&&ResearchCategories.getResearch("TD_RB")==items.get("TD_RB")&&ResearchCategories.getResearch("TD_RA")==null,"explicit same-tab move retains entry in replacement");ResearchEditor.edit("save same-tab rescue",l->l.setWarp("TD_RD",1));check(saved().contains("move(\"TD_RB\""),"same-coordinate rescue remains in saved script");MineTweakerImplementationAPI.reload();check(ResearchCategories.getResearch("TD_RB")==items.get("TD_RB"),"saved same-tab rescue survives reload");
+   Files.delete(regular);script("");
+   String reuse=m+"addResearch(\"TD_RA\", \"TD_TAB_SOURCE\", \"\", 0, 0, 0, <minecraft:cookie>);\n";
+   Files.write(regular,(remove+add+reuse).getBytes(StandardCharsets.UTF_8));script(flag);
+   check(ResearchEditor.problem()==null&&ResearchCategories.getResearch("TD_RA")!=items.get("TD_RA")&&ResearchCategories.getResearch("TD_RA").isHidden(),"new research wins reused key and receives editor edits");Files.delete(regular);script("");
+   Files.write(regular,(remove+add+reuse+m+"removeResearch(\"TD_RA\");\n").getBytes(StandardCharsets.UTF_8));script(move+e+"move(\"TD_RB\", \"TD_TAB_DEST\", 6, 6);\n");
+   check(ResearchEditor.problem()==null&&ResearchCategories.getResearch("TD_RA")==null&&ResearchCategories.getResearch("TD_RB")==items.get("TD_RB")&&items.get("TD_RB").parents.length==0,"explicit deletion does not resurrect retired research or its links");Files.delete(regular);script("");
+   Files.write(regular,(m+"removeResearch(\"TD_RA\");\n"+reuse+remove+add+fresh).getBytes(StandardCharsets.UTF_8));script(move);
+   check(ResearchEditor.problem()==null&&ResearchCategories.getResearch("TD_RA")!=null&&ResearchCategories.getResearch("TD_RA")!=items.get("TD_RA")&&ResearchCategories.getResearch("TD_RA").category.equals("TD_TAB_DEST"),"earlier removal does not hide later re-created retired key");Files.delete(regular);script("");
+   Files.write(regular,(remove+add+fresh+e+"flag(\"TYPO_KEY\", \"Hidden\", true);\n").getBytes(StandardCharsets.UTF_8));script("");
+   check(ResearchEditor.problem()!=null&&ResearchCategories.getResearch("TD_RA")==null&&ResearchCategories.getResearch("TD_FRESH")!=null&&items.get("TD_RL").parents.length==0,"invalid baseline still cleans references to discarded retired contents");Files.delete(regular);script("");
+   Files.write(regular,(remove+add+fresh).getBytes(StandardCharsets.UTF_8));script(e+"flag(\"TYPO_KEY\", \"Hidden\", true);\n");
+   check(ResearchEditor.problem()!=null&&ResearchCategories.getResearch("TD_RA")==null&&ResearchCategories.getResearch("TD_FRESH")!=null&&items.get("TD_RL").parents.length==0,"invalid overlay keeps replacement and cleans discarded references");Files.delete(regular);script("");
+   Files.write(regular,(remove+add+reuse+remove+add+fresh).getBytes(StandardCharsets.UTF_8));script(move);
+   check(ResearchEditor.problem()==null&&ResearchCategories.getResearch("TD_RA")!=items.get("TD_RA")&&ResearchCategories.getResearch("TD_RA").category.equals("TD_TAB_DEST")&&ResearchCategories.getResearch("TD_FRESH")!=null,"multiple replacements rescue newest matching key");Files.delete(regular);script("");check(ResearchCategories.getResearch("TD_RA")==items.get("TD_RA"),"multiple replacement undo restores oldest identity");
+   Files.write(regular,(remove+add+fresh+remove).getBytes(StandardCharsets.UTF_8));script(move);
+   check(ResearchEditor.problem()==null&&ResearchCategories.getResearch("TD_RA")==items.get("TD_RA")&&ResearchCategories.getResearchList("TD_TAB_SOURCE")==null&&ResearchCategories.getResearch("TD_FRESH")==null,"final removal deletes replacement but retains rescued entry");Files.delete(regular);script("");
+   Files.write(regular,(m+"removeTab(\"TD_TEMP_TAB\");\n"+m+"addTab(\"TD_TEMP_TAB\", \"minecraft\", \"textures/items/diamond.png\");\n").getBytes(StandardCharsets.UTF_8));script("");check(ResearchCategories.getResearchList("TD_TEMP_TAB")!=null,"remove missing then add creates tab");Files.delete(regular);script("");check(ResearchCategories.getResearchList("TD_TEMP_TAB")==null,"undo missing-tab replacement removes new tab");
   } finally {Files.deleteIfExists(regular);script("");}
  }
  private void autoUnlock()throws Exception {

@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import modtweaker2.mods.thaumcraft.research.OrphanResearch;
 import modtweaker2.mods.thaumcraft.research.RemoveTab;
@@ -25,21 +26,39 @@ public abstract class MixinRemoveTab {
     @Unique
     private final List<OrphanResearch> thaumicdabblery$orphanActions = new ArrayList<>();
 
-    @Inject(method = "apply", at = @At("HEAD"))
+    @Unique
+    private boolean thaumicdabblery$deferred;
+
+    @Inject(method = "apply", at = @At("HEAD"), cancellable = true)
     private void thaumicdabblery$detachResearchReferences(CallbackInfo ci) {
         thaumicdabblery$orphanActions.clear();
+        thaumicdabblery$deferred = ResearchEditor.deferTabRemoval(tab);
+        if (thaumicdabblery$deferred) {
+            ci.cancel();
+            return;
+        }
         ResearchCategoryList category = ResearchCategories.getResearchList(tab);
         if (category == null) {
             return;
         }
 
-        ResearchEditor.recordRemovedTab(tab);
         for (String researchKey : new ArrayList<>(category.research.keySet())) {
             ResearchEditor.recordRemovedResearch(researchKey);
             OrphanResearch action = new OrphanResearch(researchKey);
             action.apply();
             thaumicdabblery$orphanActions.add(action);
         }
+    }
+
+    @Inject(method = "canUndo", at = @At("HEAD"), cancellable = true)
+    private void thaumicdabblery$deferredCanUndo(CallbackInfoReturnable<Boolean> cir) {
+        if (thaumicdabblery$deferred) cir.setReturnValue(true);
+    }
+
+    @Inject(method = "undo", at = @At("HEAD"), cancellable = true)
+    private void thaumicdabblery$undoDeferred(CallbackInfo ci) {
+        // The final editor overlay restores deferred removals before ordinary actions are undone.
+        if (thaumicdabblery$deferred) ci.cancel();
     }
 
     @Inject(method = "undo", at = @At("TAIL"))

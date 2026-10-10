@@ -498,7 +498,7 @@ All tests use temporary scripts and research categories in disposable instances.
 
 Compile `ResearchEditorChecks` and `ResearchEditorServerProbe` into a small probe mod for a disposable
 production server. Run CurseForge ModTweaker 0.9.6 and GTNH ModTweaker 0.14.0, each with and without
-TC4Tweaks 1.5.47 and Salis Arcana 1.1.71. Require `TD_EDITOR_SERVER_PASS` (200 checks per combination).
+TC4Tweaks 1.5.47 and Salis Arcana 1.1.71. Require `TD_EDITOR_SERVER_PASS` (218 checks per combination).
 The fixtures exercise compact script output, swaps within and between tabs, nearest-free placement,
 all seven true/false flags, hidden prerequisites, cycle/duplicate/self rejection, exact deletion undo,
 TC4Tweaks lookup caches, ordinary-script ordering, multiple reloads, external-file conflicts and atomic
@@ -509,9 +509,13 @@ Export checks move generated batches into regular scripts, clear the managed fil
 exclude the exported moves, flags, warp, parents and deletions. Cover atomic swaps, repeated batches, overrides,
 returning to baseline, undo/redo, unchanged regular files, removing exports, helper functions/import aliases,
 a same-named source in a different script module, and independent rejection of invalid baseline/managed batches.
-Deferred tab-removal checks cover regular and managed declarations, moves out of and into removed tabs,
+Deferred tab-removal checks use ordinary `Research.removeTab` in regular and managed scripts, retain the
+`ResearchEditor.removeTab` alias, and verify that saves normalize it to the ordinary command. They cover moves out of and into removed tabs,
 compact saves, exported batches, multiple/empty tabs, duplicate link cleanup, category identity/order restoration,
-undo/redo, invalid batches and repeated reloads. Ordinary ModTweaker deletions skip obsolete editor declarations
+undo/redo, invalid batches and repeated reloads. Remove/recreate cases cover replacement category identity,
+new research at old coordinates, rescued old entries, explicit moves to the replacement itself, reused keys,
+multiple generations, later removals, invalid batches, retired-entry link cleanup and exact reload restoration.
+Ordinary `Research.removeResearch` deletions skip obsolete editor declarations
 and parent references without discarding unrelated edits; unknown keys still fail, recreated keys receive their
 edits, and deletion tracking resets on each reload.
 The fixture can also run in a development server with SRG calls remapped to MCP names.

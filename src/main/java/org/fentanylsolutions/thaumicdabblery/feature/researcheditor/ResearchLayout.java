@@ -41,6 +41,8 @@ public final class ResearchLayout {
         public String[] parents, hidden, siblings;
         public boolean deleted;
         private boolean removedWithTab;
+        private String retiredFromTab;
+        boolean moved;
 
         private Entry(ResearchItem item) {
             research = item;
@@ -69,6 +71,8 @@ public final class ResearchLayout {
             siblings = copy(source.siblings);
             deleted = source.deleted;
             removedWithTab = source.removedWithTab;
+            retiredFromTab = source.retiredFromTab;
+            moved = source.moved;
         }
 
         public boolean hasFlag(int index) {
@@ -101,6 +105,37 @@ public final class ResearchLayout {
         for (Map.Entry<String, Entry> entry : entries.entrySet())
             result.entries.put(entry.getKey(), new Entry(entry.getValue()));
         return result;
+    }
+
+    public boolean hasTab(String tab) {
+        return tabs.containsKey(tab);
+    }
+
+    /** Keep retired entries addressable without overwriting a newly registered research with the same key. */
+    public void includeRetiredTab(ResearchLayout before, String tab, boolean forUndo, Set<String> removedResearch) {
+        for (Map.Entry<String, Entry> pair : before.entries.entrySet()) {
+            Entry old = pair.getValue();
+            if (!old.deleted && old.tab.equals(tab)
+                && !entries.containsKey(pair.getKey())
+                && !removedResearch.contains(pair.getKey())) {
+                Entry entry = new Entry(old);
+                entry.deleted = forUndo;
+                entry.retiredFromTab = forUndo ? null : tab;
+                entries.put(pair.getKey(), entry);
+            }
+        }
+    }
+
+    /** Retired entries were outside the registry when ordinary removal actions detached their links. */
+    public void detachRemovedReferences(Set<String> removedResearch) {
+        for (String key : removedResearch) {
+            if (entries.containsKey(key)) continue;
+            for (Entry entry : entries.values()) {
+                entry.parents = without(entry.parents, key);
+                entry.hidden = without(entry.hidden, key);
+                entry.siblings = without(entry.siblings, key);
+            }
+        }
     }
 
     public Entry require(String key) {
@@ -136,6 +171,7 @@ public final class ResearchLayout {
         entry.tab = tab;
         entry.x = x;
         entry.y = y;
+        entry.moved = true;
     }
 
     public void moveToTab(String key, String tab) {
@@ -170,6 +206,7 @@ public final class ResearchLayout {
         b.tab = tab;
         b.x = x;
         b.y = y;
+        a.moved = b.moved = true;
     }
 
     public void toggleFlag(String key, int index) {
@@ -244,7 +281,8 @@ public final class ResearchLayout {
         ResearchLayout result = copy();
         for (Map.Entry<String, Entry> pair : result.entries.entrySet()) {
             Entry entry = pair.getValue();
-            if (!entry.deleted && removedTabs.contains(entry.tab)) {
+            if (!entry.deleted
+                && (removedTabs.contains(entry.tab) || !entry.moved && entry.tab.equals(entry.retiredFromTab))) {
                 result.delete(pair.getKey());
                 entry.removedWithTab = true;
             }
@@ -330,7 +368,8 @@ public final class ResearchLayout {
         for (Map.Entry<String, Entry> pair : new TreeMap<>(entries).entrySet()) {
             Entry original = base.entries.get(pair.getKey());
             if (pair.getValue().deleted && original != null && !original.deleted) {
-                if (!pair.getValue().removedWithTab || !removedTabs.contains(original.tab))
+                if (!pair.getValue().removedWithTab
+                    || !removedTabs.contains(original.tab) && original.retiredFromTab == null)
                     script.append("ResearchEditor.remove(")
                         .append(quote(pair.getKey()))
                         .append(");\n");
@@ -341,7 +380,9 @@ public final class ResearchLayout {
             String key = pair.getKey();
             Entry entry = pair.getValue(), original = base.entries.get(key);
             if (entry.deleted || original == null) continue;
-            if (!entry.tab.equals(original.tab) || entry.x != original.x || entry.y != original.y)
+            if (!entry.tab.equals(original.tab) || entry.x != original.x
+                || entry.y != original.y
+                || original.retiredFromTab != null && !original.moved && entry.moved)
                 script.append("ResearchEditor.move(")
                     .append(quote(key))
                     .append(", ")
@@ -374,7 +415,7 @@ public final class ResearchLayout {
                     .append(");\n");
         }
         for (String tab : removedTabs)
-            if (!baseline.removedTabs.contains(tab)) script.append("ResearchEditor.removeTab(")
+            if (!baseline.removedTabs.contains(tab)) script.append("mods.thaumcraft.Research.removeTab(")
                 .append(quote(tab))
                 .append(");\n");
         return script.toString();

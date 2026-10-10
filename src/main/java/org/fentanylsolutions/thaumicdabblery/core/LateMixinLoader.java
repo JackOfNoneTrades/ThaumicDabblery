@@ -131,6 +131,7 @@ public class LateMixinLoader implements ILateMixinLoader {
                 mixins.add("modtweaker.MixinOrphanResearch");
                 mixins.add("modtweaker.MixinRemoveResearch");
                 mixins.add("modtweaker.MixinRemoveTab");
+                mixins.add("modtweaker.MixinAddTab");
                 mixins.add("modtweaker.MixinSetResearch");
             }
             if (loadedMods.contains("tc4tweak")) {

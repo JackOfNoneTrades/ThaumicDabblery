@@ -31,7 +31,9 @@ public final class ResearchEditor {
     private static String problem;
     private static int generation;
     private static boolean collecting;
-    private static final Set<String> REMOVED_RESEARCH = new HashSet<>(), REMOVED_TABS = new HashSet<>();
+    private static final Set<String> REMOVED_RESEARCH = new HashSet<>();
+    private static final List<TabRemoval> TAB_REMOVALS = new ArrayList<>();
+    private static final List<RetiredTab> RETIRED_TABS = new ArrayList<>();
 
     private ResearchEditor() {}
 
@@ -44,7 +46,8 @@ public final class ResearchEditor {
     private static synchronized void prepareReload() {
         collecting = true;
         REMOVED_RESEARCH.clear();
-        REMOVED_TABS.clear();
+        TAB_REMOVALS.clear();
+        RETIRED_TABS.clear();
         SCRIPT_PATCHES.clear();
         EDITOR_PATCHES.clear();
         baseline = current = null;
@@ -66,6 +69,14 @@ public final class ResearchEditor {
         collecting = false;
         ResearchLayout original = ResearchLayout.capture();
         baseline = original.copy();
+        // Newer replacements win when a key was reused across several tab generations.
+        for (int i = RETIRED_TABS.size() - 1; i >= 0; i--) {
+            RetiredTab retired = RETIRED_TABS.get(i);
+            baseline.includeRetiredTab(retired.before, retired.tab, false, REMOVED_RESEARCH);
+            original.includeRetiredTab(retired.before, retired.tab, true, REMOVED_RESEARCH);
+        }
+        baseline.detachRemovedReferences(REMOVED_RESEARCH);
+        ResearchLayout unpatched = baseline.copy();
         try {
             for (Consumer<ResearchLayout> patch : SCRIPT_PATCHES) patch.accept(baseline);
             baseline.finishTabRemovals()
@@ -73,8 +84,8 @@ public final class ResearchEditor {
         } catch (IllegalArgumentException exception) {
             problem = exception.getMessage();
             MineTweakerAPI.logError("Research editor script baseline rejected: " + problem);
-            baseline = original.copy();
-            current = baseline.copy();
+            baseline = unpatched;
+            current = baseline.finishTabRemovals();
             MineTweakerAPI.apply(new Overlay(original, current));
             return;
         }
@@ -110,6 +121,7 @@ public final class ResearchEditor {
             entry.tab = tab;
             entry.x = x;
             entry.y = y;
+            entry.moved = true;
         });
     }
 
@@ -148,26 +160,68 @@ public final class ResearchEditor {
         researchPatch(key, layout -> layout.delete(key));
     }
 
+    /** Compatibility alias. Both public APIs now use the same removal action. */
     @ZenMethod
     public static synchronized void removeTab(String tab) {
-        patches().add(layout -> {
-            if (REMOVED_TABS.contains(tab)
-                && !thaumcraft.api.research.ResearchCategories.researchCategories.containsKey(tab)) {
-                MineTweakerAPI
-                    .logWarning("Skipping editor removal of tab " + tab + ": already removed by ordinary scripts.");
-                return;
+        modtweaker2.mods.thaumcraft.handlers.Research.removeTab(tab);
+    }
+
+    /** Intercept ordinary script actions, but leave direct Java actions outside reload unchanged. */
+    public static synchronized boolean deferTabRemoval(String tab) {
+        if (!collecting) return false;
+        TabRemoval removal = new TabRemoval(tab);
+        TAB_REMOVALS.add(removal);
+        patches().add(removal);
+        return true;
+    }
+
+    /** Re-adding a pending tab starts a new generation; preserve old entries for deferred moves. */
+    public static synchronized ResearchLayout prepareTabAddition(String tab) {
+        if (!collecting) return null;
+        boolean replacing = false;
+        for (TabRemoval removal : TAB_REMOVALS) {
+            if (removal.active && java.util.Objects.equals(tab, removal.tab)) {
+                removal.active = false;
+                replacing = true;
             }
-            layout.removeTab(tab);
-        });
+        }
+        if (!replacing) return null;
+        ResearchLayout before = ResearchLayout.capture();
+        // An existing key may have been removed and re-created earlier in this script.
+        for (ResearchLayout.Entry entry : before.entries.values())
+            if (java.util.Objects.equals(entry.tab, tab)) REMOVED_RESEARCH.remove(entry.research.key);
+        RETIRED_TABS.add(new RetiredTab(tab, before));
+        return before;
+    }
+
+    private static final class TabRemoval implements Consumer<ResearchLayout> {
+
+        private final String tab;
+        private boolean active = true;
+
+        private TabRemoval(String tab) {
+            this.tab = tab;
+        }
+
+        public void accept(ResearchLayout layout) {
+            if (active && layout.hasTab(tab)) layout.removeTab(tab);
+        }
+    }
+
+    private static final class RetiredTab {
+
+        private final String tab;
+        private final ResearchLayout before;
+
+        private RetiredTab(String tab, ResearchLayout before) {
+            this.tab = tab;
+            this.before = before;
+        }
     }
 
     /** Called only for existing entries actually removed by ordinary ModTweaker actions during this reload. */
     public static synchronized void recordRemovedResearch(String key) {
         if (collecting) REMOVED_RESEARCH.add(key);
-    }
-
-    public static synchronized void recordRemovedTab(String tab) {
-        if (collecting) REMOVED_TABS.add(tab);
     }
 
     private static void researchPatch(String key, Consumer<ResearchLayout> patch) {

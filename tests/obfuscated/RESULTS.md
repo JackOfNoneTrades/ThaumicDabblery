@@ -1142,3 +1142,30 @@ Evidence: `/tmp/td-witchery-build.log`, `/tmp/td-rites/servers.log`, `remote.log
 `{gtnh,curse,network-gtnh,network-curse,remote-gtnh,remote-curse}/result.log`,
 `remote-*/screenshots/witchery-rites.png`, and `/tmp/td-rites-absent/servers.log`.
 All eight installed production jars matched the artifact hash. All test JVMs exited.
+
+## Unified tab removal (2026-10-10)
+
+Artifact: `thaumicdabblery-dbcffde-snapshot-master.29+ca06adbec7-dirty.jar`.
+SHA-256: `759c5784fb7d570a1d02c8cb7fb066c8bcb01f35e891f1f2b8e51b5e264c9cc7`.
+`spotlessApply spotlessCheck build` passed. Obfuscated dedicated servers passed 218 editor checks
+and 582 research-removal regression checks per configuration: GTNH ModTweaker 0.14.0 and
+CurseForge ModTweaker 0.9.6, each with and without TC4Tweaks 1.5.47/Salis Arcana 1.1.71-GTNH.
+The four corresponding obfuscated clients passed 77 checks each without addons and 81 each with
+addons, using the native Thaumonomicon and integrated server. Runs used Forge 1614,
+Thaumcraft 4.2.3.5, CraftTweaker 3.4.8 and Java 8.
+
+Ordinary `Research.removeTab` now runs the deferred-removal fixtures, including regular/managed
+script ownership, rescued moves, compact saves, link cleanup, undo/redo and repeated reloads.
+The compatibility alias produces the ordinary command when saved. Replacement tests cover
+remove/add of the same tab key, fresh research at old positions, explicit same-tab rescue,
+reused research keys, several replacement generations, later deletion, missing tabs, invalid
+baseline/overlay recovery and exact restoration when declarations are removed. Explicitly
+deleted reused keys cannot resurrect retired entries or leave links on rescued entries.
+
+The removal regression suite also checks direct actions outside script loading and guarded
+research subclasses; Witching Gadgets itself was not installed. Client checks reload with the
+deleted tab selected, retain the rescued entry, and exercise subsequent edit/save/undo/redo.
+All twelve installed production jars matched the final artifact hash. All test JVMs exited.
+Evidence: `/tmp/td-issue6-new/build.log`, `/tmp/td-tab-unified/{servers,clients}.log`,
+`/tmp/td-tab-unified/{editor,client}-*/result.log`, and
+`/tmp/td-tab-removal-regression/{servers.log,editor-*/result.log}`.
