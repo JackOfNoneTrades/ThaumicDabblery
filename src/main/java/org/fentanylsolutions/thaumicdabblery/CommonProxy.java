@@ -2,6 +2,7 @@ package org.fentanylsolutions.thaumicdabblery;
 
 import net.minecraft.network.INetHandler;
 
+import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ConstructPagesZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.CreatureInfusionZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.FurnacePagesZen;
 import org.fentanylsolutions.thaumicdabblery.compat.modtweaker.ResearchPrerequisitesZen;
@@ -43,6 +44,7 @@ public class CommonProxy {
         if (Loader.isModLoaded("MineTweaker3") && Loader.isModLoaded("modtweaker2")) {
             ResearchTabsZen.register();
             FurnacePagesZen.register();
+            ConstructPagesZen.register();
             ResearchPrerequisitesZen.register();
             ResearchEditor.register();
             if (Loader.isModLoaded("ThaumicTinkerer"))

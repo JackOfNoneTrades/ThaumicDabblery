@@ -108,6 +108,7 @@ public class LateMixinLoader implements ILateMixinLoader {
                 mixins.add("thaumcraft.MixinPrimalDiscoveryPacket");
                 mixins.add("thaumcraft.MixinPrimalPoolPacket");
                 mixins.add("thaumcraft.MixinGuiResearchBrowser");
+                mixins.add("thaumcraft.MixinConstructResearchPage");
             }
             if (loadedMods.contains("modtweaker2")) {
                 mixins.add("thaumcraft.MixinResearchCategories");

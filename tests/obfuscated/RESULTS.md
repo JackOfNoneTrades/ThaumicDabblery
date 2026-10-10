@@ -1032,3 +1032,39 @@ on the left of the diagram. `spotlessCheck build` passed; the obfuscated GTNH re
 passed 132 checks. The final paid/free spread was visually reviewed. Evidence:
 `/tmp/td-planar/build-page-wand-layout.log`, `page-wand-layout-remote.log`, and the refreshed
 `remote-gtnh/screenshots/vortex-pages-0.png`.
+
+## Mystical Construct pages (2026-10-10)
+
+Artifact: `thaumicdabblery-dbcffde-snapshot-master.25+944bab394d-dirty.jar`.
+SHA-256: `1fa6de38c62e0011de1e6f4cbba5cb8861df32d94ef2156cf0ec913c392be82d`. `spotlessCheck build` passed. All four production server
+configurations (GTNH/CurseForge ModTweaker, each with and without TC4Tweaks/Salis Arcana)
+passed 51 checks. Each corresponding remote client passed 86 checks. All installed production
+jars match the tested hash. The GTNH remote pair ran without Thaumic Horizons installed.
+
+The actual portal demo compiled and synchronized on both forks, with three automatically
+unlocked pages: obsidian/flint and steel, glowstone/water bucket, and grass/water/flowers/diamond.
+Checks cover all overloads, bottom-first ordering, null cells, NBT/wildcards, optional and empty
+costs, merged amounts, invalid dimensions/stacks/aspects/overflow, subsequent valid calls after
+rejections, repeated reloads, exact undo (including null page arrays), clear/remove/replace
+interactions, and retaining unrelated pages. No craftable output is advertised by diagrams.
+
+Clients exercised the stock book and next-page handler, activation/cost hovers, wildcard
+resolution without mutating the definition, GL states and stacks, a 16-layer structure, and
+liquid rendering. Screenshot review caught culled liquid faces; the new framebuffer assertion
+failed on the preceding jar and passed after the correction, for water and lava with model
+culling enabled. Screenshots confirm the portal layouts, liquids, activation items and costs.
+The empty-cost check also catches Thaumcraft's empty AspectList.copy() null-entry quirk.
+
+The tested fixture matches `run/client/scripts/thaumicdabblery_construct_demo.zs` byte-for-byte.
+Evidence: `/tmp/td-construct/build.log`, `servers-final.log`, `remote-final.log`,
+`liquid-before.log`, and `remote-*/screenshots/construct-pages-{0,1,2}.png`.
+
+Layer-spacing correction: SHA-256
+`bad69b81b6c0d61d5daa1c302ce43557281ac6da16722b9924e0e3eccf190176`.
+The fixed 32-pixel layer pitch let the front flowers overlap the grass and water behind them
+on the next layer. Spacing now includes the complete projected layer footprint plus a gap,
+and page scaling accounts for that spacing. `spotlessApply build` passed. All four obfuscated
+remote clients passed 86 checks each, with their dedicated servers passing 51 checks each.
+GTNH and CurseForge screenshots were visually reviewed: all twelve flowers sit in a separate
+ring above the blocks. Evidence: `/tmp/td-construct/build-spacing.log`, `remote-spacing.log`,
+and refreshed `remote-*/screenshots/construct-pages-{0,1,2}.png`.

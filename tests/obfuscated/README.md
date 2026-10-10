@@ -699,3 +699,22 @@ Creature checks cover pig, baby zombie, wisp and void golem previews, appearance
 absence from the world, and restoration of lightmap, camera and billboard state. A framebuffer
 comparison checks dirt against vanilla inventory lighting with normal rescaling initially off,
 then repeats the comparison after each creature preview.
+
+### Mystical Construct pages
+
+Compile `ConstructPageChecks` and `ConstructPageServerProbe` into a disposable server probe.
+Install `construct-pages.zs` in its scripts folder. It verifies the three portal demos, all API
+arities, dimension/order validation, empty cells, NBT and wildcard metadata, optional activation
+and costs, rejection without mutation, reload stability, null page arrays, both `clearPages`
+orders, research removal/replacement and preservation of unrelated pages during undo.
+
+Compile `ConstructPageChecks` and `ConstructPageClientProbe` into a separate client probe.
+Launch the server with `-Dtd.construct.network=true`, and the client with
+`-Dtd.construct.server=127.0.0.1:PORT` and username `Developer` (give that user operator rights
+in the disposable server so the probe can stop it). The client verifies synchronized pages and
+automatic unlock, opens the stock book, checks native page navigation, activation/cost tooltips,
+wildcard resolution, GL state and stack restoration. A framebuffer check verifies water and lava
+remain visible with model culling enabled and restore that state afterward. Captures `construct-pages-{0,1,2}.png`
+cover both frames, the water/flower pool, and a 16-layer structure alongside liquid cells and
+six displayed vis costs. Use GTNH and CurseForge ModTweaker, with/without TC4Tweaks/Salis Arcana;
+also run a pair without Thaumic Horizons to verify this feature's independent loading.

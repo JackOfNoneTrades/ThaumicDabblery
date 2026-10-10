@@ -60,3 +60,4 @@ thaumicdabblery.vortex.page.exact_nbt=Requires this exact NBT:
 thaumicdabblery.vortex.page.entity_nbt=Creature NBT:
 thaumicdabblery.vortex.page.wisps=1-4 Wisps
 thaumicdabblery.vortex.page.void_golem=Voidling Golem
+thaumicdabblery.construct.apply=Apply to the structure

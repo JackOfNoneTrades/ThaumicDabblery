@@ -121,3 +121,18 @@ Register custom furnace recipes with `furnace.addRecipe(output, input, xp)` befo
 Page changes support `/mt reload`; smelting itself does not require research.
 See the [research wiki](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Research#furnace-recipe-pages)
 and the runnable [demo script](tests/obfuscated/manual-furnace-pages.zs).
+
+### Mystical Construct pages
+
+Add display-only, layered structure diagrams with optional activation items and vis costs:
+
+```zenscript
+mods.thaumcraft.Research.addConstructPage("MY_RESEARCH", [
+    [[<minecraft:bookshelf>]]
+], <Thaumcraft:WandCasting>);
+```
+
+Layers are supplied bottom to top. Use `null` for empty cells; metadata, NBT and wildcard variants
+are supported. Works with GTNH and CurseForge ModTweaker, without Thaumic Horizons.
+See the [research wiki](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Research#mystical-construct-pages)
+and the [portal demo](tests/obfuscated/construct-pages.zs).
