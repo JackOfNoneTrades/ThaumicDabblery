@@ -154,4 +154,5 @@ commands run server-side with command-block permissions. By default, 25% of succ
 warp checks choose one eligible custom event. Native protections and research progression remain
 active. Test with `/td warp trigger weakness [player]`, and list events with `/td warp list`.
 See the [warp event documentation](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Warp-Events)
-for configuration, command behavior and reload details.
+for configuration, command behavior and reload details. An optional fifth argument supplies a
+private chat message in Thaumcraft's warp-message style: `register(name, minWarp, maxWarp, commands, message)`.

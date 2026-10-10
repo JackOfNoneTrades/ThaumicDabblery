@@ -744,3 +744,8 @@ creative-mode suppression. Run GTNH/CurseForge ModTweaker with and without TC4Tw
 Expected error logs deliberately test invalid definitions, unknown commands, permission denial,
 recursive triggers and unknown entity IDs. These probes modify scripts/worlds and are only for
 disposable instances.
+
+Warp message checks exercise both registration arities, empty/null messages and reloads. The
+connected client asserts exactly one dark-purple italic message for a multi-command event,
+while the bystander receives none and omitted messages remain silent. Vortex page checks use
+the wand marker's hover area on the right side of the diagram.

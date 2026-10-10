@@ -45,8 +45,8 @@ public final class VortexPageRenderer {
             // Like the stock smelting page: offering over the diagram, result beneath its arrow.
             quad(x + 9, y - 4, 114, 137, 0, 0, 1, 1);
             if (!"instant".equals(recipe.completion)) {
-                item(mc, new ItemStack(ConfigItems.itemWandCasting), x + 18, y + 52);
-                if (hover(mx, my, x + 18, y + 52)) tooltip(gui, font, Arrays.asList(tr("wand")), mx, my);
+                item(mc, new ItemStack(ConfigItems.itemWandCasting), x + 98, y + 52);
+                if (hover(mx, my, x + 98, y + 52)) tooltip(gui, font, Arrays.asList(tr("wand")), mx, my);
             }
             ItemStack input = recipe.input.copy();
             if (input.getItemDamage() == 32767) input.setItemDamage(0);

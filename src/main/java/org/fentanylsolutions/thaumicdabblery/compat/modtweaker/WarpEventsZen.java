@@ -18,8 +18,13 @@ public final class WarpEventsZen {
 
     @ZenMethod
     public static void register(String name, int minWarp, int maxWarp, String[] commands) {
+        register(name, minWarp, maxWarp, commands, null);
+    }
+
+    @ZenMethod
+    public static void register(String name, int minWarp, int maxWarp, String[] commands, String message) {
         try {
-            MineTweakerAPI.apply(new Add(new CustomWarpEvents.Event(name, minWarp, maxWarp, commands)));
+            MineTweakerAPI.apply(new Add(new CustomWarpEvents.Event(name, minWarp, maxWarp, commands, message)));
         } catch (IllegalArgumentException error) {
             MineTweakerAPI.logError("Cannot register warp event " + name + ": " + error.getMessage());
         }

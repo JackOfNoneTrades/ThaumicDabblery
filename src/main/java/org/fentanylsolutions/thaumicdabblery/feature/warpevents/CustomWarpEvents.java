@@ -10,6 +10,9 @@ import java.util.regex.Pattern;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.common.util.FakePlayer;
 
 import org.fentanylsolutions.thaumicdabblery.ThaumicDabblery;
@@ -27,8 +30,13 @@ public final class CustomWarpEvents {
         public final String name;
         public final int minWarp, maxWarp;
         public final List<String> commands;
+        public final String message;
 
         public Event(String name, int minWarp, int maxWarp, String[] commands) {
+            this(name, minWarp, maxWarp, commands, null);
+        }
+
+        public Event(String name, int minWarp, int maxWarp, String[] commands, String message) {
             if (name == null || !name.matches("[a-zA-Z0-9_.:-]+"))
                 throw new IllegalArgumentException("event names require letters, digits, _, ., : or -");
             if (minWarp < 0 || maxWarp < minWarp) throw new IllegalArgumentException("require 0 <= minWarp <= maxWarp");
@@ -49,6 +57,8 @@ public final class CustomWarpEvents {
             this.minWarp = minWarp;
             this.maxWarp = maxWarp;
             this.commands = Collections.unmodifiableList(copy);
+            this.message = message == null || message.trim()
+                .isEmpty() ? null : message;
         }
     }
 
@@ -86,6 +96,10 @@ public final class CustomWarpEvents {
         RUNNING.set(true);
         int succeeded = 0;
         try {
+            if (event.message != null) player.addChatMessage(
+                new ChatComponentText(event.message).setChatStyle(
+                    new ChatStyle().setColor(EnumChatFormatting.DARK_PURPLE)
+                        .setItalic(true)));
             for (String template : event.commands) {
                 String command = TARGET.matcher(template)
                     .replaceAll(java.util.regex.Matcher.quoteReplacement(player.getCommandSenderName()));

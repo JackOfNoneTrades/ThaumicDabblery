@@ -1097,3 +1097,19 @@ Connected gameplay probes use survival mode, then explicitly enable creative for
 Arcana suppression check. Expected warnings exercise invalid scripts/commands and permissions.
 Evidence: `/tmp/td-warp/build-final.log`, `servers-final.log`, `remote-final.log`,
 `network-*/result.log`, and `remote-*/result.log`.
+
+## Vortex wand position and optional warp messages (2026-10-10)
+
+Artifact: `thaumicdabblery-dbcffde-snapshot-master.27+a6c88cb9e2-dirty.jar`.
+SHA-256: `bc90bd06369f568c20c6b201c37c71a4b2ab5131b63d3e655d5debc34f795307`.
+`spotlessApply spotlessCheck build` passed. GTNH and CurseForge obfuscated vortex clients each
+passed 132 checks with the wand hover target on the right; the updated page screenshot was
+visually reviewed. Both the icon and tooltip moved together.
+
+All four warp server configurations passed 24 script/registry checks. Connected GTNH/CurseForge
+runs passed 64 server checks each; their TC4Tweaks/Salis Arcana combinations passed 65 each.
+Every client verified exactly one private, dark-purple italic message for a multi-command event.
+Old four-argument calls, empty/null messages, reloads, normal command-feedback suppression and
+bystander silence remain covered. The dev-client example now includes a narrative message.
+Evidence: `/tmp/td-warp/build-message.log`, `servers-message.log`, `remote-message.log`, and
+`/tmp/td-planar/page-wand-right.log` plus refreshed `remote-*/screenshots/vortex-pages-*.png`.
