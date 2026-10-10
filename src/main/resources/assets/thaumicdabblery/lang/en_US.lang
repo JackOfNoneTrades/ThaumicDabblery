@@ -65,3 +65,6 @@ thaumicdabblery.construct.apply=Apply to the structure
 thaumicdabblery.config.feature.customWarpEvents=Custom Warp Events
 thaumicdabblery.config.feature.customWarpEvents.enabled=Enable Custom Warp Events
 thaumicdabblery.config.feature.customWarpEvents.chance=Custom Event Chance
+
+thaumicdabblery.config.feature.witcheryRites=Witchery Rites
+thaumicdabblery.config.feature.witcheryRites.enabled=Enable Witchery Rite Scripting

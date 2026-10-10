@@ -22,6 +22,7 @@
 * Scripted head/body tracking for vat creatures and effigies, with configurable item-frame rotation controls
 * Scripted Planar Vortex item and creature recipes, with NBT support and native recipe removal
 * Scripted Osmotic Enchanter enchantments, vis costs, icons and research requirements, with paginated selection
+* Scripted Witchery rite offerings, living sacrifices, circles, initial altar power, time and weather conditions
 * Thaumic Horizons Corpse Effigies display bound player skins, with personal appearances for shared Soul Beacons
 * Single-player Thaumonomicon editor with drag placement, parent editing, cross-tab moves and swaps, properties, deletion, undo/redo and compact script saving through `/td edit`
 * Operator command `/td scanall [player]` to complete item/entity scans, discover aspects and reveal scan-dependent research without awarding research points
@@ -156,3 +157,14 @@ active. Test with `/td warp trigger weakness [player]`, and list events with `/t
 See the [warp event documentation](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Warp-Events)
 for configuration, command behavior and reload details. An optional fifth argument supplies a
 private chat message in Thaumcraft's warp-message style: `register(name, minWarp, maxWarp, commands, message)`.
+
+### Witchery rite requirements
+
+Edit existing Witchery rites with `mods.witchery.Rites`: mandatory and optional offerings,
+living sacrifices, native circles, initial altar power, time, weather and Overworld restrictions.
+Rite IDs and effects are preserved, and edits support script reload/undo. Both CurseForge and
+GTNH ModTweaker are supported without requiring WitcheryExtras.
+
+Run `/mt witcheryRites` for IDs and requirements. See the
+[Witchery rite documentation](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Witchery-Rites)
+for syntax and native behavior.

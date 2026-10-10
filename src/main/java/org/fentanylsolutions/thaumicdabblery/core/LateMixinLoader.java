@@ -185,6 +185,12 @@ public class LateMixinLoader implements ILateMixinLoader {
                 mixins.add("thaumichorizons.MixinVortexResearchPage");
             }
         }
+        if (loadedMods.contains("witchery")) {
+            mixins.add("witchery.RitualAccessor");
+            mixins.add("witchery.SacrificeMultipleAccessor");
+            mixins.add("witchery.SacrificeItemAccessor");
+            mixins.add("witchery.SacrificeLivingAccessor");
+        }
         if (loadedMods.contains("ThaumicHorizons") && loadedMods.contains("witchery")) {
             mixins.add("thaumichorizons.MixinItemInfusionSelfCheat");
             mixins.add("witchery.MixinItemMysticBranch");

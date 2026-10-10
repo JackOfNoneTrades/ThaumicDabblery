@@ -749,3 +749,31 @@ Warp message checks exercise both registration arities, empty/null messages and 
 connected client asserts exactly one dark-purple italic message for a multi-command event,
 while the bystander receives none and omitted messages remain silent. Vortex page checks use
 the wand marker's hover area on the right side of the diagram.
+
+## Witchery rite requirements
+
+Compile `WitcheryRitesChecks.java` and `WitcheryRitesServerProbe.java` against the SRG-first production
+classpath plus Witchery 0.24.1. Put `witchery-rites.zs` in the disposable server's scripts directory.
+The server probe snapshots the original rite registry before scripts run, checks the edited fixture,
+rewrites a temporary script for validation and undo tests, executes native rituals and stops the server.
+Require `TD_RITES_SERVER_PASS` with no `TD_RITES_SERVER_FAILED`.
+
+For a remote test, start that server with `-Dtd.rites.network=true` and compile/install
+`WitcheryRitesClientProbe.java` in a separate client with Witchery. Start the client as `Developer` with
+`-Dtd.rites.server=127.0.0.1:PORT` and an empty local scripts directory. Require
+`TD_RITES_NETWORK_PASS` and `TD_RITES_CLIENT_PASS`, with no corresponding failures. The client opens
+the native Circle Magic book, verifies its edited page data, saves `screenshots/witchery-rites.png`,
+and exits. The server stops shortly afterward. These are destructive probes for disposable instances.
+
+Coverage includes stable identities/IDs for every native rite; exact undo of original sacrifices,
+circles and traits; repeated reloads; last setter wins; invalid inputs; disabled integration; nested
+requirements and unknown subclasses; optional versus mandatory offerings; repeated living sacrifice
+definitions; initial power timing; all native ring sizes and chalk types; native matching of time,
+weather, dimension and offerings; missing altar power/living sacrifices; optional item consumption;
+unchanged native output; removing power and mob requirements; and actual heart-glyph activation
+through Witchery's chalk scanner. Native tile steps are ticked directly to avoid waiting for animations.
+A controlled `IPowerSource` tests the native power debit path; this does not test altar generation or upkeep.
+The remote test repeats execution with a connected player and checks server-to-client script synchronization.
+
+Both ModTweaker forks are tested with Witchery 0.24.1 and CraftTweaker 3.4.8. WitcheryExtras is not installed
+in this matrix. Separate startup regressions without Witchery confirm the optional integration stays dormant.

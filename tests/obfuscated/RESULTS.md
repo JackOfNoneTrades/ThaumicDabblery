@@ -1113,3 +1113,32 @@ Old four-argument calls, empty/null messages, reloads, normal command-feedback s
 bystander silence remain covered. The dev-client example now includes a narrative message.
 Evidence: `/tmp/td-warp/build-message.log`, `servers-message.log`, `remote-message.log`, and
 `/tmp/td-planar/page-wand-right.log` plus refreshed `remote-*/screenshots/vortex-pages-*.png`.
+
+## Witchery rite requirements (2026-10-10)
+
+Artifact: `thaumicdabblery-dbcffde-snapshot-master.28+ee624d5012-dirty.jar`.
+SHA-256: `54c991bd1ddce9b7b4b09191978422c5971ce8503318bc388c8b4480c88f4e49`.
+`spotlessApply spotlessCheck build` passed. Tested with Witchery 0.24.1, CraftTweaker 3.4.8,
+Forge 1614 and Java 8. Both GTNH ModTweaker 0.14.0 and CurseForge ModTweaker 0.9.6 passed
+2,409 checks on standalone obfuscated servers, then 2,435 checks each with connected clients.
+Both clients passed their script synchronization and native Circle Magic book assertions.
+The GTNH remote pair also runs without Thaumic Horizons. Separate servers without Witchery
+passed startup and 24 existing warp-event regression checks each on both ModTweaker forks.
+
+Checks cover all native rite identities and registry slots, original requirement restoration,
+reloads/removal, validation, disabled integration, nested and unknown sacrifice preservation,
+shared condition-set isolation, exact native power timing, native item/mob consumption and
+failure/refund paths, unchanged charged attuned stone output, zero-cost operation without an
+altar, and actual heart-glyph activation with a placed chalk ring. A controlled IPowerSource
+supplies altar power; tile steps are ticked directly, so this does not test altar power generation
+or the full real-time animation duration. Optional items and native living sacrifices remain
+separate from mandatory offerings. Existing upkeep effects are untouched.
+
+Clients start with no local scripts, receive the server's edits, and open the stock Circle Magic
+book. Screenshots show the diamond, optional cookie, pig, power cost and edited small-circle
+layout. Both screenshots were visually reviewed. WitcheryExtras was not installed in these runs.
+
+Evidence: `/tmp/td-witchery-build.log`, `/tmp/td-rites/servers.log`, `remote.log`,
+`{gtnh,curse,network-gtnh,network-curse,remote-gtnh,remote-curse}/result.log`,
+`remote-*/screenshots/witchery-rites.png`, and `/tmp/td-rites-absent/servers.log`.
+All eight installed production jars matched the artifact hash. All test JVMs exited.

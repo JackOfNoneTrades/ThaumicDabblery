@@ -27,5 +27,6 @@ final class FeatureBootstrap {
         FeatureManager.register(new ThaumcraftItemStatsFeature());
         FeatureManager.register(new ResearchScanGatesFeature());
         FeatureManager.register(new WitcheryBranchFeature());
+        FeatureManager.register(new org.fentanylsolutions.thaumicdabblery.feature.witcheryrites.WitcheryRitesFeature());
     }
 }
