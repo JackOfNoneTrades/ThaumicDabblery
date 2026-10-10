@@ -61,3 +61,7 @@ thaumicdabblery.vortex.page.entity_nbt=Creature NBT:
 thaumicdabblery.vortex.page.wisps=1-4 Wisps
 thaumicdabblery.vortex.page.void_golem=Voidling Golem
 thaumicdabblery.construct.apply=Apply to the structure
+
+thaumicdabblery.config.feature.customWarpEvents=Custom Warp Events
+thaumicdabblery.config.feature.customWarpEvents.enabled=Enable Custom Warp Events
+thaumicdabblery.config.feature.customWarpEvents.chance=Custom Event Chance

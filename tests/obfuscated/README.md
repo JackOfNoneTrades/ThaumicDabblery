@@ -718,3 +718,29 @@ remain visible with model culling enabled and restore that state afterward. Capt
 cover both frames, the water/flower pool, and a 16-layer structure alongside liquid cells and
 six displayed vis costs. Use GTNH and CurseForge ModTweaker, with/without TC4Tweaks/Salis Arcana;
 also run a pair without Thaumic Horizons to verify this feature's independent loading.
+
+### Custom warp events
+
+Compile `WarpEventChecks` and `WarpEventServerProbe` into a disposable server probe and install
+`warp-events.zs`. Standalone startup checks real script compilation, unique names, invalid
+arguments without aborting later definitions, repeated reload/removal, inclusive ranges,
+configuration, selection probability and preservation of RNG when no custom event can run.
+
+For gameplay checks, start that server with `-Dtd.warp.network=true`. Install
+`WarpEventClientProbe` in the client and launch with `-Dtd.warp.server=127.0.0.1:PORT`, username
+`Developer`. Leave Developer **without operator permissions** and enable ordinary survival mode.
+The server runs the checks after login and shuts itself down afterward. The client checks that
+explicit tellraw arrives, routine effect/sound/research feedback stays silent, and the server
+completes its runtime assertions. A second player with a recording connection verifies that
+`@w` leaves bystanders unaffected and that operator feedback is suppressed too.
+
+Runtime checks execute real effect, sound, teleport, summon and research commands; verify
+command-block permissions, failure logging/continuation and recursive-trigger rejection; and
+exercise transformed native warp code, gear contributions, total warp above the severity cap,
+activity/probability gates, normal tick cadence, Warp Ward, disabled warp, counter decay and
+Bath Salts/Eldritch progression. Tests also cover the force command's permissions, argument
+completion, bypass behavior and preservation of warp values. Addon runs verify Salis Arcana's
+creative-mode suppression. Run GTNH/CurseForge ModTweaker with and without TC4Tweaks/Salis Arcana.
+Expected error logs deliberately test invalid definitions, unknown commands, permission denial,
+recursive triggers and unknown entity IDs. These probes modify scripts/worlds and are only for
+disposable instances.

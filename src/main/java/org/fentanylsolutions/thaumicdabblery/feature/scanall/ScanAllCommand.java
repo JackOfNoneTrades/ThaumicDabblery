@@ -13,6 +13,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
 
 import org.fentanylsolutions.thaumicdabblery.ThaumicDabblery;
+import org.fentanylsolutions.thaumicdabblery.feature.warpevents.WarpEventCommand;
 
 public final class ScanAllCommand extends CommandBase {
 
@@ -28,7 +29,7 @@ public final class ScanAllCommand extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/td scanall [player] | /td edit";
+        return "/td scanall [player] | /td edit | /td warp list | /td warp trigger <event> [player]";
     }
 
     @Override
@@ -38,6 +39,10 @@ public final class ScanAllCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] arguments) {
+        if (arguments.length > 0 && "warp".equalsIgnoreCase(arguments[0])) {
+            WarpEventCommand.process(sender, arguments);
+            return;
+        }
         if (arguments.length == 1 && "edit".equalsIgnoreCase(arguments[0])) {
             try {
                 boolean enabled = ThaumicDabblery.proxy.toggleResearchEditor();
@@ -64,7 +69,9 @@ public final class ScanAllCommand extends CommandBase {
 
     @Override
     public List<String> addTabCompletionOptions(ICommandSender sender, String[] arguments) {
-        if (arguments.length == 1) return getListOfStringsMatchingLastWord(arguments, "scanall", "edit");
+        if (arguments.length == 1) return getListOfStringsMatchingLastWord(arguments, "scanall", "edit", "warp");
+        if (arguments.length > 1 && "warp".equalsIgnoreCase(arguments[0]))
+            return WarpEventCommand.complete(sender, arguments);
         if (arguments.length == 2 && "scanall".equalsIgnoreCase(arguments[0])) {
             return getListOfStringsMatchingLastWord(
                 arguments,
@@ -76,6 +83,8 @@ public final class ScanAllCommand extends CommandBase {
 
     @Override
     public boolean isUsernameIndex(String[] arguments, int index) {
-        return index == 1;
+        return arguments.length > 0 && ("warp".equalsIgnoreCase(arguments[0])
+            ? arguments.length > 1 && "trigger".equalsIgnoreCase(arguments[1]) && index == 3
+            : "scanall".equalsIgnoreCase(arguments[0]) && index == 1);
     }
 }

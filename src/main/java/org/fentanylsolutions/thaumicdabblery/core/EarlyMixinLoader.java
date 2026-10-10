@@ -24,6 +24,7 @@ public class EarlyMixinLoader implements IEarlyMixinLoader, IFMLLoadingPlugin {
     public List<String> getMixins(Set<String> loadedCoreMods) {
         List<String> mixins = new ArrayList<>();
         mixins.add("MixinEntityItemVortexOutput");
+        mixins.add("MixinWarpCommandFeedback");
         if (cpw.mods.fml.relauncher.FMLLaunchHandler.side()
             .isClient()) mixins.add("MixinRenderItemVortexInput");
         return mixins;

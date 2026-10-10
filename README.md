@@ -6,6 +6,7 @@
 
 * Extends ModTweaker Thaumcraft 4 compatibility
     * Custom primal and compound aspects with scripted names, icons, colors, components, and descriptions
+    * Custom warp events with warp ranges, command sequences, player targeting and an operator testing command
     * Gadomancy Aura Pylon potion effects for custom or existing aspects, with multiple entity targets and reload-safe replacement of native effects
     * Vis discount modification for equippables (armor and baubles)
     * Per-aspect wand cap and fixed casting item Vis discount customization, including Thaumic Bases bracelets
@@ -136,3 +137,21 @@ Layers are supplied bottom to top. Use `null` for empty cells; metadata, NBT and
 are supported. Works with GTNH and CurseForge ModTweaker, without Thaumic Horizons.
 See the [research wiki](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Research#mystical-construct-pages)
 and the [portal demo](tests/obfuscated/construct-pages.zs).
+
+### Custom warp events
+
+```zenscript
+import mods.thaumcraft.WarpEvents;
+
+WarpEvents.register("weakness", 50, 100, [
+    "effect @w 18 99 4",
+    "playsound mob.endermen.stare @w ~ ~ ~"
+]);
+```
+
+Ranges include permanent, normal, temporary and equipped warp. `@w` targets the affected player;
+commands run server-side with command-block permissions. By default, 25% of successful native
+warp checks choose one eligible custom event. Native protections and research progression remain
+active. Test with `/td warp trigger weakness [player]`, and list events with `/td warp list`.
+See the [warp event documentation](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Warp-Events)
+for configuration, command behavior and reload details.

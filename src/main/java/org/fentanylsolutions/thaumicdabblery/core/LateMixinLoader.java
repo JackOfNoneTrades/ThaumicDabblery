@@ -81,6 +81,8 @@ public class LateMixinLoader implements ILateMixinLoader {
         }
         if (loadedMods.contains("Thaumcraft")) {
             mixins.add("thaumcraft.MixinAllScanHistory");
+            mixins.add("thaumcraft.MixinCustomWarpEvents");
+            mixins.add("thaumcraft.MixinWarpResearchFeedback");
             mixins.add("thaumcraft.MixinPrimalAspectLists");
             mixins.add("thaumcraft.MixinPrimalRod");
             mixins.add("thaumcraft.MixinPrimalKnowledge");

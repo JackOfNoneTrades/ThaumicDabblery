@@ -1068,3 +1068,32 @@ remote clients passed 86 checks each, with their dedicated servers passing 51 ch
 GTNH and CurseForge screenshots were visually reviewed: all twelve flowers sit in a separate
 ring above the blocks. Evidence: `/tmp/td-construct/build-spacing.log`, `remote-spacing.log`,
 and refreshed `remote-*/screenshots/construct-pages-{0,1,2}.png`.
+
+## Custom warp events (2026-10-10)
+
+Artifact: `thaumicdabblery-dbcffde-snapshot-master.26+c0192a0e5d-dirty.jar`.
+SHA-256: `20138bfd22dd299f83d47195ecb3a45eea0fd85327c9de931c8a5557a9f032c9`.
+`spotlessApply spotlessCheck build` passed. All four standalone production servers passed
+18 registry/script checks. Connected GTNH and CurseForge clients passed with 55 server checks
+each; both combinations with TC4Tweaks/Salis Arcana passed with 56 checks each. All twelve
+installed jars match the tested hash. The GTNH pair also runs without Thaumic Horizons.
+
+Tests cover script validation, duplicate rejection, repeated reload/removal, inclusive warp
+ranges, a statistical 25% selection check, uniformly choosing one eligible event, and no RNG
+consumption when ineligible or disabled. Real non-operator clients exercise potion duration and
+amplifier, sounds, relative teleport/summon, scripted research unlocks, explicit tellraw,
+quiet vanilla/Thaumcraft command feedback, operator bystander silence, permission boundaries,
+failed command continuation and recursive-trigger rejection.
+
+The transformed native hook is exercised with deterministic severity rolls: it replaces only
+the selected effect, preserves warp decay and Bath Salts/Eldritch progression, uses uncapped
+total warp plus gear, and respects inactive counters, failed native rolls, tick cadence,
+Warp Ward and disabled warp. Addon checks verify creative suppression separately from normal
+survival triggering. The force command bypasses natural restrictions, preserves warp values,
+checks permissions and feature enablement, and completes event names.
+
+The fixture registers its research through MineTweaker before TC4Tweaks populates its cache.
+Connected gameplay probes use survival mode, then explicitly enable creative for the Salis
+Arcana suppression check. Expected warnings exercise invalid scripts/commands and permissions.
+Evidence: `/tmp/td-warp/build-final.log`, `servers-final.log`, `remote-final.log`,
+`network-*/result.log`, and `remote-*/result.log`.
