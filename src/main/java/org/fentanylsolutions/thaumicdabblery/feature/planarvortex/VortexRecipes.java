@@ -307,7 +307,7 @@ public final class VortexRecipes {
         }
     }
 
-    private static void merge(NBTTagCompound target, NBTTagCompound patch) {
+    static void merge(NBTTagCompound target, NBTTagCompound patch) {
         for (Object key : patch.func_150296_c()) {
             String name = (String) key;
             NBTBase value = patch.getTag(name);

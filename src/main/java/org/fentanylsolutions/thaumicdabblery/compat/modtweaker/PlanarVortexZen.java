@@ -2,6 +2,7 @@ package org.fentanylsolutions.thaumicdabblery.compat.modtweaker;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.minecraft.item.ItemStack;
@@ -29,6 +30,17 @@ public final class PlanarVortexZen {
 
     public static void register() {
         MineTweakerAPI.registerClass(PlanarVortexZen.class);
+        minetweaker.MineTweakerImplementationAPI.onPostReload(event -> VortexPages.refresh());
+    }
+
+    @ZenMethod
+    public static void addPage(String research, String key) {
+        VortexPages.add(research, key, null);
+    }
+
+    @ZenMethod
+    public static void addPage(String research, String key, IItemStack outputIcon) {
+        VortexPages.add(research, key, stack(outputIcon, false));
     }
 
     @ZenMethod
@@ -88,10 +100,12 @@ public final class PlanarVortexZen {
 
             public void apply() {
                 VortexRecipes.RECIPES.put(key, replacement);
+                VortexPages.refresh();
             }
 
             public void undo() {
                 VortexRecipes.RECIPES.put(key, previous);
+                VortexPages.refresh();
             }
         });
     }
@@ -130,13 +144,16 @@ public final class PlanarVortexZen {
             MineTweakerAPI.apply(new Change(key) {
 
                 boolean changed;
+                List<VortexPages.Detached> pages;
 
                 public void apply() {
                     changed = VortexRecipes.DISABLED.add(key);
+                    pages = VortexPages.detach(key);
                 }
 
                 public void undo() {
                     if (changed) VortexRecipes.DISABLED.remove(key);
+                    VortexPages.restore(pages);
                 }
             });
         } else {
@@ -145,15 +162,18 @@ public final class PlanarVortexZen {
             MineTweakerAPI.apply(new Change(key) {
 
                 Map<String, Recipe> previous;
+                List<VortexPages.Detached> pages;
 
                 public void apply() {
                     previous = new LinkedHashMap<>(VortexRecipes.RECIPES);
+                    pages = VortexPages.detach(key);
                     VortexRecipes.RECIPES.remove(key);
                 }
 
                 public void undo() {
                     VortexRecipes.RECIPES.clear();
                     VortexRecipes.RECIPES.putAll(previous);
+                    VortexPages.restore(pages);
                 }
             });
         }

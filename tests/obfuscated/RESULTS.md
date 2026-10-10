@@ -957,3 +957,59 @@ Both bundled assets are mono 32 kHz Vorbis. The opening is trimmed to 1.1 second
 supplied 1.74125-second duration. Both assets and sounds.json are present in the production jar.
 Evidence: `/tmp/td-planar/build-craft-sounds.log`, `sound-format.log`,
 `sound-server-matrix.log`, and `sound-remote-matrix.log`.
+
+## Planar Vortex research pages (2026-10-10)
+
+Production artifact: `thaumicdabblery-dbcffde-snapshot-master.23+46547b4ebd-dirty.jar`.
+SHA-256: `19b260bb93a0a0afafb184639adb504c91bbaef1da03ab048b9231d6c0c3a323`.
+`spotlessApply build` passed. All four production server configurations (CurseForge/GTNH
+ModTweaker, each with and without TC4Tweaks/Salis Arcana) passed 183 checks. The corresponding
+four separate obfuscated clients each passed 100 checks against dedicated servers. All eight
+installed jars were checked against the tested artifact hash.
+
+Page checks cover both scripting overloads, quantities and NBT, optional display icons, actual
+item-output references, live completion/cost changes, all four native recipes, multiple research
+owners, removal/redefinition, repeated reloads, `clearPages` ordering, invalid arguments, null
+initial page arrays and exact original-array restoration after undo.
+
+Remote clients open the stock book, view eight pages through its native next-page mouse handler,
+and check input/output tooltips, wildcard metadata preservation, lighting/depth/blend state and
+GL stack restoration. Screenshots of all four spreads were captured; the first heading offset,
+paid vis icons and native creature labels were visually reviewed. Existing crafting, suction,
+vis, sound and animation checks also passed in each run.
+
+Evidence: `/tmp/td-planar/build-pages.log`, `pages-servers.log`, `pages-remote.log`, and
+`/tmp/td-planar/remote-*/screenshots/vortex-pages-{0,2,4,6}.png`.
+
+Page visual follow-up: SHA-256
+`cd5d5404d6f1caa06c044f6cc6d1c3703eba1823034022a9c19c1e8e820a7d76`.
+Build passed; GTNH and CurseForge remote clients each passed 104 checks. The page now uses
+Thaumcraft's book-forward arrow and the stabilized vortex's animated row from `nodes.png`.
+Wand activation is shown by an actual wand above the vortex, with a right-click tooltip;
+automatic recipes omit that indicator. Free recipes have no cost section. Updated captures
+were visually reviewed, and the probe checks indicator hover only for wand recipes alongside
+existing tooltip, wildcard and GL state checks. Evidence: `build-page-visuals.log`,
+`page-visuals-remote.log`, and the refreshed `vortex-pages-*.png` captures under `/tmp/td-planar`.
+
+Creature-preview follow-up: SHA-256
+`7cb603bf79b5b4aa108585865276edfff536a827708fbecce3878518ecad8b5f`.
+`spotlessCheck build` passed. The page renders real creature models by default, with an explicit
+item icon still available as an override. The development demo now uses the pig model.
+GTNH and CurseForge obfuscated remote clients each passed 126 checks against dedicated servers.
+The probes verify pig, baby zombie, wisp and void golem models, applied baby/custom-name NBT,
+cache reuse, absence from the world, item-icon overrides, GL culling/state/stacks and restoration
+of lightmap/camera/billboard values. Screenshot review caught and corrected reversed billboard
+culling for the wisp. Updated captures show the pig, baby zombie, wisp and void golem; neither
+client logged preview-rendering errors. Evidence: `/tmp/td-planar/build-page-entities.log`,
+`page-entities-final.log`, and refreshed `remote-*/screenshots/vortex-pages-*.png`.
+
+Block-icon lighting fix: SHA-256
+`074bd1b31cfc8500db341e0f70d3141c32e3e91b37f29eaf15355107203858cf`.
+`spotlessCheck build` passed. The new framebuffer regression failed on the preceding production
+jar at the dirt-versus-vanilla pixel comparison. Enabling vanilla's normal rescaling for item
+renders and isolating their GL attributes fixes dark block faces. GTNH and CurseForge remote
+clients each passed 132 checks with the corrected jar, including exact pixel comparisons against
+vanilla inventory lighting before and after pig, zombie, wisp and golem previews. The dirt page
+was visually reviewed. Evidence: `/tmp/td-planar/page-lighting-before.log`,
+`page-lighting-after.log`, `build-page-lighting.log`, `dirt-before.png`, and the refreshed
+`remote-*/screenshots/vortex-pages-2.png` captures.

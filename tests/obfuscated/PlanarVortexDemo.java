@@ -13,9 +13,10 @@ import thaumcraft.common.config.ConfigItems;
 @Mod(modid="tdplanardemo",name="Planar vortex demo",version="1",acceptableRemoteVersions="*",dependencies="required-after:thaumicdabblery;required-after:ThaumicHorizons;required-after:modtweaker2")
 public final class PlanarVortexDemo {
  public static final String COMPLETION="\nPlanarVortex.addItemRecipe(\"custom:instant_diamond\", <minecraft:dirt>, <minecraft:diamond>);\nPlanarVortex.setCompletion(\"custom:instant_diamond\", \"instant\");\nPlanarVortex.addEntityRecipe(\"custom:paid_pig\", <minecraft:cookie>, \"Pig\");\nPlanarVortex.setCompletion(\"custom:paid_pig\", \"wand\", \"aer 5, terra 2\");\n";
+ public static final String PAGES="mods.thaumcraft.Research.clearPages(\"planarRift\");\nPlanarVortex.addPage(\"planarRift\", \"custom:diamond\");\nPlanarVortex.addPage(\"planarRift\", \"custom:paid_pig\");\nPlanarVortex.addPage(\"planarRift\", \"custom:zombie\");\nPlanarVortex.addPage(\"planarRift\", \"custom:instant_diamond\");\nPlanarVortex.addPage(\"planarRift\", \"builtin:wisps\");\nPlanarVortex.addPage(\"planarRift\", \"builtin:void_golem\");\nPlanarVortex.addPage(\"planarRift\", \"builtin:crystal_wand\");\nPlanarVortex.addPage(\"planarRift\", \"builtin:void_putty\");\n";
  @Mod.EventHandler public void init(FMLInitializationEvent event){FMLCommonHandler.instance().bus().register(this);}
  @Mod.EventHandler public void started(FMLServerStartedEvent event){try{
-  WorldServer w=MinecraftServer.func_71276_C().func_71218_a(0);PlanarVortexChecks.script(PlanarVortexChecks.DEMO.replace("IsBaby: 0 as byte", "IsBaby: 1 as byte, Attributes: [{Name: \"generic.movementSpeed\", Base: 0.0 as double}]")+COMPLETION);
+  WorldServer w=MinecraftServer.func_71276_C().func_71218_a(0);PlanarVortexChecks.script(PlanarVortexChecks.DEMO.replace("IsBaby: 0 as byte", "IsBaby: 1 as byte, Attributes: [{Name: \"generic.movementSpeed\", Base: 0.0 as double}]")+COMPLETION+PAGES);
   w.func_82736_K().func_82764_b("doDaylightCycle","false");w.func_82736_K().func_82764_b("doMobSpawning","false");w.func_72877_b(18000);
   for(int x=-10;x<=10;x++)for(int z=-10;z<=10;z++)w.func_147465_d(x,3,z,(Block)Block.field_149771_c.func_82594_a("stonebrick"),0,3);
   PlanarVortexChecks.vortex(w,0,5,0);

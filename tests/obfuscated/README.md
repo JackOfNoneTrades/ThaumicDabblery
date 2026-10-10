@@ -682,3 +682,20 @@ and rejection of a direct unaffordable start packet.
 Screenshots: `osmotic-page-1.png`, `osmotic-page-2.png`, and `osmotic-selected.png`.
 Use fresh disposable worlds. The remote fixture counts server player-tick events to open the GUI;
 matching an exact `ticksExisted` value can miss the event on these runtimes.
+
+### Planar Vortex book pages
+
+Compile `PlanarVortexPageChecks` with the other server probes. It checks both ZenScript overloads,
+all four builtin conversions, live completion/cost changes, real item-output references, creature
+icons and NBT, attaching the same recipe to multiple research entries, removal, redefinition,
+three reloads, `clearPages` ordering, validation and restoration of the original page arrays.
+
+Compile `PlanarVortexPageClientChecks` alongside `PlanarVortexRemoteProbe`. The demo script builds
+eight pages in `planarRift`, covering item outputs, creature models, automatic and paid completion,
+and native conversions. A separate draw checks explicit item-icon overrides. After crafting checks the remote probe
+opens the stock Thaumonomicon GUI, turns through four spreads with its native mouse handler,
+captures `vortex-pages-{0,2,4,6}.png`, and verifies tooltips and GL state/stack restoration.
+Creature checks cover pig, baby zombie, wisp and void golem previews, appearance NBT, model reuse,
+absence from the world, and restoration of lightmap, camera and billboard state. A framebuffer
+comparison checks dirt against vanilla inventory lighting with normal rescaling initially off,
+then repeats the comparison after each creature preview.

@@ -50,3 +50,14 @@ thaumicdabblery.osmotic.wand=Insert a compatible wand
 thaumicdabblery.osmotic.insufficient=Not enough vis to start
 thaumicdabblery.osmotic.missing=%s: missing %s vis
 thaumicdabblery.osmotic.invalidDiscount=Invalid wand vis modifier
+
+thaumicdabblery.vortex.page.title=Planar Vortex
+thaumicdabblery.vortex.page.wand=Right-click with a wand to release
+thaumicdabblery.vortex.page.vis=Base vis cost
+thaumicdabblery.vortex.page.discount=Wand modifiers and discounts apply
+thaumicdabblery.vortex.page.owner=Bound to whoever throws it
+thaumicdabblery.vortex.page.wildcard=Any item metadata
+thaumicdabblery.vortex.page.exact_nbt=Requires this exact NBT:
+thaumicdabblery.vortex.page.entity_nbt=Creature NBT:
+thaumicdabblery.vortex.page.wisps=1-4 Wisps
+thaumicdabblery.vortex.page.void_golem=Voidling Golem

@@ -179,6 +179,7 @@ public class LateMixinLoader implements ILateMixinLoader {
                 mixins.add("thaumichorizons.MixinTileVatEffigyRender");
                 mixins.add("thaumichorizons.MixinTileVatFacingRender");
                 mixins.add("thaumichorizons.MixinTileVortexCraftingRender");
+                mixins.add("thaumichorizons.MixinVortexResearchPage");
             }
         }
         if (loadedMods.contains("ThaumicHorizons") && loadedMods.contains("witchery")) {
