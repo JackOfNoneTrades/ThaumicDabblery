@@ -14,6 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 
+import org.fentanylsolutions.thaumicdabblery.ThaumicDabblery;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -82,7 +83,7 @@ public final class VortexPageRenderer {
                 List<String> outputTip = recipe.output != null
                     ? new ArrayList<>(recipe.output.getTooltip(mc.thePlayer, mc.gameSettings.advancedItemTooltips))
                     : new ArrayList<>(Arrays.asList(name));
-                if (recipe.entity != null && !recipe.nbt.hasNoTags()) {
+                if (ThaumicDabblery.isDebugMode() && recipe.entity != null && !recipe.nbt.hasNoTags()) {
                     outputTip.add(tr("entity_nbt"));
                     outputTip.addAll(font.listFormattedStringToWidth(recipe.nbt.toString(), 220));
                 }
