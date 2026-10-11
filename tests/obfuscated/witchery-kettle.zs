@@ -1,0 +1,10 @@
+import mods.witchery.Kettle;
+Kettle.addRecipe("custom:diamond", [<minecraft:dirt>, <minecraft:cookie>, <minecraft:apple>, <minecraft:coal>, <minecraft:stick>, <minecraft:wheat>], <minecraft:diamond>.withTag({kettle:1}) * 2, 100);
+Kettle.setColor("custom:diamond", 0x8844FF);
+Kettle.setDimension("custom:diamond", 0);
+Kettle.addRecipe("custom:cat", [<minecraft:dirt>, <minecraft:cookie>, <minecraft:apple>, <minecraft:coal>, <minecraft:stick>, <minecraft:sugar>], <minecraft:diamond>);
+Kettle.setFamiliar("custom:cat", "cat");
+Kettle.setBonus("custom:cat", 2);
+Kettle.setInBook("custom:cat", false);
+Kettle.setPower("native:witchery:ingredient/121/0", 12);
+Kettle.removeRecipe("native:witchery:ingredient/121/1");

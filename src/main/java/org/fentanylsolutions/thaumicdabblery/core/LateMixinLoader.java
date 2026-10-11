@@ -187,6 +187,10 @@ public class LateMixinLoader implements ILateMixinLoader {
             }
         }
         if (loadedMods.contains("witchery")) {
+            mixins.add("witchery.KettleRecipeAccessor");
+            mixins.add("witchery.MixinKettleRecipe");
+            mixins.add("witchery.MixinKettleTile");
+            mixins.add("witchery.MixinKettleCollection");
             mixins.add("witchery.BrewRegistryAccessor");
             mixins.add("witchery.CauldronRecipeAccessor");
             mixins.add("witchery.MixinCauldronRecipe");
@@ -198,6 +202,7 @@ public class LateMixinLoader implements ILateMixinLoader {
                 .isClient()) {
                 mixins.add("witchery.MixinOvenNEI");
                 mixins.add("witchery.MixinCauldronNEI");
+                mixins.add("witchery.MixinKettleNEI");
             }
             mixins.add("witchery.RitualAccessor");
             mixins.add("witchery.SacrificeMultipleAccessor");

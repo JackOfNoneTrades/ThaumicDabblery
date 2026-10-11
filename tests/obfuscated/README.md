@@ -844,3 +844,37 @@ heating, timing, debit, completion and drain logic, but ticks are advanced direc
 in real time. Save/load is exercised through tile NBT serialization, not a complete JVM restart.
 Infernal/medium-circle combinations and random misfortune outcomes are delegated to Witchery and
 not separately asserted. Run both ModTweaker forks; also check startup without Witchery.
+
+## Witches' Kettle recipes
+
+Compile `WitcheryKettleChecks.java` and `WitcheryKettleServerProbe.java` against the SRG-first
+production classpath and Witchery 0.24.1. Install `witchery-kettle.zs` in a disposable server.
+Require `TD_KETTLE_SERVER_PASS` without a matching failure. The probe rewrites scripts, reloads
+MineTweaker and replaces a test kettle; do not install it in a real world.
+
+For a remote pair, start the server with `-Dtd.kettle.network=true`. Compile/install
+`WitcheryKettleClientProbe.java` in a client with Witchery and NEI, no local scripts, username
+`Developer` and `-Dtd.kettle.server=127.0.0.1:PORT`. Require `TD_KETTLE_NETWORK_PASS` and
+`TD_KETTLE_CLIENT_PASS`. Screenshots are `witchery-kettle-nei.png` and `witchery-kettle-book.png`
+in the client's screenshots directory. Both processes stop after the checks.
+
+Coverage includes optional power, all setters, stable native alternatives, exact native identity/order
+restoration, repeated reload, disabled integration, unsupported input/count/NBT/wildcard/bottle rejection,
+output/bonus/color/familiar validation, custom precedence, six-slot multiplicity, whole dropped-stack
+handling, water/fire/invalid ingredient gates, partial and insufficient power, one-time debit, output
+quantity/NBT, bottle consumption, and actual manual/automated collection. Shared-output recipes retain
+separate familiar/bonus rules. A matching native active-familiar flag permits collection; a missing
+familiar and automated extraction do not. Serialized completed batches remain collectable with their
+bonus after their scripts are removed; old NBT falls back to native rules. The final-item collection
+check exercises the bonus after native kettle reset. Dimension zero means Overworld, clearing the
+restriction permits Nether, and RGB black remains a valid partial brew.
+
+Remote clients verify server synchronization, native-book visibility and requirements, all NEI output
+alternatives, ingredient usages including unchanged native recipes, tooltips and actual rendering.
+Use both ModTweaker forks and check startup without Witchery.
+
+The runtime probe advances real native tile ticks with a controlled `IPowerSource`, rather than
+constructing an altar or waiting in real time. Save/load reconstructs tile NBT without restarting the
+JVM. A fake player suppresses network inventory packets for manual collection; its familiar state is
+set through Witchery's native persisted flags. The bonus test seeds one successful native hat roll;
+all clothing combinations and the second random bonus roll are not separately exercised.

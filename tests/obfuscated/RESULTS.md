@@ -1286,3 +1286,48 @@ Evidence: `/tmp/td-cauldron-build.log`, `/tmp/td-cauldron-tests/{servers,remote}
 `/tmp/td-cauldron-tests/{gtnh,curse,gtnh-addons,curse-addons,network-gtnh,network-curse,remote-gtnh,remote-curse}/result.log`,
 `/tmp/td-cauldron-tests/remote-*/screenshots/witchery-cauldron.png`,
 and `/tmp/td-cauldron-absent/servers.log`.
+
+## Witches' Kettle recipes (2026-10-11)
+
+Artifact: `thaumicdabblery-dbcffde-snapshot-master.35+0059e98993-dirty.jar`.
+SHA-256: `20e107f2bb96cdc49b30ddbdc1814a6379b86be63c01cd129865d4899ca375a7`.
+`spotlessApply` and `build` passed, including Checkstyle and Spotless verification.
+
+Witchery 0.24.1, Forge 1614, Java 8, CraftTweaker 3.4.8: GTNH ModTweaker 0.14.0 and
+CurseForge ModTweaker 0.9.6 each passed 135 checks on obfuscated dedicated servers, both with
+and without TC4Tweaks 1.5.47 / Salis Arcana 1.1.71-GTNH (four runs). Each remote pair passed
+197 server checks and 97 client checks. Remote GTNH ran without Thaumic Horizons. Clients
+started with empty local script directories and received the server scripts. NEI 2.8.114-GTNH
+and native Witchcraft: Brews and Infusions pages rendered successfully; all four screenshots
+were visually reviewed. Two servers without Witchery passed 24 warp-event checks each.
+
+The 39 native recipes become 40 in the fixture: one alternative removed and two custom recipes
+added. Checks cover recipe IDs and independent native alternatives, native identity/order restoration,
+setters/reload/disabled integration, validation, priority, output quantity/NBT, exact one-time power
+cost, insufficient power, fire/water/invalid ingredient gates, separate slots for repeats, native
+whole-stack consumption and bottle collection. Two recipes share diamond output with distinct
+collection requirements. The unrestricted batch permits automation, the cat batch refuses it,
+and only a player with the required native familiar state can manually collect the cat batch.
+Saved familiar/bonus rules survive edits, removal and tile NBT reconstruction. A seeded native
+clothing bonus still applies after collecting the last item resets the kettle. Old tiles without
+a snapshot fall back to native lookup. Explicit Overworld restrictions, cleared restrictions in
+the Nether and valid opaque-black brew color are verified.
+
+Client checks cover output alternatives, native/custom ingredient usages, tooltip requirements,
+book visibility, recipe counts, output NBT and render paths. One initial test incorrectly expected
+only two cookie usages; the native Brew of Sleeping also uses cookies, so the final test expects
+all three. An initial partial-black-color assertion selected the higher-priority overlapping recipe;
+the final test uses wheat to select the intended recipe unambiguously.
+
+Tests use native block collisions and tile updates with a controlled power source and directly
+advanced ticks. Save/load does not restart the JVM. Manual collection uses a fake player with
+inventory packet sync suppressed and familiar flags set through Witchery's native player data.
+Only one successful clothing roll is forced; all outfit probabilities and the second bonus roll
+are left to unchanged native logic. WitcheryExtras was not installed. Expected invalid-script
+errors and existing JOML module-info / Forge version-check diagnostics are unrelated; no kettle
+probe or mixin failure remains. All kettle test processes exited.
+
+Evidence: `/tmp/td-kettle-build.log`, `/tmp/td-kettle-tests/{servers,remote}.log`,
+`/tmp/td-kettle-tests/{gtnh,curse,gtnh-addons,curse-addons,network-gtnh,network-curse,remote-gtnh,remote-curse}/result.log`,
+`/tmp/td-kettle-tests/remote-*/screenshots/witchery-kettle-{nei,book}.png`,
+and `/tmp/td-kettle-absent/servers.log`.
