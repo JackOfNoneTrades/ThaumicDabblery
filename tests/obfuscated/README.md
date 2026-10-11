@@ -498,11 +498,11 @@ All tests use temporary scripts and research categories in disposable instances.
 
 Compile `ResearchEditorChecks` and `ResearchEditorServerProbe` into a small probe mod for a disposable
 production server. Run CurseForge ModTweaker 0.9.6 and GTNH ModTweaker 0.14.0, each with and without
-TC4Tweaks 1.5.47 and Salis Arcana 1.1.71. Require `TD_EDITOR_SERVER_PASS` (218 checks per combination).
+TC4Tweaks 1.5.47 and Salis Arcana 1.1.71. Require `TD_EDITOR_SERVER_PASS` (226 checks per combination).
 The fixtures exercise compact script output, swaps within and between tabs, nearest-free placement,
-all seven true/false flags, hidden prerequisites, cycle/duplicate/self rejection, exact deletion undo,
+all eight true/false flags, hidden prerequisites, cycle/duplicate/self rejection, exact deletion undo,
 TC4Tweaks lookup caches, ordinary-script ordering, multiple reloads, external-file conflicts and atomic
-file replacement. A research subclass whose six flag getters throw verifies that capture, script replay and
+file replacement. A research subclass whose seven flag getters throw verifies that capture, script replay and
 rollback use stored flags without invoking player-dependent addon code. Dedicated servers must refuse editor
 activation while applying generated scripts normally.
 Export checks move generated batches into regular scripts, clear the managed file and reload. New saves must
@@ -523,6 +523,8 @@ Script-sync checks retain the input streams and verify immediate closure for nor
 including an actual file stream that cannot be garbage-collected during the assertion. Repeated reloads followed
 by the first prerequisite edit must save successfully. These checks reproduce the handle leak on non-Windows
 systems; native Windows sharing-lock behavior still needs a Windows runtime.
+Concealed checks cover enabling and clearing the native flag independently of Hidden, script reloads,
+restoring an originally concealed entry, addon getter safety, and the Properties checkbox with undo/redo.
 Virtual tests cover overlapping placement, final-state collision checks before applying flag changes,
 clearing an original virtual flag, automatic relocation when clearing Virtual, compact script output,
 reload, undo and redo. Forbidden knowledge checks cover setting and clearing warp, compact output,

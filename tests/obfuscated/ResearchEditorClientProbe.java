@@ -141,20 +141,20 @@ public final class ResearchEditorClientProbe {
     toolbar("Redo");checks.check(checks.items.get("TD_A").displayColumn==1,"redo button repeats drag");
     click(sx(1),sy(1),1);menu(3);
    }else if(stage==3){
-    checks.check((Integer)call(overlay(),"menuRows","menuRows",new Class[]{})==9,"complete Properties menu fits on screen");
-    shot("editor-properties");Object menuOverlay=overlay();click((Integer)field(menuOverlay,"menuX")+12,(Integer)field(menuOverlay,"menuY")+34,1);checks.check(ResearchEditor.layout().require("TD_A").flags==0,"right-click does not execute a context-menu item");for(int i=0;i<7;i++)menu(i);type(1);
-    checks.check(ResearchEditor.layout().require("TD_A").flags==127&&checks.items.get("TD_A").isAutoUnlock(),"all seven property controls work together");
-    shortcut(44,false);checks.check(ResearchEditor.layout().require("TD_A").flags==63&&!checks.items.get("TD_A").isAutoUnlock(),"Ctrl/Cmd+Z undoes AutoUnlock");
-    shortcut(44,true);checks.check(ResearchEditor.layout().require("TD_A").flags==127&&checks.items.get("TD_A").isAutoUnlock(),"Ctrl/Cmd+Shift+Z redoes AutoUnlock");
+    checks.check((Integer)call(overlay(),"menuRows","menuRows",new Class[]{})==10,"complete Properties menu fits on screen");
+    shot("editor-properties");Object menuOverlay=overlay();click((Integer)field(menuOverlay,"menuX")+12,(Integer)field(menuOverlay,"menuY")+34,1);checks.check(ResearchEditor.layout().require("TD_A").flags==0,"right-click does not execute a context-menu item");for(int i=0;i<8;i++)menu(i);type(1);
+    checks.check(ResearchEditor.layout().require("TD_A").flags==255&&checks.items.get("TD_A").isConcealed()&&checks.items.get("TD_A").isAutoUnlock(),"all eight property controls work together");
+    shortcut(44,false);checks.check(ResearchEditor.layout().require("TD_A").flags==127&&!checks.items.get("TD_A").isConcealed(),"Ctrl/Cmd+Z undoes Concealed");
+    shortcut(44,true);checks.check(ResearchEditor.layout().require("TD_A").flags==255&&checks.items.get("TD_A").isConcealed(),"Ctrl/Cmd+Shift+Z redoes Concealed");
     click(sx(1),sy(1),1);menu(3);menu(5);type(1);
     checks.check(!checks.items.get("TD_A").isVirtual(),"Virtual checkbox clears flag");
-    click(sx(1),sy(1),1);menu(3);menu(7);type(6,'5');type(28);
+    click(sx(1),sy(1),1);menu(3);menu(8);type(6,'5');type(28);
     checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5&&field(overlay(),"warpKey")==null,"forbidden knowledge input applies entered amount");
     toolbar("Undo");checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==0,"warp UI undo");
     toolbar("Redo");checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5,"warp UI redo");
-    click(sx(1),sy(1),1);menu(3);menu(7);type(12,'-');type(28);
+    click(sx(1),sy(1),1);menu(3);menu(8);type(12,'-');type(28);
     checks.check(field(overlay(),"warpKey")!=null&&thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5,"invalid warp input stays open without applying");type(1);
-    click(sx(1),sy(1),1);menu(3);menu(7);type(2,'1');
+    click(sx(1),sy(1),1);menu(3);menu(8);type(2,'1');
    }else if(stage==4){
     Object input=field(overlay(),"warpInput");int cursor=(Integer)field(input,"field_146214_l");
     for(int i=0;i<100;i++)ResearchEditorClient.beginFrame((GuiResearchBrowser)mc.field_71462_r);
@@ -232,7 +232,7 @@ public final class ResearchEditorClientProbe {
    }else{
     tab(ResearchEditorChecks.OTHER);call(overlay(),"focus","focus",new Class[]{String.class},"TD_A");
     checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5&&checks.items.get("TD_A").category.equals(ResearchEditorChecks.OTHER),"exported UI changes remain after reload");
-    click(sx(0),sy(0),1);menu(3);checks.check((Integer)call(overlay(),"menuRows","menuRows",new Class[]{})==9,"complete Properties menu fits minimum-size screen");menu(7);type(9,'8');type(28);
+    click(sx(0),sy(0),1);menu(3);checks.check((Integer)call(overlay(),"menuRows","menuRows",new Class[]{})==10,"complete Properties menu fits minimum-size screen");menu(8);type(9,'8');type(28);
     checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==8&&checks.saved().contains("ResearchEditor.warp(\"TD_A\", 8)")&&!checks.saved().contains("ResearchEditor.move")&&!checks.saved().contains("ResearchEditor.flag")&&!checks.saved().contains("ResearchEditor.parents"),"next UI save emits only new overrides after export");
     toolbar("Undo");checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_A")==5&&!checks.saved().contains("ResearchEditor."),"UI undo preserves exported baseline");
     checks.check(new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("scripts/zzzz-exported-editor.zs")),java.nio.charset.StandardCharsets.UTF_8).equals(exported),"UI saves leave exported script unchanged");
@@ -243,7 +243,7 @@ public final class ResearchEditorClientProbe {
     checks.check(ResearchEditorClient.enabled()&&ResearchCategories.getResearchList(ResearchEditorChecks.TAB)==null&&!ResearchEditorClient.selectedTab().equals(ResearchEditorChecks.TAB),"removing selected tab on reload keeps editor open on an existing tab");
     checks.check(ResearchCategories.getResearch("TD_B")==checks.items.get("TD_B")&&ResearchCategories.getResearch("TD_C")==null,"managed move rescues research from regular deferred tab removal in client");
     tab(ResearchEditorChecks.OTHER);call(overlay(),"focus","focus",new Class[]{String.class},"TD_B");
-    click(sx(8),sy(8),1);menu(3);menu(7);type(6,'5');type(28);
+    click(sx(8),sy(8),1);menu(3);menu(8);type(6,'5');type(28);
     checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_B")==5&&checks.saved().contains("ResearchEditor.move(\"TD_B\"")&&!checks.saved().contains("removeTab"),"UI save preserves managed rescue without copying baseline tab removal");
     toolbar("Undo");checks.check(thaumcraft.api.ThaumcraftApi.getWarp("TD_B")==0&&ResearchCategories.getResearchList(ResearchEditorChecks.TAB)==null,"UI undo retains tab removal and rescued entry");
     toolbar("Redo");MineTweakerImplementationAPI.reload();overlay();

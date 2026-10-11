@@ -26,7 +26,7 @@ public final class ResearchEditorChecks {
   ResearchCategories.registerCategory("TD_EDITOR_EMPTY",icon,back);
   make("TD_A",TAB,0,0);make("TD_B",TAB,2,0);make("TD_C",TAB,0,2);make("TD_D",OTHER,0,0);
   items.get("TD_C").setParents("TD_A","TD_A").setParentsHidden("TD_B").setSiblings("TD_A","TD_A","TD_B");
-  items.get("TD_D").setLost().setHidden().setRound().setSpecial().setSecondary().setAutoUnlock();
+  items.get("TD_D").setLost().setHidden().setRound().setSpecial().setSecondary().setAutoUnlock().setConcealed();
   make("TD_V",OTHER,4,4);items.get("TD_V").setVirtual();
   script("");
  }
@@ -78,7 +78,7 @@ public final class ResearchEditorChecks {
   ResearchEditor.edit("branch",l->l.require("TD_A").flags|=1);
   check(ResearchEditor.redoName()==null,"new action clears redo");
   script("");
-  for(int i=0;i<5;i++){
+  for(int i:new int[]{0,1,2,3,4,7}){
    final int flag=i;
    ResearchEditor.edit("enable flag",l->l.require("TD_A").flags|=1<<flag);
    check(ResearchEditor.layout().require("TD_A").hasFlag(i),"flag enabled "+i);
@@ -90,6 +90,10 @@ public final class ResearchEditorChecks {
    ResearchEditor.undo();check(ResearchEditor.layout().require("TD_D").hasFlag(i),"exact true flag restored "+i);
   }
   script("");
+  script("mods.thaumicdabblery.ResearchEditor.flag(\"TD_D\", \"Concealed\", false);\n");
+  check(!items.get("TD_D").isConcealed()&&items.get("TD_D").isHidden(),"clearing Concealed preserves Hidden");
+  MineTweakerImplementationAPI.reload();check(!items.get("TD_D").isConcealed(),"false Concealed survives reload");
+  script("");check(items.get("TD_D").isConcealed(),"removing Concealed override restores original flag");
   ResearchEditor.edit("virtual placement",l->{l.toggleFlag("TD_A",5);l.move("TD_A",TAB,2,0);});
   check(items.get("TD_A").isVirtual()&&items.get("TD_A").displayColumn==2,"pending virtual flag permits overlap before applying");
   MineTweakerImplementationAPI.reload();
@@ -351,16 +355,17 @@ public final class ResearchEditorChecks {
    @Override public boolean isRound(){throw new AssertionError("dynamic isRound called");}
    @Override public boolean isSpecial(){throw new AssertionError("dynamic isSpecial called");}
    @Override public boolean isAutoUnlock(){throw new AssertionError("dynamic isAutoUnlock called");}
+   @Override public boolean isConcealed(){throw new AssertionError("dynamic isConcealed called");}
   };
-  dynamic.setHidden().setRound().setAutoUnlock().registerResearchItem();
+  dynamic.setHidden().setRound().setAutoUnlock().setConcealed().registerResearchItem();
   script("");
-  check(ResearchEditor.layout().require("TD_DYNAMIC").flags==74,"capture stored flags without invoking addon getters");
+  check(ResearchEditor.layout().require("TD_DYNAMIC").flags==202,"capture stored flags without invoking addon getters");
   ResearchEditor.edit("dynamic flags",l->l.require("TD_DYNAMIC").flags=21);
   check(ResearchLayout.capture().require("TD_DYNAMIC").flags==21,"apply stored flags without invoking addon getters");
   MineTweakerImplementationAPI.reload();
   check(ResearchEditor.layout().require("TD_DYNAMIC").flags==21,"dynamic research flag script replays");
   script("");
-  check(ResearchLayout.capture().require("TD_DYNAMIC").flags==74,"rollback restores stored flags without invoking addon getters");
+  check(ResearchLayout.capture().require("TD_DYNAMIC").flags==202,"rollback restores stored flags without invoking addon getters");
  }
  public interface Checked{void run()throws Exception;}
  private void expectInvalid(String label,Checked action)throws Exception{String before=saved();try{action.run();throw new AssertionError("accepted "+label);}catch(IllegalArgumentException expected){checks++;}check(saved().equals(before),"invalid "+label+" leaves file unchanged");}

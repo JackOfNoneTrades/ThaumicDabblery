@@ -1169,3 +1169,20 @@ All twelve installed production jars matched the final artifact hash. All test J
 Evidence: `/tmp/td-issue6-new/build.log`, `/tmp/td-tab-unified/{servers,clients}.log`,
 `/tmp/td-tab-unified/{editor,client}-*/result.log`, and
 `/tmp/td-tab-removal-regression/{servers.log,editor-*/result.log}`.
+
+## Concealed editor property (2026-10-11)
+
+Artifact: `thaumicdabblery-dbcffde-snapshot-master.31+7dfcfbb336-dirty.jar`.
+SHA-256: `a8059b5eef9daad18ae5a4de3065fd6a836ad0d85793c5af9132d5690ccaae0a`.
+`spotlessApply spotlessCheck build` passed. All four obfuscated editor server configurations
+passed 226 checks each: GTNH ModTweaker 0.14.0 and CurseForge ModTweaker 0.9.6, each with and
+without TC4Tweaks 1.5.47/Salis Arcana 1.1.71-GTNH. Corresponding clients passed 77 checks each
+without addons and 81 each with addons. All eight installed jars matched the artifact hash.
+
+Checks exercise all eight Properties controls together, Concealed undo/redo, true/false script
+replay, clearing Concealed independently of Hidden, restoring originally concealed entries,
+compact saves, and snapshots that avoid overridden addon getters. The expanded menu fits both
+tested screen sizes, and the GTNH Properties screenshot was visually reviewed.
+Evidence: `/tmp/td-concealed-build.log`, `/tmp/td-concealed/{servers,clients}.log`,
+`/tmp/td-concealed/{editor,client}-*/result.log`, and
+`/tmp/td-concealed/client-gtnh/screenshots/editor-properties.png`.
