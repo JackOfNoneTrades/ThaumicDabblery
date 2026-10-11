@@ -574,14 +574,17 @@ the production Dabblery jar, Forge and Thaumic Horizons 1.8.24. Require `TD_EFFI
 Run both ModTweaker forks, each with and without TC4Tweaks/Salis Arcana. Checks exercise the actual beacon
 activation and transformed vat: shared viewers, last binder, rebinding, dimension isolation, packet round trips,
 vat/beacon disk and description NBT, malformed profiles, retained signed texture properties, self-infusion,
-body consumption/destruction and binding before vat construction.
+body consumption/destruction and binding before vat construction. Rebinding checks also cover clearing
+the former last-binder fallback from both tiles, keeping another shared user's personal skin, rejecting
+stale identities loaded later, and reading an offline player's native saved binding.
 
 `EffigySkinClientProbe` creates a disposable integrated world and sends binding and tile updates through
 real connections. It renders the actual vat TESR into a framebuffer using deterministic legacy and modern
 textures. Pixel checks require the original texture before revival and player skins after revival and during self-infusion, plus clothing proportions, classic/slim models,
 and native fallback. A loopback HTTP fixture exercises asynchronous texture downloads and model metadata
 through the native skin loader; its domain is temporarily allowed only inside the disposable probe process.
-It also closes and reopens the world to check saved identities and login synchronization.
+It also closes and reopens the world to check saved identities and login synchronization, then rebinds
+the last binder elsewhere and requires the old client vat to lose its skin through real tile updates.
 Require `TD_EFFIGY_CLIENT_PASS`; inspect `effigy-*.png` in the instance directory. These fixtures test
 rendering independently of Mojang availability; live skin-service availability is not part of their assertions.
 Also run without MineTweaker/ModTweaker, and check ordinary startup without Horizons. Never use an existing save.

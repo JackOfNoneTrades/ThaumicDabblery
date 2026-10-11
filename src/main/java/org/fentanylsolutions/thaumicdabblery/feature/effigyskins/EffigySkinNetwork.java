@@ -30,6 +30,7 @@ public final class EffigySkinNetwork {
     }
 
     public static void sync(EntityPlayerMP player) {
+        EffigySkinBindings.remember(player);
         if (player.playerNetServerHandler != null) CHANNEL.sendTo(Binding.from(player.getEntityData()), player);
     }
 
@@ -82,6 +83,11 @@ public final class EffigySkinNetwork {
     @SubscribeEvent
     public void login(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.player instanceof EntityPlayerMP) sync((EntityPlayerMP) event.player);
+    }
+
+    @SubscribeEvent
+    public void logout(PlayerEvent.PlayerLoggedOutEvent event) {
+        EffigySkinBindings.remember(event.player);
     }
 
     @SubscribeEvent

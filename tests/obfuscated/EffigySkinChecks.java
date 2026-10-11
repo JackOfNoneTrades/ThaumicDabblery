@@ -43,6 +43,12 @@ public final class EffigySkinChecks {
   nativeData.func_74783_a("soulBeaconCoords",new int[]{40});check(!EffigySkinNetwork.Binding.from(nativeData).matches(vat),"malformed binding coordinates are ignored");
   io.netty.buffer.ByteBuf bytes=Unpooled.buffer();bindingB.toBytes(bytes);check(bytes.readableBytes()==17,"small bound-player packet");EffigySkinNetwork.Binding decoded=new EffigySkinNetwork.Binding();decoded.fromBytes(bytes);check(decoded.matches(vat),"network binding roundtrip");bytes.release();
   bytes=Unpooled.buffer();new EffigySkinNetwork.Binding().toBytes(bytes);check(bytes.readableBytes()==1,"unbound packet clears previous binding");decoded.fromBytes(bytes);check(!decoded.matches(vat),"unbound packet roundtrip");bytes.release();
+  elsewhere.activate(bob);EffigySkins.inherit(vat);
+  check(profile(vat)==null&&profile(beacon)==null,"last binder moving elsewhere clears old vat and beacon fallback");
+  check(EffigySkins.select(vat,b,EffigySkinNetwork.Binding.from(data(bob)))==null,"old beacon no longer displays former binder to any viewer");
+  EffigySkins.inherit(vat);check(profile(vat)==null,"old beacon cannot reapply invalid skin on later ticks");
+  beacon.activate(alice);beacon.activate(bob);elsewhere.activate(bob);EffigySkins.inherit(vat);
+  check(profile(vat)==null&&EffigySkins.select(vat,a,EffigySkinNetwork.Binding.from(data(alice))).getId().equals(a.getId()),"remaining shared-beacon binder still sees own skin after fallback binder leaves");
   beacon.activate(alice);
   NBTTagCompound saved=new NBTTagCompound();vat.func_145841_b(saved);TileVat restored=new TileVat();restored.func_145839_a(saved);
   check(profile(restored).getId().equals(a.getId())&&profile(restored).getProperties().get("textures").iterator().next().getSignature().equals("saved-signature-a"),"vat disk save retains UUID and signed texture property");
@@ -57,5 +63,24 @@ public final class EffigySkinChecks {
   TileVat loose=new TileVat();loose.func_145834_a(w);loose.field_145851_c=60;loose.field_145848_d=100;profile(loose,a);loose.killMe();check(profile(loose)==null,"dismantled vat clears appearance");
   TileSoulBeacon early=beacon(w,70,101,0);early.activate(bob);TileVat later=vat(w,70,100,0);later.func_145845_h();check(profile(later).getId().equals(b.getId()),"binding before vat construction is inherited");
   later.mode=0;
+  // A chunk can load its old saved identity long after the player has rebound elsewhere.
+  beacon=beacon(w,40,101,0);profile(vat,b);profile(beacon,b);vat.mode=4;EffigySkins.inherit(vat);
+  check(profile(vat)==null&&profile(beacon)==null,"late-loaded saved identities are checked against current binding");
+  GameProfile offline=new GameProfile(UUID.fromString("dddddddd-dddd-4ddd-8ddd-dddddddddddd"),"OfflineBinder");
+  NBTTagCompound playerSave=new NBTTagCompound(),forgeData=new NBTTagCompound();
+  forgeData.func_74757_a("soulBeacon",true);forgeData.func_74783_a("soulBeaconCoords",new int[]{70,101,0});forgeData.func_74768_a("soulBeaconDim",w.field_73011_w.field_76574_g);
+  playerSave.func_74782_a("ForgeData",forgeData);
+  java.io.File playerFile=new java.io.File(w.func_72860_G().func_75765_b(),"playerdata/"+offline.getId()+".dat");
+  playerFile.getParentFile().mkdirs();try(java.io.FileOutputStream out=new java.io.FileOutputStream(playerFile)){CompressedStreamTools.func_74799_a(playerSave,out);}
+  profile(vat,offline);profile(beacon,offline);EffigySkins.inherit(vat);
+  check(profile(vat)==null&&profile(beacon)==null,"offline player's native saved binding repairs stale appearances from older versions");
+  profile(later,offline);profile(early,offline);later.mode=4;EffigySkins.inherit(later);
+  check(profile(later).getId().equals(offline.getId()),"valid offline binding retains saved skin");
+  EntityPlayerMP returning=player(w,offline);beacon.activate(returning);EffigySkins.inherit(later);
+  check(profile(later)==null&&profile(early)==null,"rebinding refreshes cached offline data");
+  w.func_147468_f(40,101,0);
+  check(EffigySkins.select(vat,a,EffigySkinNetwork.Binding.from(data(alice))).getId().equals(offline.getId()),"removed beacon cannot override saved self-infusion appearance with another viewer");
+  later.mode=0;vat.mode=0;
+
  }
 }

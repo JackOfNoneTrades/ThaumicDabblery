@@ -51,6 +51,7 @@ public final class EffigySkins {
 
     public static void bind(TileSoulBeacon beacon, EntityPlayer player) {
         if (beacon.getWorldObj().isRemote) return;
+        EffigySkinBindings.remember(player);
         update(beacon, player.getGameProfile());
         TileEntity below = beacon.getWorldObj()
             .getTileEntity(beacon.xCoord, beacon.yCoord - 1, beacon.zCoord);
@@ -65,20 +66,35 @@ public final class EffigySkins {
             .markBlockForUpdate(tile.xCoord, tile.yCoord, tile.zCoord);
     }
 
-    /** A beacon can be bound before an effigy is grown. Copy once when that body becomes visible. */
+    /** Validate saved identities before using them, including after an old vat's chunk loads again. */
     public static void inherit(TileVat vat) {
-        if (vat.getWorldObj().isRemote || ((EffigySkinHolder) vat).thaumicdabblery$getEffigyProfile() != null
-            || !(vat.mode == 3 || vat.mode == 4 || vat.mode == 2 && vat.recipeType == 1)) return;
+        if (vat.getWorldObj().isRemote) return;
         TileEntity above = vat.getWorldObj()
             .getTileEntity(vat.xCoord, vat.yCoord + 1, vat.zCoord);
         if (above instanceof TileSoulBeacon) {
             GameProfile profile = ((EffigySkinHolder) above).thaumicdabblery$getEffigyProfile();
-            if (profile != null) update(vat, profile);
+            if (profile != null && !EffigySkinBindings.permits(profile, vat)) {
+                update(above, null);
+                profile = null;
+            }
+            GameProfile previous = ((EffigySkinHolder) vat).thaumicdabblery$getEffigyProfile();
+            if (previous != null && !EffigySkinBindings.permits(previous, vat)) {
+                update(vat, null);
+                previous = null;
+            }
+            if (previous == null && profile != null
+                && (vat.mode == 3 || vat.mode == 4 || vat.mode == 2 && vat.recipeType == 1)) {
+                update(vat, profile);
+            }
         }
     }
 
     public static GameProfile select(TileVat vat, GameProfile viewer, EffigySkinNetwork.Binding binding) {
-        if (viewer != null && binding != null && binding.matches(vat)) return viewer;
+        if (viewer != null && binding != null
+            && binding.matches(vat)
+            && vat.getWorldObj()
+                .getTileEntity(vat.xCoord, vat.yCoord + 1, vat.zCoord) instanceof TileSoulBeacon)
+            return viewer;
         return ((EffigySkinHolder) vat).thaumicdabblery$getEffigyProfile();
     }
 }

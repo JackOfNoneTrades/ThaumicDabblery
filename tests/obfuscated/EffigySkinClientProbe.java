@@ -39,6 +39,8 @@ public final class EffigySkinClientProbe {
    }else if(request==2){EffigySkinChecks.beacon(w,x+4,y+1,z).activate(p);}
    else if(request==3){TileVat v=(TileVat)w.func_147438_o(x,y,z);v.mode=0;v.killSubject();w.func_147471_g(x,y,z);}
    else if(request==4){TileVat v=(TileVat)w.func_147438_o(x,y,z);v.mode=4;TileSoulBeacon b=(TileSoulBeacon)w.func_147438_o(x,y+1,z);b.activate(p);b.activate(EffigySkinChecks.player(w,observer));}
+   else if(request==8){((TileSoulBeacon)w.func_147438_o(x,y+1,z)).activate(p);}
+   else if(request==9){((TileSoulBeacon)w.func_147438_o(x+4,y+1,z)).activate(p);}
    completed=request;
   }catch(Throwable t){failure=t;completed=request;}
  }
@@ -104,7 +106,9 @@ public final class EffigySkinClientProbe {
    if(stage==7){EffigySkinClient.Skin downloaded=EffigySkinClient.resolve(downloadedProfile,mc.field_71441_e);if(downloaded==null)return;checks.check(imageRequests==1&&downloaded.slim,"native skin loader downloads texture and preserves model metadata");checks.check(render("effigy-downloaded",interior)[0]>1000,"downloaded skin renders through actual vat TESR");imageServer.stop(0);imageServer=null;allowedDomains[0]=originalDomain;request=3;stage=3;return;}
    if(stage==3){if(EffigySkinChecks.profile(vat)!=null)return;checks.check(true,"cleared body identity reaches real client");request=4;stage=4;return;}
    if(stage==4){if(EffigySkinChecks.profile(vat)==null||!observer.getId().equals(EffigySkinChecks.profile(vat).getId())||!mc.field_71439_g.func_146103_bH().getId().equals(EffigySkinClient.profileFor(vat).getId()))return;mc.field_71441_e.func_72882_A();mc.func_71403_a(null);mc.func_147108_a(new net.minecraft.client.gui.GuiMainMenu());stage=5;return;}
-   if(stage==6){if(EffigySkinChecks.profile(vat)==null||!mc.field_71439_g.func_146103_bH().getId().equals(EffigySkinClient.profileFor(vat).getId()))return;checks.check(observer.getId().equals(EffigySkinChecks.profile(vat).getId()),"saved last binder restored after real world rejoin");checks.check(mc.field_71439_g.func_146103_bH().getId().equals(EffigySkinClient.profileFor(vat).getId()),"login packet restores personal appearance after rejoin");System.out.println("TD_EFFIGY_CLIENT_PASS checks="+checks.checks);done=true;mc.func_71400_g();}
+   if(stage==6){if(EffigySkinChecks.profile(vat)==null||!mc.field_71439_g.func_146103_bH().getId().equals(EffigySkinClient.profileFor(vat).getId()))return;checks.check(observer.getId().equals(EffigySkinChecks.profile(vat).getId()),"saved last binder restored after real world rejoin");checks.check(mc.field_71439_g.func_146103_bH().getId().equals(EffigySkinClient.profileFor(vat).getId()),"login packet restores personal appearance after rejoin");request=8;stage=8;return;}
+   if(stage==8){if(EffigySkinChecks.profile(vat)==null||!mc.field_71439_g.func_146103_bH().getId().equals(EffigySkinChecks.profile(vat).getId()))return;request=9;stage=9;return;}
+   if(stage==9){if(EffigySkinChecks.profile(vat)!=null||EffigySkinClient.profileFor(vat)!=null)return;checks.check(true,"rebinding sole last binder clears old fallback through actual tile packets");checks.check(!EffigySkinClient.render(interior,0.1F),"invalid old binding renders native effigy instead of player skin");System.out.println("TD_EFFIGY_CLIENT_PASS checks="+checks.checks);done=true;mc.func_71400_g();}
   }catch(Throwable t){if(imageServer!=null)imageServer.stop(0);if(allowedDomains!=null)allowedDomains[0]=originalDomain;done=true;System.out.println("TD_EFFIGY_CLIENT_FAILED checks="+checks.checks);t.printStackTrace();mc.func_71400_g();}
  }
 }

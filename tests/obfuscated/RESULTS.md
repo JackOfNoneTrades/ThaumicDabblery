@@ -1372,3 +1372,35 @@ Evidence: `/tmp/td-distillery/build.log`, `/tmp/td-distillery-tests/{servers,rem
 `/tmp/td-distillery-tests/{gtnh,curse,gtnh-addons,curse-addons,network-gtnh,network-curse,remote-gtnh,remote-curse}/result.log`,
 `/tmp/td-distillery-tests/remote-*/screenshots/witchery-distillery-{nei,book}.png`,
 and `/tmp/td-distillery-absent/servers.log`.
+
+
+# Replaced Soul Beacon skin verification, 2026-10-11
+
+Production artifact SHA-256: `f2bec61a66493db13c2dfe88c37a49e1f47220fc3b5d21127afdef0e26e25e24`.
+`spotlessApply build` passed. The production jar ran under obfuscated Forge 1.7.10-10.13.4.1614,
+Java 8, Thaumcraft 4.2.3.5 and Thaumic Horizons 1.8.24.
+
+| ModTweaker | TC4Tweaks 1.5.47 + Salis Arcana 1.1.71 | Dedicated server | Integrated client |
+| --- | --- | --- | --- |
+| GTNH 0.14.0 | absent | 37 passed | 19 passed |
+| CurseForge 0.9.6 | absent | 37 passed | 19 passed |
+| GTNH 0.14.0 | present | 37 passed | 19 passed |
+| CurseForge 0.9.6 | present | 37 passed | 19 passed |
+
+The server fixture binds the previous last binder elsewhere, ticks the old vat, and verifies both
+old tile profiles clear and cannot be inherited again. Remaining shared-beacon users retain their
+personal skin. Restored stale profiles are invalidated on a later tick; native offline player NBT
+is read without loading a player or the destination chunk, and a subsequent bind updates that cache.
+Saved self-infusion appearance survives beacon removal, without a removed beacon overriding it with
+a different viewer's skin. Existing binding, persistence, packet and body lifecycle checks also pass.
+
+The client fixture checks actual binding and tile packets, world exit/rejoin, rendering and native
+fallback. After rejoining, the current last binder binds elsewhere and the old client vat must lose
+its profile and return to native rendering. Synthetic legacy/modern/slim skin and loopback download
+checks also pass. These are integrated clients, not separate dedicated connections; stale chunk data
+is simulated by restoring saved profiles rather than forcing a real chunk unload. Live skin services
+are not required. Missing offline player data conservatively retains the saved fallback until that
+player logs in or binds again.
+
+Evidence: `/tmp/td-effigy-binding/{gtnh,curse,gtnh-addons,curse-addons}/result.log` and
+`/tmp/td-effigy-binding/client-{gtnh,curse,gtnh-addons,curse-addons}/result.log`.
