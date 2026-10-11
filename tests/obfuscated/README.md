@@ -815,3 +815,32 @@ shift-click routing, client script sync, NEI filtering/search/counts/tooltips, a
 Tile updates are advanced directly; automation checks exercise sided-inventory permissions rather
 than a complete hopper setup. A controlled random seed tests the ordinary side-funnel bonus;
 filtered-funnel arithmetic is delegated to Witchery and not separately simulated.
+
+## Witches' Cauldron recipes
+
+Compile `WitcheryCauldronChecks.java` with `WitcheryCauldronServerProbe.java` against the SRG-first
+production classpath and Witchery 0.24.1. Install `witchery-cauldron.zs` in a disposable server.
+The probe snapshots native brewing actions before scripts, then tests validation, edits, undo and
+real cauldron execution. Require `TD_CAULDRON_SERVER_PASS` with no corresponding failure.
+Invalid-definition errors are intentional. The probe rewrites scripts and clears test-world items.
+
+For remote testing, start that server with `-Dtd.cauldron.network=true`. Compile/install
+`WitcheryCauldronClientProbe.java` in a separate client with Witchery and NEI, no local scripts,
+username `Developer`, and `-Dtd.cauldron.server=127.0.0.1:PORT`. Require
+`TD_CAULDRON_NETWORK_PASS` and `TD_CAULDRON_CLIENT_PASS`. The client saves
+`screenshots/witchery-cauldron.png` and exits; the server stops shortly afterward.
+
+Coverage includes native action identities, individual native alternative removal/output/power edits,
+shared-trigger cost isolation, optional power, new neutral ingredients, trigger conflicts, invalid
+counts/NBT/wildcards/duplicates, output NBT, temporary-action cleanup and full undo, disabled integration,
+native boiling/full-water gates, actual dropped-item collision, per-recipe power and the native 1.4
+multiplier, insufficient altar power, the native small white circle and its discount, container returns,
+trigger-only crafting, native bulk-stack consumption, one-time output and water drain, serialized
+pending crafts completing after definitions are removed, normal potion costs, native fallback,
+custom priority, client synchronization, NEI lookup/filter/count/order/tooltip data and rendering.
+
+A controlled `IPowerSource` supplies altar power. The native cauldron update method performs real
+heating, timing, debit, completion and drain logic, but ticks are advanced directly rather than waiting
+in real time. Save/load is exercised through tile NBT serialization, not a complete JVM restart.
+Infernal/medium-circle combinations and random misfortune outcomes are delegated to Witchery and
+not separately asserted. Run both ModTweaker forks; also check startup without Witchery.

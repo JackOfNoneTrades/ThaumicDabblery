@@ -29,5 +29,7 @@ final class FeatureBootstrap {
         FeatureManager.register(new WitcheryBranchFeature());
         FeatureManager.register(new org.fentanylsolutions.thaumicdabblery.feature.witcheryrites.WitcheryRitesFeature());
         FeatureManager.register(new org.fentanylsolutions.thaumicdabblery.feature.witcheryoven.WitcheryOvenFeature());
+        FeatureManager
+            .register(new org.fentanylsolutions.thaumicdabblery.feature.witcherycauldron.WitcheryCauldronFeature());
     }
 }

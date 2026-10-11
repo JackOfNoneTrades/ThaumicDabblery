@@ -1247,3 +1247,42 @@ Forge version-check diagnostics are unrelated to the feature; no oven probe or m
 Evidence: `/tmp/td-oven-build.log`, `/tmp/td-oven/{servers,remote}.log`,
 `/tmp/td-oven/{gtnh,curse,gtnh-addons,curse-addons,network-gtnh,network-curse,remote-gtnh,remote-curse}/result.log`,
 `/tmp/td-oven/remote-*/screenshots/witchery-oven.png`, and `/tmp/td-oven-absent/servers.log`.
+
+## Witches' Cauldron recipes (2026-10-11)
+
+Artifact: `thaumicdabblery-dbcffde-snapshot-master.34+c5201fcdf9-dirty.jar`.
+SHA-256: `da5335f52f1e6e8334ee352fbd92823c964b6c407a7a901c3bc341ee3fd04bf3`.
+`spotlessApply` and `build` passed, including Checkstyle and Spotless verification.
+
+Witchery 0.24.1, Forge 1614, Java 8 and CraftTweaker 3.4.8: GTNH ModTweaker 0.14.0 and
+CurseForge ModTweaker 0.9.6 each passed 800 checks on obfuscated dedicated servers, both with
+and without TC4Tweaks 1.5.47 / Salis Arcana 1.1.71-GTNH (four runs). Remote pairs passed
+834 server checks and 94 client checks each. The GTNH remote pair had no Thaumic Horizons.
+Clients started with no local scripts, received server definitions and rendered the native
+cauldron NEI category using NEI 2.8.114-GTNH. Both final screenshots were visually reviewed.
+
+Checks verify all original brewing-action identities across reloads, exact action-table restoration,
+stable recipe IDs, individual native alternative removal, per-recipe output/power edits, sibling
+power isolation, new neutral ingredients and trigger ownership cleanup, rejected unsupported inputs
+and conflicting triggers, disabled integration, custom precedence and setters retaining order.
+
+Actual block collision and cauldron ticks exercise cold/boiling/full-water admission, trigger order,
+base cost overriding ingredient costs, insufficient/sufficient altar power, one output/debit/water
+drain, output NBT, zero-cost crafting without an altar, native ingredient costs outside crafting,
+native recipe fallback, bulk-stack consumption, trigger-only recipes and returned containers.
+A base-100 recipe consumed 140 power without circles and 120 with Witchery's native 12-glyph
+small white circle. A pending custom craft was serialized to tile NBT, its script and owned actions
+removed, and its tile reconstructed; it completed with the captured output.
+
+A controlled IPowerSource supplies power and tile ticks are advanced directly. Tests do not run
+real altar generation, a full JVM restart, or separate infernal/medium-circle and random-misfortune
+assertions. Native logic handles those cases. Expected invalid-script errors and the existing JOML
+module-info / Forge version-check diagnostics are unrelated; no cauldron probe or mixin failures remain.
+
+Two servers without Witchery passed startup and 24 warp-event regression checks each.
+WitcheryExtras was not installed.
+
+Evidence: `/tmp/td-cauldron-build.log`, `/tmp/td-cauldron-tests/{servers,remote}.log`,
+`/tmp/td-cauldron-tests/{gtnh,curse,gtnh-addons,curse-addons,network-gtnh,network-curse,remote-gtnh,remote-curse}/result.log`,
+`/tmp/td-cauldron-tests/remote-*/screenshots/witchery-cauldron.png`,
+and `/tmp/td-cauldron-absent/servers.log`.
