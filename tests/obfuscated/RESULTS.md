@@ -1215,3 +1215,35 @@ All sixteen installed jars matched the artifact hash. Evidence: `/tmp/td-revival
 An additional GTNH run passed with frame captures enabled. Visually reviewed
 `remote-gtnh/screenshots/revival-sparkles.png` shows both rising bubbles and the completion
 sparkles; `remote-screenshots.log` records the run.
+
+## Witches' Oven recipes (2026-10-11)
+
+Artifact: `thaumicdabblery-dbcffde-snapshot-master.33+0bd236f433-dirty.jar`.
+SHA-256: `8163bfe367cce94e27e4a2d98a2abd0b83e1bcd50cacf136b7a5fced22bf0446`.
+`spotlessApply` and `build` passed, including Checkstyle and Spotless verification.
+
+Tested Witchery 0.24.1 on Forge 1614 / Java 8 / CraftTweaker 3.4.8. GTNH ModTweaker 0.14.0
+and CurseForge ModTweaker 0.9.6 each passed 95 checks on obfuscated dedicated servers, both
+with and without TC4Tweaks 1.5.47 and Salis Arcana 1.1.71-GTNH (four runs).
+Remote pairs on both ModTweaker forks passed 149 server checks and 43 / 44 client checks
+respectively. The GTNH remote pair had no Thaumic Horizons installed. Both clients started
+without local scripts and received the server's definitions. NEI 2.8.114-GTNH rendered the
+native oven category with custom recipes; both screenshots were visually reviewed.
+
+Coverage includes ore/wildcard/NBT and stack-count inputs, output NBT, ordered overrides and
+exclusions, setter priority, no native fallback when blocked, exact stack capacity, optional and
+required jars, zero-cost jars, chance-zero/one and deterministic failed/successful rolls, native
+180-tick cooking and fuel, top-funnel speed, ordinary side-funnel chance, readiness not rolling
+RNG, native recipes/global furnace preservation, invalid definitions without partial changes,
+disabled feature, reload/undo and custom-progress resets. Native container shift-click and
+sided-inventory permissions were exercised. NEI tests verify quantities, main/byproduct lookups,
+excluded inputs, winning-rule usage search, jar-policy tooltips and actual GUI registration.
+Tile ticks were advanced directly; a real hopper network and filtered-funnel bonus were not simulated.
+
+Two additional servers without Witchery passed startup and 24 existing warp-event checks each.
+WitcheryExtras was not installed. Expected invalid-script errors and existing JOML module-info /
+Forge version-check diagnostics are unrelated to the feature; no oven probe or mixin failure remained.
+
+Evidence: `/tmp/td-oven-build.log`, `/tmp/td-oven/{servers,remote}.log`,
+`/tmp/td-oven/{gtnh,curse,gtnh-addons,curse-addons,network-gtnh,network-curse,remote-gtnh,remote-curse}/result.log`,
+`/tmp/td-oven/remote-*/screenshots/witchery-oven.png`, and `/tmp/td-oven-absent/servers.log`.

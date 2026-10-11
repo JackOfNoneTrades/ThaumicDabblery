@@ -793,3 +793,25 @@ The remote test repeats execution with a connected player and checks server-to-c
 
 Both ModTweaker forks are tested with Witchery 0.24.1 and CraftTweaker 3.4.8. WitcheryExtras is not installed
 in this matrix. Separate startup regressions without Witchery confirm the optional integration stays dormant.
+
+## Witches' Oven recipes
+
+Compile `WitcheryOvenChecks.java` with `WitcheryOvenServerProbe.java` against the SRG-first production
+classpath plus Witchery 0.24.1. Install `witchery-oven.zs` in a disposable server's scripts directory.
+Require `TD_OVEN_SERVER_PASS` and no corresponding failure. Run both ModTweaker forks, optionally
+with TC4Tweaks and Salis Arcana. Validation errors in the temporary script are intentional.
+
+For remote tests, start the server with `-Dtd.oven.network=true`. Compile/install
+`WitcheryOvenClientProbe.java` in a separate client with NEI and Witchery, no local scripts, username
+`Developer`, and `-Dtd.oven.server=127.0.0.1:PORT`. Require `TD_OVEN_NETWORK_PASS` and
+`TD_OVEN_CLIENT_PASS`, with no corresponding failures. The client opens the native oven NEI category,
+writes `screenshots/witchery-oven.png`, and exits; the server then stops.
+
+Checks cover script validation and undo, defaults, ore/wildcard/tagged inputs, priority, blocked
+fallback, native furnace preservation, exact stack limits, required/optional/zero-cost jars,
+guaranteed/zero/probabilistic byproducts, native fuel and cook timing, funnel speed and chance,
+no RNG during readiness checks, automation slot permissions, reload/input-change progress reset,
+shift-click routing, client script sync, NEI filtering/search/counts/tooltips, and GUI rendering.
+Tile updates are advanced directly; automation checks exercise sided-inventory permissions rather
+than a complete hopper setup. A controlled random seed tests the ordinary side-funnel bonus;
+filtered-funnel arithmetic is delegated to Witchery and not separately simulated.

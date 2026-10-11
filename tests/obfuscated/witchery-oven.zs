@@ -1,0 +1,10 @@
+import mods.witchery.Oven;
+Oven.addRecipe("custom:dirt", <minecraft:dirt> * 2, <minecraft:diamond> * 3);
+Oven.setByproduct("custom:dirt", <minecraft:cookie> * 2, 2, 1.0, false);
+Oven.setRequireJars("custom:dirt", true);
+Oven.addRecipe("custom:ore", <ore:logWood> * 2, <minecraft:apple>);
+Oven.removeInput(<minecraft:log:*>);
+Oven.addRecipe("custom:oak", <minecraft:log:0> * 2, <minecraft:diamond>);
+Oven.addRecipe("custom:tag", <minecraft:stone>.withTag({oven: 1}), <minecraft:emerald>.withTag({oven: 2}));
+Oven.addRecipe("custom:optional", <minecraft:cobblestone>, <minecraft:apple>);
+Oven.setByproduct("custom:optional", <minecraft:cookie>);

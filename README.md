@@ -22,6 +22,7 @@
 * Scripted head/body tracking for vat creatures and effigies, with configurable item-frame rotation controls
 * Scripted Planar Vortex item and creature recipes, with NBT support and native recipe removal
 * Scripted Osmotic Enchanter enchantments, vis costs, icons and research requirements, with paginated selection
+* Scripted Witches' Oven recipes, byproducts, jar policies and NEI display
 * Scripted Witchery rite offerings, living sacrifices, circles, initial altar power, time and weather conditions
 * Thaumic Horizons Corpse Effigies display bound player skins, with personal appearances for shared Soul Beacons
 * Single-player Thaumonomicon editor with drag placement, parent editing, cross-tab moves and swaps, properties, deletion, undo/redo and compact script saving through `/td edit`
@@ -157,6 +158,15 @@ active. Test with `/td warp trigger weakness [player]`, and list events with `/t
 See the [warp event documentation](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Warp-Events)
 for configuration, command behavior and reload details. An optional fifth argument supplies a
 private chat message in Thaumcraft's warp-message style: `register(name, minWarp, maxWarp, commands, message)`.
+
+### Witches' Oven recipes
+
+Add or replace oven recipes with `mods.witchery.Oven`, including counted item/ore inputs,
+byproducts, jar costs and chances. Exclude native inputs without changing ordinary furnace recipes.
+Custom recipes appear in NEI and support script reloads on CurseForge and GTNH ModTweaker.
+
+See the [oven documentation](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Witchery-Oven)
+for syntax and recipe priority.
 
 ### Witchery rite requirements
 

@@ -187,6 +187,10 @@ public class LateMixinLoader implements ILateMixinLoader {
             }
         }
         if (loadedMods.contains("witchery")) {
+            mixins.add("witchery.MixinWitchesOven");
+            mixins.add("witchery.MixinOvenContainer");
+            if (loadedMods.contains("NotEnoughItems") && FMLLaunchHandler.side()
+                .isClient()) mixins.add("witchery.MixinOvenNEI");
             mixins.add("witchery.RitualAccessor");
             mixins.add("witchery.SacrificeMultipleAccessor");
             mixins.add("witchery.SacrificeItemAccessor");
