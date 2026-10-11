@@ -1186,3 +1186,32 @@ tested screen sizes, and the GTNH Properties screenshot was visually reviewed.
 Evidence: `/tmp/td-concealed-build.log`, `/tmp/td-concealed/{servers,clients}.log`,
 `/tmp/td-concealed/{editor,client}-*/result.log`, and
 `/tmp/td-concealed/client-gtnh/screenshots/editor-properties.png`.
+
+## Effigy revival appearance and particles (2026-10-11)
+
+Artifact: `thaumicdabblery-dbcffde-snapshot-master.32+a9231e2c39-dirty.jar`.
+SHA-256: `a26f025566948578d2ce0447ebcb5a01a0a9748c17e0e8469bcfa89844ec2814`.
+`spotlessApply spotlessCheck build` passed. The four obfuscated skin server configurations
+passed 28 checks each, and their integrated clients passed 17 each. Tested GTNH ModTweaker
+0.14.0 and CurseForge ModTweaker 0.9.6, each with and without TC4Tweaks 1.5.47/Salis Arcana
+1.1.71-GTNH, using Thaumic Horizons 1.8.24 and Thaumcraft 4.2.3.5.
+
+Pixel assertions now require the original unrevived texture in mode 3 and player skins in
+mode 4 and self-infusion mode. The GTNH mode 3/4 framebuffer images were visually reviewed.
+Shared-beacon selection, downloaded skins, classic/slim models, persistence and fallback checks
+continue to pass.
+
+Separate dedicated-server/client pairs passed six server and seven client checks per configuration.
+Native jars and connectors supply eight Victus and eight Sano to an assembled vat. The client
+receives all 160 native essentia bubbles and 80 completion sparkles at the full particle setting
+(two calls with native count 20, doubled by Thaumcraft's particle setting). Starved revival emits
+neither effect; completed revival does not repeat them. Server assertions confirm emptied jars,
+consumed effigy and native revived health. No changes to the bubble effect were needed.
+
+All sixteen installed jars matched the artifact hash. Evidence: `/tmp/td-revival-build.log`,
+`/tmp/td-revival/{servers,clients,remote}.log`, and corresponding
+`{editor,client,network,remote}-*/result.log`. Skin images are
+`client-gtnh/effigy-legacy-{3,4}.png` under the same directory.
+An additional GTNH run passed with frame captures enabled. Visually reviewed
+`remote-gtnh/screenshots/revival-sparkles.png` shows both rising bubbles and the completion
+sparkles; `remote-screenshots.log` records the run.

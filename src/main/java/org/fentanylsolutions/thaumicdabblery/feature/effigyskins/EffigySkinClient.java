@@ -63,6 +63,16 @@ public final class EffigySkinClient {
         client.func_152344_a(() -> { if (client.getNetHandler() == source) binding = next; });
     }
 
+    public static void receive(EffigySkinNetwork.Sparkle effect, INetHandler source) {
+        Minecraft client = Minecraft.getMinecraft();
+        client.func_152344_a(() -> {
+            if (client.getNetHandler() != source || client.theWorld == null
+                || client.theWorld.provider.dimensionId != effect.dimension) return;
+            thaumcraft.common.Thaumcraft.proxy
+                .blockSparkle(client.theWorld, effect.x, effect.y, effect.z, effect.color, effect.count);
+        });
+    }
+
     @SubscribeEvent
     public void disconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
         binding = null;
@@ -150,7 +160,10 @@ public final class EffigySkinClient {
         TileEntity above = interior.getWorldObj()
             .getTileEntity(interior.xCoord, interior.yCoord + 1, interior.zCoord);
         if (!(above instanceof TileVat)) return false;
-        Skin skin = resolve(profileFor((TileVat) above), interior.getWorldObj());
+        TileVat vat = (TileVat) above;
+        // Mode 3 is the lifeless effigy. Keep its original texture until revival completes.
+        if (!(vat.mode == 4 || vat.mode == 2 && vat.recipeType == 1)) return false;
+        Skin skin = resolve(profileFor(vat), interior.getWorldObj());
         if (skin == null) return false;
         Minecraft.getMinecraft()
             .getTextureManager()

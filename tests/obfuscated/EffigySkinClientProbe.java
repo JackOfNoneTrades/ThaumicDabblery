@@ -82,7 +82,7 @@ public final class EffigySkinClientProbe {
     checks.check(observer.getId().equals(EffigySkinChecks.profile(vat).getId()),"latest binder reaches actual client tile");
     checks.check(mc.field_71439_g.func_146103_bH().getId().equals(EffigySkinClient.profileFor(vat).getId()),"bound viewer overrides shared beacon through real packet");
     ResourceLocation red=texture("effigy-legacy",32);mc.field_71439_g.func_152121_a(MinecraftProfileTexture.Type.SKIN,red);cached(mc.field_71439_g.func_146103_bH(),red,false);
-    for(int mode:new int[]{3,4,2}){vat.mode=mode;vat.recipeType=1;checks.check(render("effigy-legacy-"+mode,interior)[0]>1000,"native effigy TESR renders bound viewer in mode "+mode);}vat.mode=4;
+    for(int mode:new int[]{3,4,2}){vat.mode=mode;vat.recipeType=1;checks.check((render("effigy-legacy-"+mode,interior)[0]>1000)==(mode!=3),"player skin only after revival in mode "+mode);}vat.mode=4;
     request=2;stage=2;return;
    }
    if(stage==2){

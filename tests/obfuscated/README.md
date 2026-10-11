@@ -578,13 +578,23 @@ body consumption/destruction and binding before vat construction.
 
 `EffigySkinClientProbe` creates a disposable integrated world and sends binding and tile updates through
 real connections. It renders the actual vat TESR into a framebuffer using deterministic legacy and modern
-textures. Pixel checks cover both effigy modes, self-infusion, clothing proportions, classic/slim models,
+textures. Pixel checks require the original texture before revival and player skins after revival and during self-infusion, plus clothing proportions, classic/slim models,
 and native fallback. A loopback HTTP fixture exercises asynchronous texture downloads and model metadata
 through the native skin loader; its domain is temporarily allowed only inside the disposable probe process.
 It also closes and reopens the world to check saved identities and login synchronization.
 Require `TD_EFFIGY_CLIENT_PASS`; inspect `effigy-*.png` in the instance directory. These fixtures test
 rendering independently of Mojang availability; live skin-service availability is not part of their assertions.
 Also run without MineTweaker/ModTweaker, and check ordinary startup without Horizons. Never use an existing save.
+
+`EffigyRevivalServerProbe` (compile with `VatFacingChecks`) and `EffigyRevivalClientProbe` run on
+separate disposable server/client JVMs. The server assembles a native vat and places two native essentia
+jars below its connectors. The client starts revival without essentia, confirms the original texture
+and no particles while starved, then requests eight Victus and eight Sano in the jars. Native vat ticks
+consume the essentia and finish revival. Count the actual client particle instances: 160 native bubbles
+and two native completion sparkle bursts, scaled by the client's particle setting, with no repeats.
+The server verifies drained jars, consumed effigy and revived health. Require `TD_REVIVAL_SERVER_PASS`
+and `TD_REVIVAL_CLIENT_PASS` on both forks with and without the addons. Frame screenshots are saved
+as `screenshots/revival-bubbles.png` and `screenshots/revival-sparkles.png`.
 
 ## Vat tracking and frame controls
 

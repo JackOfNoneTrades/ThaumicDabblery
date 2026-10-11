@@ -23,6 +23,7 @@ public final class EffigySkinNetwork {
 
     public static void initialize() {
         CHANNEL.registerMessage(Handler.class, Binding.class, 0, Side.CLIENT);
+        CHANNEL.registerMessage(SparkleHandler.class, Sparkle.class, 1, Side.CLIENT);
         FMLCommonHandler.instance()
             .bus()
             .register(new EffigySkinNetwork());
@@ -30,6 +31,52 @@ public final class EffigySkinNetwork {
 
     public static void sync(EntityPlayerMP player) {
         if (player.playerNetServerHandler != null) CHANNEL.sendTo(Binding.from(player.getEntityData()), player);
+    }
+
+    public static void sparkle(net.minecraft.world.World world, int x, int y, int z, int color, int count) {
+        Sparkle effect = new Sparkle();
+        effect.dimension = world.provider.dimensionId;
+        effect.x = x;
+        effect.y = y;
+        effect.z = z;
+        effect.color = color;
+        effect.count = count;
+        CHANNEL
+            .sendToAllAround(effect, new NetworkRegistry.TargetPoint(effect.dimension, x + 0.5, y + 0.5, z + 0.5, 32));
+    }
+
+    public static final class Sparkle implements IMessage {
+
+        public int dimension, x, y, z, color, count;
+
+        @Override
+        public void fromBytes(ByteBuf buffer) {
+            dimension = buffer.readInt();
+            x = buffer.readInt();
+            y = buffer.readInt();
+            z = buffer.readInt();
+            color = buffer.readInt();
+            count = buffer.readInt();
+        }
+
+        @Override
+        public void toBytes(ByteBuf buffer) {
+            buffer.writeInt(dimension);
+            buffer.writeInt(x);
+            buffer.writeInt(y);
+            buffer.writeInt(z);
+            buffer.writeInt(color);
+            buffer.writeInt(count);
+        }
+    }
+
+    public static final class SparkleHandler implements IMessageHandler<Sparkle, IMessage> {
+
+        @Override
+        public IMessage onMessage(Sparkle message, MessageContext context) {
+            ThaumicDabblery.proxy.receiveEffigySparkle(message, context.netHandler);
+            return null;
+        }
     }
 
     @SubscribeEvent

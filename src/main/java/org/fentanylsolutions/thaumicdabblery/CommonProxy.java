@@ -76,6 +76,8 @@ public class CommonProxy {
 
     public void receiveEffigyBinding(EffigySkinNetwork.Binding binding, INetHandler source) {}
 
+    public void receiveEffigySparkle(EffigySkinNetwork.Sparkle effect, INetHandler source) {}
+
     public void receiveVatFacing(org.fentanylsolutions.thaumicdabblery.feature.vatfacing.VatFacingNetwork.Pose pose,
         INetHandler source) {}
 

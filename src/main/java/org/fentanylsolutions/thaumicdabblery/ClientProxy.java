@@ -24,6 +24,11 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
+    public void receiveEffigySparkle(EffigySkinNetwork.Sparkle effect, INetHandler source) {
+        org.fentanylsolutions.thaumicdabblery.feature.effigyskins.EffigySkinClient.receive(effect, source);
+    }
+
+    @Override
     public void receiveVatFacing(org.fentanylsolutions.thaumicdabblery.feature.vatfacing.VatFacingNetwork.Pose pose,
         INetHandler source) {
         org.fentanylsolutions.thaumicdabblery.feature.vatfacing.VatFacingClient.receive(pose, source);

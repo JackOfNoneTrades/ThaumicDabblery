@@ -2,13 +2,16 @@ package org.fentanylsolutions.thaumicdabblery.mixins.late.thaumichorizons;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.World;
 
 import org.fentanylsolutions.thaumicdabblery.feature.effigyskins.EffigySkinHolder;
+import org.fentanylsolutions.thaumicdabblery.feature.effigyskins.EffigySkinNetwork;
 import org.fentanylsolutions.thaumicdabblery.feature.effigyskins.EffigySkins;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.kentington.thaumichorizons.common.tiles.TileVat;
@@ -16,6 +19,19 @@ import com.mojang.authlib.GameProfile;
 
 @Mixin(value = TileVat.class, remap = false)
 public abstract class MixinTileVatEffigySkin implements EffigySkinHolder {
+
+    @Redirect(
+        method = { "updateEntity", "func_145845_h" },
+        at = @At(
+            value = "INVOKE",
+            target = "Lthaumcraft/common/CommonProxy;blockSparkle(Lnet/minecraft/world/World;IIIII)V"),
+        require = 4)
+    private void thaumicdabblery$syncRevivalSparkles(thaumcraft.common.CommonProxy proxy, World world, int x, int y,
+        int z, int color, int count) {
+        // Keep local growing-creature effects. Revival runs on the server, whose particle proxy is a no-op.
+        if (world.isRemote) proxy.blockSparkle(world, x, y, z, color, count);
+        else EffigySkinNetwork.sparkle(world, x, y, z, color, count);
+    }
 
     @Unique
     private GameProfile thaumicdabblery$effigyProfile;
