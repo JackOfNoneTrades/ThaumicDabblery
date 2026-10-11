@@ -878,3 +878,31 @@ constructing an altar or waiting in real time. Save/load reconstructs tile NBT w
 JVM. A fake player suppresses network inventory packets for manual collection; its familiar state is
 set through Witchery's native persisted flags. The bonus test seeds one successful native hat roll;
 all clothing combinations and the second random bonus roll are not separately exercised.
+
+## Witches' Distillery recipes
+
+Compile `WitcheryDistilleryChecks.java` and `WitcheryDistilleryServerProbe.java` against the
+SRG-first production classpath and Witchery 0.24.1. Install `witchery-distillery.zs` in a
+fresh disposable server. Require `TD_DISTILLERY_SERVER_PASS` without a matching failure.
+The probe rewrites/reloads scripts and replaces a test distillery; do not use a real world.
+
+For a remote pair, start the server with `-Dtd.distillery.network=true`. Install the separately
+compiled `WitcheryDistilleryClientProbe.java` in a Witchery/NEI client, username `Developer`,
+with empty local scripts and `-Dtd.distillery.server=127.0.0.1:PORT`. Require
+`TD_DISTILLERY_NETWORK_PASS` and `TD_DISTILLERY_CLIENT_PASS`. Screenshots are
+`witchery-distillery-nei.png` and `witchery-distillery-book.png`. Both processes exit afterward.
+
+Coverage includes nine native recipes and identity/order restoration, native ID edits/removal,
+optional jars, one/two inputs and duplicates, four counted/NBT outputs, input/output/jar validation,
+reload/disabled integration, exact metadata, swapped inputs, real native 800-tick processing and
+0.6-per-working-tick power debit, insufficient/wrong jars, blocked/full/differently tagged outputs,
+atomic output placement and ingredient/jar consumption, power interruption, saved progress,
+unchanged reload versus changed/removed recipes, custom precedence without cheaper fallback,
+registered-input/jar shift-click, output insertion rejection and actual native recipe completion.
+Clients test synchronized definitions, every output and ingredient lookup including secondary
+outputs, jar usage filtering, tooltip costs/time, native book quantities and rendering.
+
+Tests use a controlled `IPowerSource` and directly advance native tile ticks. Save/load reconstructs
+tile NBT rather than restarting the JVM. Inventory shift-click uses a fake player's real container;
+external hopper/pipe mods are not simulated. Test both ModTweaker forks, addon fixtures and startup
+without Witchery. Intentional invalid-script errors are expected.

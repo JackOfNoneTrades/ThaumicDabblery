@@ -30,6 +30,8 @@ final class FeatureBootstrap {
         FeatureManager.register(new org.fentanylsolutions.thaumicdabblery.feature.witcheryrites.WitcheryRitesFeature());
         FeatureManager.register(new org.fentanylsolutions.thaumicdabblery.feature.witcheryoven.WitcheryOvenFeature());
         FeatureManager
+            .register(new org.fentanylsolutions.thaumicdabblery.feature.witcherydistillery.WitcheryDistilleryFeature());
+        FeatureManager
             .register(new org.fentanylsolutions.thaumicdabblery.feature.witcherykettle.WitcheryKettleFeature());
         FeatureManager
             .register(new org.fentanylsolutions.thaumicdabblery.feature.witcherycauldron.WitcheryCauldronFeature());

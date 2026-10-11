@@ -1331,3 +1331,44 @@ Evidence: `/tmp/td-kettle-build.log`, `/tmp/td-kettle-tests/{servers,remote}.log
 `/tmp/td-kettle-tests/{gtnh,curse,gtnh-addons,curse-addons,network-gtnh,network-curse,remote-gtnh,remote-curse}/result.log`,
 `/tmp/td-kettle-tests/remote-*/screenshots/witchery-kettle-{nei,book}.png`,
 and `/tmp/td-kettle-absent/servers.log`.
+
+## Witches' Distillery recipes (2026-10-11)
+
+Artifact: `thaumicdabblery-dbcffde-snapshot-master.36+2e1d2bd26b-dirty.jar`.
+SHA-256: `c4bded936c13bb084419725d2c7beddf41f922f03a8c5eaa1e0a95b53aef0ede`.
+`spotlessApply` and `build` passed, including Checkstyle and Spotless verification.
+
+Witchery 0.24.1, Forge 1614, Java 8 and CraftTweaker 3.4.8: GTNH ModTweaker 0.14.0 and
+CurseForge ModTweaker 0.9.6 each passed 100 checks on obfuscated dedicated servers, with
+and without TC4Tweaks 1.5.47 / Salis Arcana 1.1.71-GTNH (four runs). Each remote pair passed
+132 server checks and 30 client checks. Remote GTNH had no Thaumic Horizons. Clients received
+all definitions from the server with no local scripts. NEI 2.8.114-GTNH and the native distilling
+book rendered four counted outputs and the jar cost; all four screenshots were visually reviewed.
+Two servers without Witchery passed 24 warp-event checks each. All test processes exited.
+
+Registry checks cover nine native identities/order, independent native edits/removal and restoration,
+all setters, invalid definitions without partial mutation, optional jars, repeated reload and disabled
+integration. Actual native tile processing verifies 799 ticks without consumption, completion at
+800 paid ticks, approximately 480 total power, four outputs placed together, one of each input and
+the configured jars consumed, reversed inputs, one-input recipes in either slot, duplicate inputs
+requiring separate slots, insufficient/wrong jars, blocked/full/NBT-incompatible result slots and
+no power debit while blocked. A native recipe also completes through the real processing loop.
+
+Progress pauses during power loss, survives tile NBT reconstruction and identical script reload,
+and resets for changed or removed recipes. Last-added custom priority remains after setters and
+does not fall back to a cheaper recipe when jars are missing. Native container shift-click routes
+custom nonsmeltable ingredients and jars correctly; all output slots reject automated insertion.
+Scripted wool metadata is matched exactly. Clients verify all primary/secondary output lookups,
+input/jar usages, separation of results from ingredients, tooltip costs/time, native book counts
+and synchronized recipe data.
+
+Tests directly advance native tile ticks with a controlled power source rather than a built altar.
+NBT reconstruction is not a full JVM restart; container checks use a fake player and native inventory
+methods rather than external pipes/hoppers. WitcheryExtras was not installed. Expected invalid-script
+errors and existing JOML module-info / Forge version-check diagnostics are unrelated; no distillery
+probe or mixin failure remains.
+
+Evidence: `/tmp/td-distillery/build.log`, `/tmp/td-distillery-tests/{servers,remote}.log`,
+`/tmp/td-distillery-tests/{gtnh,curse,gtnh-addons,curse-addons,network-gtnh,network-curse,remote-gtnh,remote-curse}/result.log`,
+`/tmp/td-distillery-tests/remote-*/screenshots/witchery-distillery-{nei,book}.png`,
+and `/tmp/td-distillery-absent/servers.log`.

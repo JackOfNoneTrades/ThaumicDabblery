@@ -25,6 +25,7 @@
 * Scripted Witches' Oven recipes, byproducts, jar policies and NEI display
 * Scripted Witches' Cauldron item recipes, final triggers, per-recipe altar costs and NEI display
 * Scripted kettle recipes, altar costs, dimension/familiar requirements and clothing bonuses
+* Scripted distillery recipes, multiple outputs, clay-jar costs and safe output handling
 * Scripted Witchery rite offerings, living sacrifices, circles, initial altar power, time and weather conditions
 * Thaumic Horizons Corpse Effigies display bound player skins, with personal appearances for shared Soul Beacons
 * Single-player Thaumonomicon editor with drag placement, parent editing, cross-tab moves and swaps, properties, deletion, undo/redo and compact script saving through `/td edit`
@@ -160,6 +161,16 @@ active. Test with `/td warp trigger weakness [player]`, and list events with `/t
 See the [warp event documentation](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Warp-Events)
 for configuration, command behavior and reload details. An optional fifth argument supplies a
 private chat message in Thaumcraft's warp-message style: `register(name, minWarp, maxWarp, commands, message)`.
+
+### Witches' Distillery recipes
+
+Use `mods.witchery.Distillery` to add, edit or remove recipes with one or two inputs, up to four
+counted/NBT outputs and a clay-jar cost. Includes native book and NEI support, custom-input
+shift-click routing, safe output capacity checks and progress tracking across reloads.
+Native processing speed and altar drain remain unchanged.
+
+See the [distillery documentation](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Witchery-Distillery)
+for syntax and `/mt witcheryDistillery` for recipe IDs.
 
 ### Witches' Kettle recipes
 
