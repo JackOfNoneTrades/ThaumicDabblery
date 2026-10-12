@@ -26,6 +26,8 @@
 * Scripted Witches' Cauldron item recipes, final triggers, per-recipe altar costs and NEI display
 * Scripted kettle recipes, altar costs, dimension/familiar requirements and clothing bonuses
 * Scripted distillery recipes, multiple outputs, clay-jar costs and safe output handling
+* Scripted Spinning Wheel recipes with counted inputs, modifiers, output NBT and NEI display
+* Scripted Brazier ingredients, burn times, altar drain, copied effects and custom mob summoning with NBT
 * Scripted Witchery rite offerings, living sacrifices, circles, initial altar power, time and weather conditions
 * Thaumic Horizons Corpse Effigies display bound player skins, with personal appearances for shared Soul Beacons
 * Single-player Thaumonomicon editor with drag placement, parent editing, cross-tab moves and swaps, properties, deletion, undo/redo and compact script saving through `/td edit`
@@ -161,6 +163,18 @@ active. Test with `/td warp trigger weakness [player]`, and list events with `/t
 See the [warp event documentation](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Warp-Events)
 for configuration, command behavior and reload details. An optional fifth argument supplies a
 private chat message in Thaumcraft's warp-message style: `register(name, minWarp, maxWarp, commands, message)`.
+
+### Spinning Wheel and Brazier recipes
+
+Use `mods.witchery.SpinningWheel` to add, edit or remove recipes with a counted main input,
+up to three modifiers and a counted/NBT output. Use `mods.witchery.Brazier` to edit ingredients,
+burn duration, altar drain and book text, copy existing effects, or define custom mob summons with NBT.
+Both integrations use `builtin:` IDs for existing recipes and `custom:` IDs for additions,
+and support undo/reload with both ModTweaker forks.
+
+See the [Spinning Wheel documentation](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Witchery-Spinning-Wheel)
+and [Brazier documentation](https://github.com/JackOfNoneTrades/ThaumicDabblery/wiki/Witchery-Brazier).
+Recipe dumps are available through `/mt witcherySpinningWheel` and `/mt witcheryBrazier`.
 
 ### Witches' Distillery recipes
 

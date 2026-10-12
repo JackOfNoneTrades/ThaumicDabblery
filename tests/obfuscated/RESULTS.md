@@ -1404,3 +1404,53 @@ player logs in or binds again.
 
 Evidence: `/tmp/td-effigy-binding/{gtnh,curse,gtnh-addons,curse-addons}/result.log` and
 `/tmp/td-effigy-binding/client-{gtnh,curse,gtnh-addons,curse-addons}/result.log`.
+
+
+# Witchery Spinning Wheel and Brazier verification, 2026-10-12
+
+Production artifact SHA-256: `741ce712a36e6b2f01746af686c54cf3f93cd951576eb1e00e8efa43df5c3c8a`.
+`spotlessApply build` passed. Runtime checks used obfuscated Forge 1.7.10-10.13.4.1614,
+Java 8, Witchery 0.24.1, Thaumcraft 4.2.3.5, CraftTweaker 3.4.8 and UniMixins 0.3.1.
+
+| ModTweaker | TC4Tweaks 1.5.47 + Salis Arcana 1.1.71 | Dedicated server | Server after client joins | Separate connected client |
+| --- | --- | --- | --- | --- |
+| GTNH 0.14.0 | absent | 132 passed | 172 passed | 39 passed |
+| CurseForge 0.9.6 | absent | 132 passed | 172 passed | 39 passed |
+| GTNH 0.14.0 | present | 132 passed | 172 passed | 39 passed |
+| CurseForge 0.9.6 | present | 132 passed | 172 passed | 39 passed |
+
+The connected server count includes the original 132 checks plus a repeated 40-check runtime suite
+with a real player connected. Clients have no local scripts. The base GTNH remote pair also omits
+Thaumic Horizons. Two separate servers without Witchery pass the unrelated 24-check warp-event suite.
+All disposable server and client JVMs exited.
+
+Registry checks cover the four built-in spinning recipes and eight named brazier effects, `builtin:`
+IDs, independent effect copies, all setters, removals, validation without partial edits, subsequent
+valid script lines, disabled integration and restoration of the exact native identities/order.
+
+Spinning tests advance the real tile loop: 300 paid ticks, approximately 180 power, counted fibre,
+unordered/duplicate modifiers, deferred consumption, capacity and output NBT, pauses without power,
+save/reload continuity, cancellation on edits/removal, priority without cheaper fallthrough, native
+shift-click and automation checks. An untouched native recipe completes too.
+
+Brazier tests exercise fractional and zero power, delayed single completion, optional entity NBT,
+named/persistent mobs, unobstructed placement, real copied strength auras, and copied wilting against
+actual mature crops and a wounded undead mob. Edited built-in spectre summoning still calls Witchery's
+native effect. Extinguishing and recipe changes clear old progress/extensions; identical reload and
+NBT reconstruction preserve progress, including beyond the native short-integer limit. Book-only
+settings and independent custom-summon copies are checked in the registry.
+
+Clients verify synchronized recipe data, input/output counts and NBT, all native ingredient usages,
+NEI result/ingredient separation, cost/time tooltips, copied effects and native burning-book entries.
+Spinning NEI and Brazier book screenshots were visually reviewed on base and addon configurations.
+
+Limits: the power source is a controlled IPowerSource, not a constructed altar; time is advanced by
+calling native tile ticks. Save/load tests reconstruct tile NBT rather than restarting the JVM.
+Automation tests call native inventory/container methods rather than external pipes. Not every mob
+renderer or third-party spawn hook is tested. WitcheryExtras was not installed. Expected invalid-script
+errors and existing Forge/version-check diagnostics are unrelated to these integrations.
+
+Evidence: `/tmp/td-brazier-investigation/build.log`, `/tmp/td-spinning-brazier-tests/{servers,remote}.log`,
+`/tmp/td-spinning-brazier-tests/{gtnh,curse,gtnh-addons,curse-addons,network-gtnh,network-curse,network-gtnh-addons,network-curse-addons}/result.log`,
+`/tmp/td-spinning-brazier-tests/remote-*/{result.log,screenshots/witchery-spinning-nei.png,screenshots/witchery-brazier-book.png}`,
+and `/tmp/td-spinning-brazier-absent/servers.log`.

@@ -909,3 +909,29 @@ Tests use a controlled `IPowerSource` and directly advance native tile ticks. Sa
 tile NBT rather than restarting the JVM. Inventory shift-click uses a fake player's real container;
 external hopper/pipe mods are not simulated. Test both ModTweaker forks, addon fixtures and startup
 without Witchery. Intentional invalid-script errors are expected.
+
+
+## Witchery Spinning Wheel and Brazier
+
+Compile `WitcherySpinningBrazierChecks` and `WitcherySpinningBrazierServerProbe` as a disposable
+probe against SRG Minecraft, the reobfuscated production jar, Forge and Witchery 0.24.1. Install
+`witchery-spinning-brazier.zs` in the disposable server's scripts directory. Require
+`TD_SPINNING_BRAZIER_SERVER_PASS` on CurseForge and GTNH ModTweaker, each with and without
+TC4Tweaks/Salis Arcana. The probe rewrites scripts and places blocks, so never use a real save.
+
+Registry checks exercise built-in IDs, independent copies, setters, removals, atomic invalid actions,
+undo, disabled integration and exact native identity/order restoration. Spinning checks use the actual
+native tile loop, a controlled altar-power source, input counts, unordered/duplicate modifiers, output
+capacity/NBT, deferred consumption, power pauses, reload/save progress, priority, shift-click and native
+recipes. Brazier checks use ignition and the native tile loop for fractional/zero power, delayed summons,
+entity NBT and collision checks, copied auras, crop-draining/healing wilting, edited native spectre summons,
+extinguishing, recipe changes, removal, optional NBT and progress beyond the native short-integer limit.
+
+For separate-process multiplayer, launch that server probe with `-Dtd.spinningbrazier.network=true`
+and a production client containing `WitcherySpinningBrazierClientProbe` with
+`-Dtd.spinningbrazier.server=127.0.0.1:PORT`. Use the Developer test profile and no client scripts.
+Require `TD_SPINNING_BRAZIER_NETWORK_PASS` and `TD_SPINNING_BRAZIER_CLIENT_PASS`. Client assertions
+check synchronized recipe IDs/data, every NEI ingredient usage, counted/NBT outputs, ingredient/result
+separation, tooltip timing/power, and native book pages. Review screenshots
+`witchery-spinning-nei.png` and `witchery-brazier-book.png`. Repeat without Thaumic Horizons to catch
+accidental dependencies, and verify startup without Witchery using the unrelated warp-event probe.
